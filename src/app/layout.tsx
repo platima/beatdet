@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BeatDet — Audio Beat Detection",
+  title: "BeatDet: Audio Beat Detection",
   description:
     "Upload audio files and detect beats, BPM, and rhythm with interactive waveform visualisation.",
 };

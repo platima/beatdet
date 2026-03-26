@@ -57,7 +57,7 @@ export interface AudioFileInfo {
   type: string;
   /** Object URL for playback (must be revoked when no longer needed). */
   objectUrl: string;
-  /** Persisted session key — Base64 of the audio data. */
+  /** Persisted session key - Base64 of the audio data. */
   sessionKey: string;
 }
 
@@ -100,7 +100,7 @@ export interface ExportOptions {
    Settings
    ============================================================ */
 
-/** Beat detection algorithm parameters — exposed in the Settings page. */
+/** Beat detection algorithm parameters: exposed in the Settings page. */
 export interface DetectionSettings {
   /**
    * Minimum inter-beat gap in seconds.
@@ -116,7 +116,7 @@ export interface DetectionSettings {
   /** Smooth the onset strength curve with this window (in frames). */
   smoothingWindow: number;
   /**
-   * BPM range to search — outside this range beats are still detected
+   * BPM range to search; outside this range beats are still detected
    * but the BPM estimator ignores them for tempo clustering.
    */
   bpmMin: number;
@@ -163,7 +163,7 @@ export type SolarisedAccent =
    Session state (persisted across page reloads)
    ============================================================ */
 
-/** Minimal persisted session — holds enough to restore the last analysis. */
+/** Minimal persisted session: holds enough to restore the last analysis. */
 export interface PersistedSession {
   /** The file name displayed to the user. */
   fileName: string;
@@ -171,7 +171,7 @@ export interface PersistedSession {
   fileSize: number;
   /** MIME type. */
   fileType: string;
-  /** Base64-encoded audio data (may be large — stored in sessionStorage). */
+  /** Base64-encoded audio data (may be large; stored in sessionStorage). */
   audioBase64: string;
   /** The completed analysis result for this file. */
   result: AnalysisResult;

@@ -1,5 +1,5 @@
 /**
- * useAudioAnalysis — manages the full lifecycle of audio analysis.
+ * useAudioAnalysis: manages the full lifecycle of audio analysis.
  *
  * Handles:
  *   - File selection and validation.

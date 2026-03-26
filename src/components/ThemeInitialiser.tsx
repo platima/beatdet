@@ -1,5 +1,5 @@
 /**
- * ThemeInitialiser — runs a tiny inline script before the first paint to
+ * ThemeInitialiser: runs a tiny inline script before the first paint to
  * prevent the flash of un-themed content (FOUC) when using the system or
  * stored theme preference.
  *
@@ -23,13 +23,13 @@ export function ThemeInitialiser() {
           } else if (pref === 'light') {
             theme = 'light';
           } else {
-            // 'system' or unset — check media query
+            // 'system' or unset - check media query
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
               theme = 'dark';
             }
           }
         } else {
-          // No stored preference — use system
+          // No stored preference - use system
           if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             theme = 'dark';
           }

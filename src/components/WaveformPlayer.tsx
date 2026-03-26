@@ -1,5 +1,5 @@
 /**
- * WaveformPlayer — interactive waveform display with playback controls,
+ * WaveformPlayer: interactive waveform display with playback controls,
  * built on wavesurfer.js. Beat markers are drawn as vertical lines.
  *
  * Renders only on the client side (wavesurfer.js requires the DOM).
@@ -122,7 +122,7 @@ export function WaveformPlayer({ audioUrl, result }: WaveformPlayerProps) {
         )}
         <div ref={containerRef} className="w-full" />
 
-        {/* Beat markers overlay — drawn as absolute vertical lines */}
+        {/* Beat markers overlay - drawn as absolute vertical lines */}
         {isReady && (
           <div className="absolute inset-x-4 top-0 h-full pointer-events-none">
             {result.beats.map((beat) => (

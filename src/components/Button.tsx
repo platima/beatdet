@@ -1,5 +1,5 @@
 /**
- * Reusable Button component — styled with Solarised CSS variables.
+ * Reusable Button component: styled with Solarised CSS variables.
  * Supports primary, secondary, danger and ghost variants.
  */
 

@@ -1,11 +1,11 @@
 /**
- * Settings page — all application configuration in one place.
+ * Settings page: all application configuration in one place.
  *
  * Organised into four sections:
- *   1. Appearance     — theme, colours, display options
- *   2. Beat Detection — algorithm parameters
- *   3. Export         — default export format and options
- *   4. About          — version information and reset
+ *   1. Appearance     - theme, colours, display options
+ *   2. Beat Detection - algorithm parameters
+ *   3. Export         - default export format and options
+ *   4. About          - version information and reset
  */
 
 'use client';
@@ -325,7 +325,7 @@ export default function SettingsPage() {
       {/* ── Beat Detection ──────────────────────────────────────────── */}
       <SettingsSection
         title="Beat Detection"
-        description="Algorithm parameters — changes apply on the next analysis."
+        description="Algorithm parameters - changes apply on the next analysis."
       >
         {/* Peak threshold */}
         <FieldRow
@@ -499,7 +499,7 @@ export default function SettingsPage() {
             </code>
           </div>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            BeatDet — open-source audio beat detection. No data leaves your browser;
+            BeatDet: open-source audio beat detection. No data leaves your browser;
             all analysis runs locally via the Web Audio API.
           </p>
         </div>

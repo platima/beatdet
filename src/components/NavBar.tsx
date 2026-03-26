@@ -1,5 +1,5 @@
 /**
- * NavBar — top navigation bar with app title, version, theme toggle
+ * NavBar: top navigation bar with app title, version, theme toggle
  * and link to the settings page.
  */
 

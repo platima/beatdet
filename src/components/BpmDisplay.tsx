@@ -1,5 +1,5 @@
 /**
- * BpmDisplay — prominent BPM readout with confidence meter and candidate list.
+ * BpmDisplay: prominent BPM readout with confidence meter and candidate list.
  *
  * Displays:
  *   - Primary BPM estimate (large, prominent)

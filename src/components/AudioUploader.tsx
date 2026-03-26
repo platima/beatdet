@@ -1,5 +1,5 @@
 /**
- * AudioUploader — drag-and-drop / click-to-browse file input for audio files.
+ * AudioUploader: drag-and-drop / click-to-browse file input for audio files.
  *
  * Accepts WAV, MP3, and M4A. Displays file information once a file is
  * selected and provides a clear button to remove the current file.
