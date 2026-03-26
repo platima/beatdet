@@ -154,7 +154,7 @@ npm run test:coverage
 - **Unit tests** (`beatDetection.test.ts`): 34 tests covering FFT correctness,
   onset strength functions, peak picking (including absolute height floor), and
   BPM estimation.
-- **Real-audio integration tests** (`realAudio.test.ts`): 15 Kevin MacLeod
+- **Real-audio integration tests** (`realAudio.test.ts`): 16 Kevin MacLeod
   tracks spanning 60-204 BPM, decoded via `node-web-audio-api` and run through
   the full spectral-flux -> peak-pick -> BPM-estimate pipeline. Tests live in
   `src/lib/__tests__/`. Real-audio tests require the `testfiles/` directory
@@ -173,17 +173,17 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.1.6
+- **Version:** 0.1.7
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
   four export modes (full track, isolate beats, cut at beats, custom range).
 - Session persistence restores the last analysis on reload.
 - All detection and display settings are configurable via the settings page.
 - Light / Dark / System theme with Solarised colour palette.
-- 49 tests (34 unit + 15 real-audio integration).
+- 50 tests (34 unit + 16 real-audio integration).
 
 ## Known Limitations
 
-- Real-audio integration tests: 13 of 15 pass outright (including 3
+- Real-audio integration tests: 14 of 16 pass outright (including 3
   octave-tolerant); 2 are skipped as known limitations (3:2 harmonic
   ambiguity and missing-candidate detection failures).
