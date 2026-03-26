@@ -270,9 +270,12 @@ export function pickPeaks(
  *
  * Harmonic correction: after finding the best candidate, check downward
  * ratios (x0.5, x1/3) for significant histogram energy; if found, prefer
- * the slower tempo.  If no downward correction triggers, check the upward
- * ×1.5 (sesquialtera) ratio with a stricter threshold to catch half-speed
- * groupings.
+ * the slower tempo.  x0.5 applies a slow-tempo gate: when the resulting
+ * BPM would be below 80 (uncommon musical tempo), a strict 95 % threshold
+ * is required to prevent false half-tempo corrections; above 80 the
+ * standard 40 % applies.  If no downward correction triggers, check the
+ * upward ×1.5 (sesquialtera) ratio with a 60 % threshold to catch
+ * half-speed groupings.
  */
 export function estimateBpm(
   beatTimes: number[],
@@ -368,12 +371,30 @@ export function estimateBpm(
   };
 
   // Phase 1 - downward correction (first match wins)
+  //
+  // x0.5 threshold depends on the resulting tempo.  Half-tempo energy is
+  // an almost universal artefact (every-other-beat IOI patterns routinely
+  // reach 80-95 % of the leader).  If the resulting BPM is below 80 (an
+  // uncommon musical tempo), we demand near-parity (95 %) to prevent false
+  // corrections (e.g. 133 BPM Canon in D → 67).  Above 80 the standard
+  // 40 % threshold applies, since a leader above ~160 is likely genuine
+  // subdivisions that should be halved (e.g. 209 → 105 Adeste Fideles).
+  //
+  // x1/3 keeps 40 % regardless; triple-tempo artefacts are far less common.
+  const SLOW_TEMPO_FLOOR = 80;
+  const STRICT_HALF_THRESHOLD = 0.95;
+  const DEFAULT_DOWN_THRESHOLD = 0.40;
   let corrected = false;
   for (const ratio of [0.5, 1 / 3]) {
     const altBpm = leader.bpm * ratio;
     if (altBpm < bpmMin || altBpm > bpmMax) continue;
     const altScore = histScoreAt(altBpm);
-    if (altScore >= leader.score * 0.40) {
+    // For x0.5, use a strict threshold when the result is a very slow tempo.
+    const threshold =
+      ratio === 0.5 && altBpm < SLOW_TEMPO_FLOOR
+        ? STRICT_HALF_THRESHOLD
+        : DEFAULT_DOWN_THRESHOLD;
+    if (altScore >= leader.score * threshold) {
       candidates.unshift({ bpm: Math.round(altBpm * 2) / 2, score: altScore });
       corrected = true;
       break;
