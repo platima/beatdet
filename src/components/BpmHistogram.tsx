@@ -1,5 +1,5 @@
 /**
- * BpmHistogram — bar chart showing the distribution of inter-beat intervals
+ * BpmHistogram: bar chart showing the distribution of inter-beat intervals
  * converted to BPM, built with Chart.js via react-chartjs-2.
  *
  * Solarised colours are used throughout.

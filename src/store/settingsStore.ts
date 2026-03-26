@@ -1,5 +1,5 @@
 /**
- * Global settings store — backed by Zustand with localStorage persistence.
+ * Global settings store: backed by Zustand with localStorage persistence.
  *
  * Default values follow modern beat-detection best-practice presets
  * and Australian English spelling conventions in comments.

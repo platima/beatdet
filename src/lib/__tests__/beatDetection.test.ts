@@ -61,11 +61,11 @@ function cosineSignal(freqBin: number, fftSize: number): Float32Array {
 }
 
 /* ============================================================
-   fft — Cooley-Tukey radix-2 correctness
+   fft: Cooley-Tukey radix-2 correctness
    ============================================================ */
 
 describe('fft', () => {
-  it('DC signal — energy at bin 0 only', () => {
+  it('DC signal: energy at bin 0 only', () => {
     const n = 8;
     const re = f64(Array(n).fill(1));
     const im = f64(Array(n).fill(0));
@@ -80,7 +80,7 @@ describe('fft', () => {
     }
   });
 
-  it('delta function — flat magnitude spectrum', () => {
+  it('delta function: flat magnitude spectrum', () => {
     // x[0]=1, rest 0 → X[k]=1 for all k
     const n = 8;
     const re = f64([1, 0, 0, 0, 0, 0, 0, 0]);
@@ -93,7 +93,7 @@ describe('fft', () => {
     }
   });
 
-  it('single-frequency cosine — energy at conjugate bins', () => {
+  it('single-frequency cosine: energy at conjugate bins', () => {
     // DFT of cos(2π·2·n/16): energy concentrated at bins 2 and 14 (N-2).
     const n = 16;
     const freqBin = 2;
@@ -120,7 +120,7 @@ describe('fft', () => {
     }
   });
 
-  it('Nyquist signal [1,−1,1,−1,…] — energy at bin N/2 only', () => {
+  it('Nyquist signal [1,-1,1,-1,...]: energy at bin N/2 only', () => {
     const n = 8;
     const re = f64(Array.from({ length: n }, (_, i) => (i % 2 === 0 ? 1 : -1)));
     const im = f64(Array(n).fill(0));
@@ -139,7 +139,7 @@ describe('fft', () => {
 });
 
 /* ============================================================
-   smoothArray — moving-average smoother
+   smoothArray: moving-average smoother
    ============================================================ */
 
 describe('smoothArray', () => {
@@ -171,7 +171,7 @@ describe('smoothArray', () => {
 });
 
 /* ============================================================
-   normalise — [0,1] normalisation
+   normalise: [0,1] normalisation
    ============================================================ */
 
 describe('normalise', () => {
@@ -197,7 +197,7 @@ describe('normalise', () => {
 });
 
 /* ============================================================
-   computeEnergyEnvelope — O(N) onset strength
+   computeEnergyEnvelope: O(N) onset strength
    ============================================================ */
 
 describe('computeEnergyEnvelope', () => {
@@ -234,7 +234,7 @@ describe('computeEnergyEnvelope', () => {
 });
 
 /* ============================================================
-   computeSpectralFlux — O(N log N) onset strength
+   computeSpectralFlux: O(N log N) onset strength
    ============================================================ */
 
 describe('computeSpectralFlux', () => {
@@ -257,7 +257,7 @@ describe('computeSpectralFlux', () => {
 
   it('steady-state sinusoid produces low flux after the first frame', () => {
     // A pure cosine that has been playing since t=0 should not create new
-    // spectral energy — flux should settle near zero after one frame.
+    // spectral energy; flux should settle near zero after one frame.
     const numSamples = 8192;
     const freqBin = 10;
     // Fill the entire buffer with the same cosine so there is no transient.
@@ -280,7 +280,7 @@ describe('computeSpectralFlux', () => {
 });
 
 /* ============================================================
-   pickPeaks — adaptive peak picking
+   pickPeaks: adaptive peak picking
    ============================================================ */
 
 describe('pickPeaks', () => {
@@ -297,14 +297,14 @@ describe('pickPeaks', () => {
   });
 
   it('suppresses peaks below the multiplicative threshold', () => {
-    // All values identical — no local maximum exists.
+    // All values identical; no local maximum exists.
     const onsets = new Float32Array(20).fill(0.5);
     const peaks = pickPeaks(onsets, 0.15, 3);
     expect(peaks.length).toBe(0);
   });
 
   it('enforces the minimum inter-beat gap', () => {
-    // Two peaks 2 frames apart with minGapFrames=5 — only the first is kept.
+    // Two peaks 2 frames apart with minGapFrames=5; only the first is kept.
     const onsets = new Float32Array(20).fill(0.01);
     onsets[5] = 1.0;
     onsets[7] = 0.9;
@@ -340,7 +340,7 @@ describe('pickPeaks', () => {
 });
 
 /* ============================================================
-   estimateBpm — multi-lag IOI with Gaussian + octave correction
+   estimateBpm: multi-lag IOI with Gaussian + octave correction
    ============================================================ */
 
 describe('estimateBpm', () => {
@@ -420,7 +420,7 @@ describe('estimateBpm', () => {
   });
 
   it('handles noisy jitter gracefully', () => {
-    // Add ±10 ms random jitter to beat times — should still detect 120 BPM.
+    // Add +-10 ms random jitter to beat times; should still detect 120 BPM.
     const times = metronome(120, 30).map((t) => t + (Math.random() - 0.5) * 0.02);
     const { bpm } = estimateBpm(times, 60, 200);
     expectBpm(bpm, 120, 5);

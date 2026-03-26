@@ -1,5 +1,5 @@
 /**
- * useTheme — manages light/dark/system theme switching.
+ * useTheme: manages light/dark/system theme switching.
  *
  * Applies the theme as a data-theme attribute on the <html> element
  * so Solarised CSS variables activate correctly. System preference

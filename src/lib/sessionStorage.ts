@@ -6,8 +6,8 @@
  * page reloads. Base64 encoding is used to store binary data in Web Storage.
  *
  * Keys:
- *   beatdet-session-meta   — JSON metadata + analysis result (localStorage)
- *   beatdet-session-audio  — Base64-encoded audio bytes (sessionStorage)
+ *   beatdet-session-meta   - JSON metadata + analysis result (localStorage)
+ *   beatdet-session-audio  - Base64-encoded audio bytes (sessionStorage)
  */
 
 import type { PersistedSession, AnalysisResult } from '@/types';
@@ -53,7 +53,7 @@ export function saveSession(
       sessionStorage.removeItem(AUDIO_KEY);
     }
   } catch {
-    // Storage quota exceeded or private browsing — silently ignore.
+    // Storage quota exceeded or private browsing; silently ignore.
     console.warn('[BeatDet] Could not persist session to storage.');
   }
 }

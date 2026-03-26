@@ -1,5 +1,5 @@
 /**
- * ProgressBar — animated progress indicator used during audio analysis.
+ * ProgressBar: animated progress indicator used during audio analysis.
  * Shows percentage and a descriptive status label.
  */
 

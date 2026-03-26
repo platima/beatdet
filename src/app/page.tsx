@@ -1,5 +1,5 @@
 /**
- * Home page — main beat detection interface.
+ * Home page: main beat detection interface.
  *
  * Flow:
  *   1. User uploads a WAV / MP3 / M4A file.
@@ -31,7 +31,7 @@ const WaveformPlayer = dynamic(
   { ssr: false, loading: () => <WaveformSkeleton /> }
 );
 
-// OnsetChart is chart.js — dynamic for bundle size
+// OnsetChart is chart.js; load dynamically for bundle size
 const OnsetChart = dynamic(
   () => import('@/components/OnsetChart').then((m) => m.OnsetChart),
   { ssr: false }
@@ -140,7 +140,7 @@ export default function HomePage() {
       {/* Results */}
       {status === 'complete' && result && fileInfo && (
         <>
-          {/* Restored session banner — shown when audio was from storage */}
+          {/* Restored session banner - shown when audio was from storage */}
           {!fileInfo.objectUrl && (
             <div
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs"
@@ -151,7 +151,7 @@ export default function HomePage() {
               }}
             >
               <History size={14} />
-              <span>Restored from last session — {fileInfo.name}</span>
+              <span>Restored from last session - {fileInfo.name}</span>
               <button
                 onClick={clearAll}
                 className="ml-auto font-medium hover:text-[var(--accent)] transition-colors"

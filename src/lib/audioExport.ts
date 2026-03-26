@@ -1,5 +1,5 @@
 /**
- * Audio export utilities — slicing, isolating, and encoding audio.
+ * Audio export utilities: slicing, isolating, and encoding audio.
  *
  * All export functions return a Blob that can be downloaded directly by
  * the browser. WAV encoding is implemented natively without any third-party
@@ -290,7 +290,7 @@ export async function exportCustomRange(
 }
 
 /**
- * Master export dispatcher — routes to the appropriate export function
+ * Master export dispatcher: routes to the appropriate export function
  * based on the chosen export mode.
  */
 export async function exportAudio(

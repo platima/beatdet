@@ -1,5 +1,5 @@
 /**
- * OnsetChart — line chart showing the onset strength curve over time,
+ * OnsetChart: line chart showing the onset strength curve over time,
  * with vertical markers indicating detected beat positions.
  *
  * Built with Chart.js / react-chartjs-2.

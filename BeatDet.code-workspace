@@ -1,0 +1,50 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"chat.tools.terminal.autoApprove": {
+			"npx create-next-app@latest": true,
+			"y": true,
+			"npx --yes create-next-app@latest": true,
+			"npm install": true,
+			"npx next": true,
+			"Receive-Job": true,
+			"npx jest": true,
+			"/^cd \"d:\\\\Repos\\\\beatdet\" ; node -e \"\nconst \\{ AudioContext \\} = require\\('node-web-audio-api'\\);\nconst fs = require\\('fs'\\);\nconst path = require\\('path'\\);\nconst ctx = new AudioContext\\(\\);\nconst mp3 = fs\\.readFileSync\\(path\\.join\\('testfiles', 'Morning 60bpm\\.mp3'\\)\\);\nctx\\.decodeAudioData\\(mp3\\.buffer\\.slice\\(mp3\\.byteOffset, mp3\\.byteOffset \\+ mp3\\.byteLength\\)\\)\n  \\.then\\(buf => \\{\n    console\\.log\\('sampleRate:', buf\\.sampleRate\\);\n    console\\.log\\('channels:', buf\\.numberOfChannels\\);\n    console\\.log\\('duration:', buf\\.duration\\.toFixed\\(1\\) \\+ 's'\\);\n    console\\.log\\('length:', buf\\.length\\);\n    ctx\\.close\\(\\);\n  \\}\\)\n  \\.catch\\(e => \\{ console\\.error\\('ERROR:', e\\.message\\); process\\.exit\\(1\\); \\}\\);\n\" 2>&1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^cd \"d:\\\\Repos\\\\beatdet\" ; node -e \"\nconst \\{ AudioContext \\} = require\\('node-web-audio-api'\\);\nconst fs = require\\('fs'\\);\nconst path = require\\('path'\\);\n\n// Inline the pure functions \\(simplified require via ts-node would need compilation\\)\n// Instead, let's see if we can run compiled output or if we need ts-node\nconst files = fs\\.readdirSync\\('testfiles'\\)\\.filter\\(f => f\\.endsWith\\('\\.mp3'\\)\\);\nconsole\\.log\\('Test files:', files\\);\n\" 2>&1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^cd \"d:\\\\Repos\\\\beatdet\" ; node -e \"\nconst \\{ AudioContext \\} = require\\('node-web-audio-api'\\);\nconst fs = require\\('fs'\\);\nconst path = require\\('path'\\);\n\n// We can't easily use the TS files directly, so run a quick probe\\.\n// Parse the compiled output via require with ts compilation\\.\\.\\. \n// Actually let's just use a simple energy-based approach to see beat counts\\.\n\nasync function probe\\(filename, expectedBpm\\) \\{\n  const filePath = path\\.join\\('testfiles', filename\\);\n  const raw = fs\\.readFileSync\\(filePath\\);\n  const ab = raw\\.buffer\\.slice\\(raw\\.byteOffset, raw\\.byteOffset \\+ raw\\.byteLength\\);\n  const ctx = new AudioContext\\(\\);\n  const buf = await ctx\\.decodeAudioData\\(ab\\);\n  await ctx\\.close\\(\\);\n  \n  const sr = buf\\.sampleRate;\n  const dur = buf\\.duration;\n  const ch = buf\\.numberOfChannels;\n  \n  // Mix to mono\n  const len = buf\\.length;\n  const mono = new Float32Array\\(len\\);\n  for \\(let c = 0; c < ch; c\\+\\+\\) \\{\n    const data = buf\\.getChannelData\\(c\\);\n    for \\(let i = 0; i < len; i\\+\\+\\) mono\\[i\\] \\+= data\\[i\\];\n  \\}\n  if \\(ch > 1\\) for \\(let i = 0; i < len; i\\+\\+\\) mono\\[i\\] /= ch;\n  \n  console\\.log\\(filename \\+ ': sr=' \\+ sr \\+ ' dur=' \\+ dur\\.toFixed\\(1\\) \\+ 's expected=' \\+ expectedBpm \\+ 'bpm'\\);\n  \n  // Energy envelope - simple hop-based RMS\n  const hopSize = 512;\n  const numHops = Math\\.floor\\(len / hopSize\\);\n  const energy = \\[\\];\n  let prev = 0;\n  for \\(let h = 0; h < numHops; h\\+\\+\\) \\{\n    let rms = 0;\n    for \\(let i = h\\*hopSize; i < \\(h\\+1\\)\\*hopSize && i < len; i\\+\\+\\) rms \\+= mono\\[i\\]\\*mono\\[i\\];\n    rms = Math\\.sqrt\\(rms/hopSize\\);\n    const diff = rms - prev;\n    energy\\.push\\(diff > 0 \\? diff : 0\\);\n    prev = rms;\n  \\}\n  \n  // Count above-threshold peaks\n  const max = Math\\.max\\(\\.\\.\\.energy\\);\n  const thresh = max \\* 0\\.1;\n  let peaks = 0;\n  let lastPeak = -5;\n  for \\(let i = 1; i < energy\\.length - 1; i\\+\\+\\) \\{\n    if \\(energy\\[i\\] > energy\\[i-1\\] && energy\\[i\\] > energy\\[i\\+1\\] && energy\\[i\\] > thresh && i - lastPeak > 5\\) \\{\n      peaks\\+\\+;\n      lastPeak = i;\n    \\}\n  \\}\n  \n  const beatsPerMin = \\(peaks / dur\\) \\* 60;\n  console\\.log\\('  Energy peaks:', peaks, '-> ~' \\+ beatsPerMin\\.toFixed\\(1\\) \\+ ' BPM'\\);\n\\}\n\n\\(async \\(\\) => \\{\n  await probe\\('Morning 60bpm\\.mp3', 60\\);\n  await probe\\('Magic Escape Room 82bpm\\.mp3', 82\\);\n  await probe\\('Southern Gothic 126bpm\\.mp3', 126\\);\n  await probe\\(\\\\\"Sergio's Magic Dustbin 204bpm\\.mp3\\\\\", 204\\);\n\\}\\)\\(\\)\\.catch\\(e => console\\.error\\(e\\)\\);\n\" 2>&1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^cd \"d:\\\\Repos\\\\beatdet\"; node probe\\.mjs 2>&1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^cd \"d:\\\\Repos\\\\beatdet\" ; node -e \"\nconst files = \\[\n  \\['Morning 60bpm\\.mp3', 60\\],\n  \\['Magic Escape Room 82bpm\\.mp3', 82\\],\n  \\['Southern Gothic 126bpm\\.mp3', 126\\],\n  \\['Boogie Party 178bpm\\.mp3', 178\\],\n  \\['Sergio\\\\u0027s Magic Dustbin 204bpm\\.mp3', 204\\],\n  \\['Adeste Fideles Shorter 105bpm\\.mp3', 105\\],\n  \\['Burn The World Waltz 177bpm\\.mp3', 177\\],\n  \\['Dentaneosuchus Hunt 114bpm\\.mp3', 114\\],\n  \\['Evening 101bpm\\.mp3', 101\\],\n  \\['Grand Dark Waltz Trio Allegro 124bpm\\.mp3', 124\\],\n  \\['Grand Dark Waltz Trio Vivace 140bpm\\.mp3', 140\\],\n  \\['Lord of the Rangs 104bpm\\.mp3', 104\\],\n  \\['Paradise_Found 105bpm\\.mp3', 105\\],\n  \\['Valse Gymnopedie 77bpm\\.mp3', 77\\],\n  \\['Vibing Over Venus 94bpm\\.mp3', 94\\],\n\\];\nimport\\('\\./probe\\.mjs'\\)\\.then\\(m => \\{\\}\\);\n\" 2>&1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^cd \"d:\\\\Repos\\\\beatdet\" ; node test-new-tracks\\.mjs 2>&1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^cd \"d:\\\\Repos\\\\beatdet\" ; node diag-fails\\.mjs 2>&1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^cd \"d:\\\\Repos\\\\beatdet\" ; node sergio-check\\.mjs 2>&1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
+		}
+	}
+}

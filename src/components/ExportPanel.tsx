@@ -1,9 +1,9 @@
 /**
- * ExportPanel — UI for configuring and triggering audio export.
+ * ExportPanel: UI for configuring and triggering audio export.
  *
  * Provides controls for:
  *   - Export mode (full, isolate beats, cut at beats, custom range)
- *   - Output format (WAV only — MP3 via native encoder if available)
+ *   - Output format (WAV only; MP3 via native encoder if available)
  *   - Pre/post-roll for beat slicing
  *   - Custom time range selection
  *   - Normalisation toggle
@@ -41,7 +41,7 @@ const MODES: Array<{ value: ExportMode; label: string; description: string; icon
   {
     value: 'cut-at-beats',
     label: 'Cut at beats',
-    description: 'Slice the audio at each beat boundary — exports one file per slice.',
+    description: 'Slice the audio at each beat boundary; exports one file per slice.',
     icon: <Scissors size={16} />,
   },
   {

@@ -1,5 +1,5 @@
 /**
- * Beat detection engine — pure TypeScript implementation using the Web Audio API.
+ * Beat detection engine: pure TypeScript implementation using the Web Audio API.
  *
  * Algorithm overview:
  *   1. Decode the audio file into a raw PCM buffer via the Web Audio API.
@@ -48,7 +48,7 @@ export function mixDownToMono(buffer: AudioBuffer): Float32Array {
 }
 
 /* ============================================================
-   Fast FFT — Cooley-Tukey radix-2 DIT (in-place, power-of-two)
+   Fast FFT: Cooley-Tukey radix-2 DIT (in-place, power-of-two)
    ============================================================ */
 
 /** In-place radix-2 FFT. re and im must have length that is a power of two. */
@@ -148,7 +148,7 @@ export function computeSpectralFlux(
 
 /**
  * Compute onset strength using the simple RMS energy envelope.
- * O(N) — fastest option, good for percussive material.
+ * O(N): fastest option, good for percussive material.
  */
 export function computeEnergyEnvelope(
   mono: Float32Array,
@@ -203,7 +203,7 @@ export function normalise(arr: Float32Array): Float32Array {
 }
 
 /**
- * Adaptive peak picking — finds local maxima in the onset curve that
+ * Adaptive peak picking: finds local maxima in the onset curve that
  * exceed a dynamic threshold based on a local median.
  *
  * @param absMinHeight  Absolute minimum normalised height for a peak to be
@@ -230,7 +230,7 @@ export function pickPeaks(
     // Must be a local maximum
     if (val <= onsets[i - 1] || val <= onsets[i + 1]) continue;
 
-    // Absolute height floor — filters spurious noise peaks
+    // Absolute height floor: filters spurious noise peaks
     if (val < absMinHeight) continue;
 
     // Compute local median baseline
@@ -269,7 +269,7 @@ export function pickPeaks(
  * bins with σ=1.5 BPM, avoiding quantisation gaps at high tempos.
  *
  * Harmonic correction: after finding the best candidate, check downward
- * ratios (×0.5, ×1/3) for significant histogram energy — if found, prefer
+ * ratios (x0.5, x1/3) for significant histogram energy; if found, prefer
  * the slower tempo.  If no downward correction triggers, check the upward
  * ×1.5 (sesquialtera) ratio with a stricter threshold to catch half-speed
  * groupings.
@@ -341,14 +341,14 @@ export function estimateBpm(
   // miss every other beat, producing a raw BPM that is a simple harmonic
   // ratio of the true musical tempo.  We correct in two phases:
   //
-  // Phase 1 — downward: if a candidate at ×0.5 or ×1/3 of the leader has
+  // Phase 1 - downward: if a candidate at x0.5 or x1/3 of the leader has
   //   significant histogram energy, prefer the slower (more musical) tempo.
-  //   ×2/3 is deliberately excluded — it causes false corrections on tracks
-  //   where the leader IS the correct tempo (e.g. 126 → 84 in Southern
-  //   Gothic, 201 → 134 in Sergio's Dustbin).
+  //   x2/3 is deliberately excluded; it causes false corrections on tracks
+  //   where the leader IS the correct tempo (e.g. 126 -> 84 in Southern
+  //   Gothic, 201 -> 134 in Sergio's Dustbin).
   //
-  // Phase 2 — upward (sesquialtera): if phase 1 didn't trigger and the
-  //   leader ×1.5 has very strong energy (≥ 60%), the detector tracked
+  // Phase 2 - upward (sesquialtera): if phase 1 didn't trigger and the
+  //   leader x1.5 has very strong energy (>= 60%), the detector tracked
   //   half-speed groupings; promote to the faster tempo.
   const leader = candidates[0];
 
@@ -367,7 +367,7 @@ export function estimateBpm(
     return best;
   };
 
-  // Phase 1 — downward correction (first match wins)
+  // Phase 1 - downward correction (first match wins)
   let corrected = false;
   for (const ratio of [0.5, 1 / 3]) {
     const altBpm = leader.bpm * ratio;
@@ -380,7 +380,7 @@ export function estimateBpm(
     }
   }
 
-  // Phase 2 — upward sesquialtera correction (×1.5)
+  // Phase 2 - upward sesquialtera correction (x1.5)
   // When the detector locks onto every-other-beat groupings (half-speed),
   // the true tempo at ×1.5 will have strong histogram energy.
   if (!corrected) {
@@ -416,7 +416,7 @@ export type ProgressCallback = (progress: number) => void;
  * Analyse an audio file (as an ArrayBuffer) and return beat detection results.
  *
  * This function is designed to be called from the main thread but does
- * heavy lifting synchronously — for large files (~10 minutes of audio)
+ * heavy lifting synchronously; for large files (~10 minutes of audio)
  * expect up to a few seconds of processing.
  *
  * @param arrayBuffer  Raw audio file bytes.

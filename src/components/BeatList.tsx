@@ -1,5 +1,5 @@
 /**
- * BeatList — scrollable table of all detected beats with timestamps and
+ * BeatList: scrollable table of all detected beats with timestamps and
  * confidence values (if enabled in display settings).
  */
 
@@ -69,7 +69,7 @@ export function BeatList({ beats }: BeatListProps) {
       <div className="px-4 py-3" style={{ backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid var(--border)' }}>
         <p className="text-xs font-medium uppercase tracking-widest"
           style={{ color: 'var(--text-muted)' }}>
-          Beat Timeline — {beats.length} beats
+          Beat Timeline - {beats.length} beats
         </p>
       </div>
 
