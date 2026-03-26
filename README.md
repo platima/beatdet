@@ -1,6 +1,10 @@
-# BeatDet
+<img align="right" src="https://visitor-badge.laobi.icu/badge?page_id=platima.beatdet" height="20" />
+
+# BeatDet _(Beat Detector)_
 
 **v0.1.6** - Browser-based audio beat detection with interactive waveform visualisation.
+
+100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
 No login required. No data leaves your browser; all processing uses the
 [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) locally.
