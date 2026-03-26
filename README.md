@@ -167,9 +167,9 @@ Two test suites cover the beat detection engine:
 - **Unit tests** (`beatDetection.test.ts`): 34 tests covering FFT correctness,
   onset strength functions, peak picking (including absolute height floor), and
   BPM estimation.
-- **Real-audio integration tests** (`realAudio.test.ts`): 15 Kevin MacLeod
+- **Real-audio integration tests** (`realAudio.test.ts`): 16 Kevin MacLeod
   tracks spanning 60-204 BPM, decoded via `node-web-audio-api` and run through
-  the full spectral-flux -> peak-pick -> BPM-estimate pipeline. 13 pass
+  the full spectral-flux -> peak-pick -> BPM-estimate pipeline. 14 pass
   outright (including 3 octave-tolerant), 2 are skipped as known limitations
   (3:2 harmonic ambiguity and missing-candidate detection failures).
 
