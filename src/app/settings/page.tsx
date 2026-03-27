@@ -17,7 +17,8 @@ import { Button } from '@/components/Button';
 import { Sun, Moon, Monitor, RotateCcw } from 'lucide-react';
 import type { SolarisedAccent } from '@/types';
 
-const VERSION = '0.1.0';
+// Version is injected at build time from the VERSION file via next.config.ts.
+const VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0';
 
 /* ============================================================
    Section wrapper

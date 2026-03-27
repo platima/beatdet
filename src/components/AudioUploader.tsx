@@ -172,7 +172,7 @@ export function AudioUploader({
             click to browse
           </span>
         </p>
-        <p className="mt-2 text-xs">Supports WAV · MP3 · M4A</p>
+        <p className="mt-2 text-xs">Supports WAV · MP3 · M4A · AAC</p>
       </div>
     </div>
   );
