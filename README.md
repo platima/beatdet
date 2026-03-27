@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.1.6** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.2.0** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -13,11 +13,13 @@ No login required. No data leaves your browser; all processing uses the
 
 ## Features
 
-- **Upload** WAV, MP3, or M4A audio files via drag-and-drop or file picker.
+- **Upload** WAV, MP3, M4A, or AAC audio files via drag-and-drop or file picker.
 - **Beat detection**: spectral-flux onset detection with adaptive peak picking.
 - **BPM estimation**: multi-lag IOI accumulation with Gaussian histogram smoothing
   and harmonic octave correction.
-- **Waveform player**: interactive playback with beat markers overlaid.
+- **BPM correction**: ÷2 / ×2 display-only quick-correct buttons for common octave errors.
+- **Waveform player**: interactive playback with beat markers overlaid; Space bar toggles play/pause.
+- **Click-to-seek**: click any row in the beat timeline to jump the waveform to that beat.
 - **Onset strength chart**: onset curve with beat positions highlighted.
 - **BPM histogram**: inter-beat interval distribution chart.
 - **Beat timeline**: scrollable table of all detected beats with timestamps
@@ -27,10 +29,12 @@ No login required. No data leaves your browser; all processing uses the
   - Isolate beats (merge beat regions into one file)
   - Cut at beats (one file per slice)
   - Custom time range
+- **Re-analyse**: re-run beat detection on the same file after changing settings without re-uploading.
 - **Session persistence**: last analysis is restored automatically on reload.
 - **Settings page**: all parameters configurable without restarting.
-- **Light / Dark / System theme** with Solarised colour palette throughout.
-- **Semantic Versioning** tracked in `VERSION`.
+- **Light / Dark / System theme** with Solarised colour palette throughout; waveform colours update live on theme change.
+- **Accessible**: ARIA labels, live regions, and screen-reader chart summaries throughout.
+- **Semantic Versioning** tracked in `VERSION`; version injected at build time from `VERSION` file.
 
 ---
 

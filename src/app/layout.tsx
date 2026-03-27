@@ -18,6 +18,19 @@ export const metadata: Metadata = {
   title: "BeatDet: Audio Beat Detection",
   description:
     "Upload audio files and detect beats, BPM, and rhythm with interactive waveform visualisation.",
+  openGraph: {
+    title: "BeatDet: Audio Beat Detection",
+    description:
+      "Upload audio files and detect beats, BPM, and rhythm with interactive waveform visualisation. No login required — all processing happens in your browser.",
+    siteName: "BeatDet",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "BeatDet: Audio Beat Detection",
+    description:
+      "Browser-based beat detection: BPM, waveform, onset charts, and audio export. No data leaves your browser.",
+  },
 };
 
 export default function RootLayout({
@@ -26,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en-AU" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
