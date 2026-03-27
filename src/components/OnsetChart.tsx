@@ -182,6 +182,11 @@ export function OnsetChart({ result }: OnsetChartProps) {
       <div className="h-52">
         <Line data={data} options={options} />
       </div>
+      {/* Screen-reader summary */}
+      <p className="sr-only">
+        Onset strength chart over {result.duration.toFixed(1)} seconds
+        with {result.beats.length} beat markers.
+      </p>
     </div>
   );
 }

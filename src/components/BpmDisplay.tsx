@@ -14,13 +14,16 @@ import type { AnalysisResult } from '@/types';
 
 interface BpmDisplayProps {
   result: AnalysisResult;
+  /** Display-only BPM multiplier (1, 2, or 0.5); does not re-run analysis. */
+  bpmMultiplier?: number;
+  onMultiplierChange?: (m: number) => void;
 }
 
 function formatSeconds(s: number): string {
   return s.toFixed(3);
 }
 
-export function BpmDisplay({ result }: BpmDisplayProps) {
+export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: BpmDisplayProps) {
   const { bpmEstimate, beats, duration } = result;
   const avgInterval =
     beats.length > 1
@@ -49,12 +52,48 @@ export function BpmDisplay({ result }: BpmDisplayProps) {
               className="text-6xl font-bold tabular-nums leading-none"
               style={{ color: 'var(--accent)' }}
             >
-              {bpmEstimate.bpm > 0 ? bpmEstimate.bpm : '—'}
+              {bpmEstimate.bpm > 0
+                ? Math.round(bpmEstimate.bpm * bpmMultiplier)
+                : '—'}
             </span>
             <span className="text-xl font-medium" style={{ color: 'var(--text-muted)' }}>
               BPM
             </span>
           </div>
+          {/* Quick-correct buttons: divide or multiply displayed BPM */}
+          {onMultiplierChange && bpmEstimate.bpm > 0 && (
+            <div className="flex items-center gap-1.5 mt-2">
+              <button
+                onClick={() => onMultiplierChange(bpmMultiplier * 0.5)}
+                className="rounded px-2 py-0.5 text-xs font-mono transition-colors hover:bg-[var(--bg-alt)]"
+                style={{ border: '1px solid var(--border)', color: 'var(--text-muted)' }}
+                title="Halve displayed BPM"
+                aria-label="Halve displayed BPM"
+              >
+                ÷2
+              </button>
+              <button
+                onClick={() => onMultiplierChange(bpmMultiplier * 2)}
+                className="rounded px-2 py-0.5 text-xs font-mono transition-colors hover:bg-[var(--bg-alt)]"
+                style={{ border: '1px solid var(--border)', color: 'var(--text-muted)' }}
+                title="Double displayed BPM"
+                aria-label="Double displayed BPM"
+              >
+                ×2
+              </button>
+              {bpmMultiplier !== 1 && (
+                <button
+                  onClick={() => onMultiplierChange(1)}
+                  className="rounded px-2 py-0.5 text-xs transition-colors hover:bg-[var(--bg-alt)]"
+                  style={{ border: '1px solid var(--border)', color: 'var(--warning)' }}
+                  title="Reset to detected BPM"
+                  aria-label="Reset to detected BPM"
+                >
+                  reset
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Confidence ring */}
@@ -92,8 +131,8 @@ export function BpmDisplay({ result }: BpmDisplayProps) {
         </div>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Stats row: stacks on mobile, 3-columns on sm+ */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: 'Beats detected', value: beats.length.toString() },
           {
@@ -102,7 +141,8 @@ export function BpmDisplay({ result }: BpmDisplayProps) {
           },
           {
             label: 'Duration',
-            value: `${Math.floor(duration / 60)}:${String(Math.round(duration % 60)).padStart(2, '0')}`,
+            // Use Math.floor to avoid rounding 59.5s up to :60.
+            value: `${Math.floor(duration / 60)}:${String(Math.floor(duration % 60)).padStart(2, '0')}`,
           },
         ].map(({ label, value }) => (
           <div key={label} className="text-center">

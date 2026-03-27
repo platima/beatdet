@@ -30,6 +30,8 @@ export interface UseAudioAnalysisReturn {
   analyseFile: (file: File) => Promise<void>;
   clearAll: () => void;
   restoreSession: () => boolean;
+  /** Re-run analysis on the last uploaded file using current settings. */
+  reanalyse: (() => Promise<void>) | null;
 }
 
 export function useAudioAnalysis(): UseAudioAnalysisReturn {
@@ -44,6 +46,8 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
 
   // Track the current object URL so we can revoke it on clear
   const objectUrlRef = useRef<string | null>(null);
+  // Keep a reference to the last uploaded File for re-analysis
+  const lastFileRef = useRef<File | null>(null);
 
   const clearAll = useCallback(() => {
     if (objectUrlRef.current) {
@@ -102,7 +106,7 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
 
       if (!validType && !validExt) {
         setError(
-          `Unsupported file type. Accepted formats: WAV, MP3, M4A.`
+          `Unsupported file type. Accepted formats: WAV, MP3, M4A, AAC.`
         );
         setStatus('error');
         return;
@@ -117,7 +121,8 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
       objectUrlRef.current = objectUrl;
 
       setStatus('loading');
-      setProgress(0);
+      // Emit -1 as sentinel during file-read phase (indeterminate progress)
+      setProgress(-1);
       setError(null);
       setResult(null);
 
@@ -128,6 +133,9 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
         objectUrl,
         sessionKey: '',
       });
+
+      // Store reference so the user can re-analyse with updated settings
+      lastFileRef.current = file;
 
       try {
         // Read file as ArrayBuffer
@@ -168,5 +176,6 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
     analyseFile,
     clearAll,
     restoreSession,
+    reanalyse: lastFileRef.current ? () => analyseFile(lastFileRef.current!) : null,
   };
 }

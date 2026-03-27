@@ -12,10 +12,16 @@ import WaveSurfer from 'wavesurfer.js';
 import { Play, Pause, SkipBack, Volume2, VolumeX } from 'lucide-react';
 import type { AnalysisResult } from '@/types';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useTheme } from '@/hooks/useTheme';
 
 interface WaveformPlayerProps {
   audioUrl: string;
   result: AnalysisResult;
+  /**
+   * When this value changes and is non-null, the waveform seeks to that
+   * time in seconds. Used by BeatList click-to-seek.
+   */
+  seekTo?: number | null;
 }
 
 const SOLARISED_ACCENT: Record<string, string> = {
@@ -35,7 +41,7 @@ function formatTime(secs: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-export function WaveformPlayer({ audioUrl, result }: WaveformPlayerProps) {
+export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -47,6 +53,8 @@ export function WaveformPlayer({ audioUrl, result }: WaveformPlayerProps) {
 
   const displaySettings = useSettingsStore((s) => s.settings.display);
   const beatColour = SOLARISED_ACCENT[displaySettings.beatMarkerColour] ?? '#cb4b16';
+  // Re-create WaveSurfer when theme changes so it picks up new CSS variable values
+  const { preference: theme } = useTheme();
 
   // Initialise WaveSurfer
   useEffect(() => {
@@ -89,12 +97,38 @@ export function WaveformPlayer({ audioUrl, result }: WaveformPlayerProps) {
       setIsReady(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioUrl]);
+  }, [audioUrl, theme]);
 
   // Volume / mute
   useEffect(() => {
     wsRef.current?.setVolume(muted ? 0 : volume);
   }, [volume, muted]);
+
+  // Seek to a specific time (driven by BeatList click-to-seek)
+  useEffect(() => {
+    if (seekTo !== null && seekTo !== undefined && isReady && duration > 0) {
+      wsRef.current?.seekTo(Math.max(0, Math.min(1, seekTo / duration)));
+    }
+  }, [seekTo, isReady, duration]);
+
+  // Space bar global shortcut to play/pause
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (!isReady) return;
+      if (
+        e.key === ' ' &&
+        // Do not intercept when focus is on an interactive element
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement) &&
+        !(e.target instanceof HTMLButtonElement)
+      ) {
+        e.preventDefault();
+        wsRef.current?.playPause();
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [isReady]);
 
   const togglePlay = useCallback(() => wsRef.current?.playPause(), []);
   const restart = useCallback(() => {
@@ -158,6 +192,7 @@ export function WaveformPlayer({ audioUrl, result }: WaveformPlayerProps) {
           className="flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-40"
           style={{ color: 'var(--text-muted)' }}
           title="Return to start"
+          aria-label="Restart"
         >
           <SkipBack size={16} />
         </button>
@@ -169,6 +204,7 @@ export function WaveformPlayer({ audioUrl, result }: WaveformPlayerProps) {
           className="flex h-10 w-10 items-center justify-center rounded-full text-white transition-all disabled:opacity-40 hover:brightness-110"
           style={{ backgroundColor: 'var(--accent)' }}
           title={isPlaying ? 'Pause' : 'Play'}
+          aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? <Pause size={18} /> : <Play size={18} />}
         </button>
@@ -179,6 +215,7 @@ export function WaveformPlayer({ audioUrl, result }: WaveformPlayerProps) {
           className="flex h-8 w-8 items-center justify-center rounded-full transition-colors"
           style={{ color: 'var(--text-muted)' }}
           title={muted ? 'Unmute' : 'Mute'}
+          aria-label={muted ? 'Unmute' : 'Mute'}
         >
           {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
         </button>
@@ -196,6 +233,7 @@ export function WaveformPlayer({ audioUrl, result }: WaveformPlayerProps) {
           }}
           className="h-1.5 w-20 accent-[var(--accent)] cursor-pointer"
           title="Volume"
+          aria-label="Volume"
         />
 
         {/* Beat count badge */}

@@ -144,6 +144,10 @@ export function BpmHistogram({ result }: BpmHistogramProps) {
     },
   };
 
+  // Find the label with the highest count for the screen-reader summary
+  const peakIdx = counts.indexOf(Math.max(...counts));
+  const peakBpm = labels[peakIdx] ?? 'unknown';
+
   return (
     <div
       className="rounded-xl p-4"
@@ -159,6 +163,10 @@ export function BpmHistogram({ result }: BpmHistogramProps) {
       <div className="h-52">
         <Bar data={data} options={options as Parameters<typeof Bar>[0]['options']} />
       </div>
+      {/* Screen-reader summary */}
+      <p className="sr-only">
+        BPM distribution histogram: highest count at {peakBpm} BPM across {labels.length} bins.
+      </p>
     </div>
   );
 }

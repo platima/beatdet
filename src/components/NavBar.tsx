@@ -10,7 +10,8 @@ import { usePathname } from 'next/navigation';
 import { Activity, Settings, Sun, Moon, Monitor } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
-const VERSION = '0.1.3';
+// Version is injected at build time from the VERSION file via next.config.ts.
+const VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0';
 
 export function NavBar() {
   const pathname = usePathname();
@@ -54,6 +55,7 @@ export function NavBar() {
           <button
             onClick={toggleTheme}
             title={`Switch theme (currently ${preference})`}
+            aria-label="Cycle theme"
             className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-[var(--bg)] transition-colors"
           >
             <ThemeIcon size={18} />
@@ -63,6 +65,7 @@ export function NavBar() {
           <Link
             href="/settings"
             title="Settings"
+            aria-label="Settings"
             className={[
               'flex h-9 w-9 items-center justify-center rounded-lg transition-colors',
               pathname === '/settings'
