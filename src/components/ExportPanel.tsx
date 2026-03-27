@@ -58,10 +58,12 @@ export function ExportPanel({ audioBuffer, result, fileName }: ExportPanelProps)
 
   const [exporting, setExporting] = useState(false);
   const [exportedCount, setExportedCount] = useState<number | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const handleExport = useCallback(async () => {
     setExporting(true);
     setExportedCount(null);
+    setExportError(null);
 
     try {
       const slices = await exportAudio(
@@ -79,6 +81,8 @@ export function ExportPanel({ audioBuffer, result, fileName }: ExportPanelProps)
 
       setExportedCount(slices.length);
     } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setExportError(`Export failed: ${msg}`);
       console.error('[BeatDet] Export failed:', err);
     } finally {
       setExporting(false);
@@ -248,7 +252,7 @@ export function ExportPanel({ audioBuffer, result, fileName }: ExportPanelProps)
       </div>
 
       {/* Export button */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <Button
           variant="primary"
           size="md"
@@ -260,12 +264,34 @@ export function ExportPanel({ audioBuffer, result, fileName }: ExportPanelProps)
           {exporting ? 'Exporting…' : 'Download'}
         </Button>
 
+        {/* File count preview for multi-file modes */}
+        {exportOptions.mode === 'cut-at-beats' && !exporting && (
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Will download {result.beats.length} file{result.beats.length !== 1 ? 's' : ''}
+          </span>
+        )}
+
         {exportedCount !== null && (
           <span className="text-sm" style={{ color: 'var(--success)' }}>
             ✓ Exported {exportedCount} file{exportedCount !== 1 ? 's' : ''}
           </span>
         )}
       </div>
+
+      {/* Export error banner */}
+      {exportError && (
+        <div
+          role="alert"
+          className="rounded-lg px-3 py-2 text-xs"
+          style={{
+            backgroundColor: 'var(--bg)',
+            border: '1px solid var(--danger)',
+            color: 'var(--danger)',
+          }}
+        >
+          {exportError}
+        </div>
+      )}
     </div>
   );
 }

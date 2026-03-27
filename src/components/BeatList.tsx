@@ -10,6 +10,8 @@ import { useSettingsStore } from '@/store/settingsStore';
 
 interface BeatListProps {
   beats: Beat[];
+  /** Optional callback fired when a row is clicked; receives the beat time in seconds. */
+  onBeatClick?: (time: number) => void;
 }
 
 function formatTime(s: number): string {
@@ -45,7 +47,7 @@ function ConfidenceBar({ value }: { value: number }) {
   );
 }
 
-export function BeatList({ beats }: BeatListProps) {
+export function BeatList({ beats, onBeatClick }: BeatListProps) {
   const showConfidence = useSettingsStore(
     (s) => s.settings.display.showBeatConfidence
   );
@@ -74,10 +76,10 @@ export function BeatList({ beats }: BeatListProps) {
       </div>
 
       <div
-        className="max-h-64 overflow-y-auto"
+        className="max-h-64 overflow-x-auto overflow-y-auto"
         style={{ backgroundColor: 'var(--bg-panel)' }}
       >
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[320px] text-sm">
           <thead>
             <tr
               className="sticky top-0 text-left text-xs font-medium uppercase tracking-wider"
@@ -97,8 +99,15 @@ export function BeatList({ beats }: BeatListProps) {
             {beats.map((beat, i) => (
               <tr
                 key={beat.time}
-                className="border-b transition-colors hover:bg-[var(--bg-alt)]"
+                className={[
+                  'border-b transition-colors',
+                  onBeatClick
+                    ? 'cursor-pointer hover:bg-[var(--bg-alt)]'
+                    : 'hover:bg-[var(--bg-alt)]',
+                ].join(' ')}
                 style={{ borderColor: 'var(--border)' }}
+                onClick={() => onBeatClick?.(beat.time)}
+                title={onBeatClick ? `Seek to ${beat.time.toFixed(3)} s` : undefined}
               >
                 <td className="px-4 py-1.5 font-mono tabular-nums text-xs"
                   style={{ color: 'var(--text-muted)' }}>

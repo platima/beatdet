@@ -12,7 +12,7 @@
 
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AudioUploader } from '@/components/AudioUploader';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -23,7 +23,7 @@ import { ExportPanel } from '@/components/ExportPanel';
 import { Button } from '@/components/Button';
 import { useAudioAnalysis } from '@/hooks/useAudioAnalysis';
 import { useSettingsStore } from '@/store/settingsStore';
-import { RefreshCw, AlertCircle, History } from 'lucide-react';
+import { RefreshCw, AlertCircle, History, RotateCcw } from 'lucide-react';
 
 // WaveformPlayer uses wavesurfer.js (browser-only), so load it dynamically
 const WaveformPlayer = dynamic(
@@ -65,17 +65,38 @@ export default function HomePage() {
     analyseFile,
     clearAll,
     restoreSession,
+    reanalyse,
   } = useAudioAnalysis();
 
   const showOnsetCurve = useSettingsStore(
     (s) => s.settings.display.showOnsetCurve
   );
 
+  // Display-only BPM multiplier (×2 / ÷2 correction without re-analysis)
+  const [bpmMultiplier, setBpmMultiplier] = useState(1);
+  // Seek target propagated from BeatList row clicks to WaveformPlayer
+  const [seekTime, setSeekTime] = useState<number | null>(null);
+
   // Attempt to restore the last session on mount
   useEffect(() => {
     if (status === 'idle') restoreSession();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Reset BPM multiplier and seek when a new analysis completes
+  useEffect(() => {
+    if (status === 'complete') {
+      setBpmMultiplier(1);
+      setSeekTime(null);
+      // Smooth-scroll results into view
+      setTimeout(() => {
+        document.getElementById('results')?.scrollIntoView({
+          behaviour: 'smooth',
+          block: 'start',
+        } as ScrollIntoViewOptions);
+      }, 100);
+    }
+  }, [status]);
 
   const isProcessing = status === 'loading' || status === 'analysing';
 
@@ -90,7 +111,7 @@ export default function HomePage() {
           Beat Detection
         </h1>
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          Upload a WAV, MP3, or M4A file to detect beats, visualise the
+          Upload a WAV, MP3, M4A, or AAC file to detect beats, visualise the
           waveform, and export sliced audio.
         </p>
       </div>
@@ -106,6 +127,8 @@ export default function HomePage() {
       {/* Error state */}
       {status === 'error' && error && (
         <div
+          role="alert"
+          aria-live="assertive"
           className="flex items-start gap-3 rounded-xl p-4"
           style={{
             backgroundColor: 'var(--bg-panel)',
@@ -137,10 +160,20 @@ export default function HomePage() {
         />
       )}
 
+      {/* Visually-hidden live region for screen reader announcements */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {status === 'analysing' && 'Analysing audio, please wait.'}
+        {status === 'complete' && result
+          ? `Analysis complete. Detected BPM: ${result.bpmEstimate.bpm > 0 ? result.bpmEstimate.bpm : 'unknown'}.`
+          : ''}
+      </div>
+
       {/* Results */}
       {status === 'complete' && result && fileInfo && (
         <>
-          {/* Restored session banner - shown when audio was from storage */}
+          {/* Anchor used by auto-scroll after analysis */}
+          <div id="results" />
+          {/* Restored session banner - shown when audio was not saved */}
           {!fileInfo.objectUrl && (
             <div
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs"
@@ -151,7 +184,10 @@ export default function HomePage() {
               }}
             >
               <History size={14} />
-              <span>Restored from last session - {fileInfo.name}</span>
+              <span>
+                Restored from last session — {fileInfo.name}. The audio was too large
+                to save; re-upload the file to restore waveform playback.
+              </span>
               <button
                 onClick={clearAll}
                 className="ml-auto font-medium hover:text-[var(--accent)] transition-colors"
@@ -163,20 +199,33 @@ export default function HomePage() {
 
           {/* Waveform player */}
           {fileInfo.objectUrl && (
-            <WaveformPlayer audioUrl={fileInfo.objectUrl} result={result} />
+            <WaveformPlayer
+              audioUrl={fileInfo.objectUrl}
+              result={result}
+              seekTo={seekTime}
+            />
           )}
 
           {/* BPM card */}
-          <BpmDisplay result={result} />
+          <BpmDisplay
+            result={result}
+            bpmMultiplier={bpmMultiplier}
+            onMultiplierChange={setBpmMultiplier}
+          />
 
-          {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Charts: two-column only when both charts are visible */}
+          <div className={`grid grid-cols-1 gap-5${
+            showOnsetCurve ? ' lg:grid-cols-2' : ''
+          }`}>
             {showOnsetCurve && <OnsetChart result={result} />}
             <BpmHistogram result={result} />
           </div>
 
           {/* Beat timeline */}
-          <BeatList beats={result.beats} />
+          <BeatList
+            beats={result.beats}
+            onBeatClick={fileInfo.objectUrl ? setSeekTime : undefined}
+          />
 
           {/* Export */}
           {audioBuffer && (
@@ -187,8 +236,18 @@ export default function HomePage() {
             />
           )}
 
-          {/* Re-analyse */}
-          <div className="flex justify-end pt-2">
+          {/* Re-analyse / New file footer */}
+          <div className="flex justify-end gap-2 pt-2">
+            {reanalyse && (
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<RotateCcw size={14} />}
+                onClick={() => { setBpmMultiplier(1); reanalyse(); }}
+              >
+                Re-analyse
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"

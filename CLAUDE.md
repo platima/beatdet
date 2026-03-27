@@ -65,8 +65,10 @@ Browser (static site)
 | `src/types/index.ts`            | Shared TypeScript type definitions                |
 | `src/lib/__tests__/`            | Unit + integration tests                          |
 | `testfiles/`                    | Kevin MacLeod MP3 benchmark tracks for tests      |
-| `next.config.ts`                | Next.js config (static export)                    |
+| `src/app/icon.svg`              | App favicon (Solarised blue waveform icon)        |
+| `next.config.ts`                | Next.js config (static export + version injection)|
 | `jest.config.js`                | Jest config (SWC transformer, path aliases)       |
+| `TODO.md`                       | Planned features and milestone tracking           |
 | `CLAUDE.md`                     | AI assistant context (this file)                  |
 | `README.md`                     | User-facing documentation                         |
 | `VERSION`                       | Semantic version string                           |
@@ -173,17 +175,33 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.1.7
+- **Version:** 0.2.0
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
   four export modes (full track, isolate beats, cut at beats, custom range).
+- Version string injected at build time from `VERSION` file via `next.config.ts`
+  `env.NEXT_PUBLIC_APP_VERSION`; no more hardcoded version constants in components.
+- Space bar toggles waveform play/pause globally (excludes inputs/buttons).
+- Click any beat row to seek the waveform to that beat time.
+- BPM ÷2 / ×2 display-only quick-correct buttons on the BPM card for octave error correction.
+- Re-analyse button re-runs detection on the last uploaded file with current settings.
+- Export panel shows visible error messages (not just `console.error`).
+- Cut-at-beats mode shows a file count preview before downloading.
+- Waveform colours update on theme toggle (WaveSurfer re-created with new theme dep).
+- Indeterminate progress shimmer during file-load phase (before analysis begins).
+- Session restore banner explains why waveform is unavailable and prompts re-upload.
+- ARIA labels on all interactive controls; `role="alert"` on error banners;
+  `aria-live` region announces analysis start/completion.
+- Screen-reader `<p className="sr-only">` summaries added to BpmHistogram and OnsetChart.
+- BpmDisplay stats row stacks on mobile (`grid-cols-1 sm:grid-cols-3`).
+- BeatList table wrapped in `overflow-x-auto` with `min-width` for mobile.
+- Charts grid is single-column when onset curve is hidden (no half-width histogram).
+- Open Graph and Twitter Card metadata in `layout.tsx`; `lang="en-AU"`.
+- Favicon from `src/app/icon.svg` (Solarised blue waveform/Activity icon).
+- `next-themes` dependency removed (app uses its own `useTheme` + `ThemeInitialiser`).
+- AAC listed in upload zone label and error messages.
+- Duration display uses `Math.floor` (prevents `0:60` rounding edge case).
 - Session persistence restores the last analysis on reload.
 - All detection and display settings are configurable via the settings page.
 - Light / Dark / System theme with Solarised colour palette.
-- 50 tests (34 unit + 16 real-audio integration).
-
-## Known Limitations
-
-- Real-audio integration tests: 14 of 16 pass outright (including 3
-  octave-tolerant); 2 are skipped as known limitations (3:2 harmonic
-  ambiguity and missing-candidate detection failures).
+- 50 tests (34 unit + 16 real-audio integration; 48 pass, 2 skipped as known limitations).
