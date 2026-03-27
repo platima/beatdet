@@ -11,6 +11,14 @@ No login required. No data leaves your browser; all processing uses the
 
 ---
 
+## Try It
+
+**[beatdet.plati.ma](https://beatdet.plati.ma/)** — live on Cloudflare Pages, no install needed.
+
+Drop in any WAV, MP3, M4A, or AAC file and get BPM, beat markers, and export options in seconds.
+
+---
+
 ## Features
 
 - **Upload** WAV, MP3, M4A, or AAC audio files via drag-and-drop or file picker.

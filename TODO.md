@@ -46,13 +46,30 @@
 
 ## v0.3.0 — Extended Features
 
-- [ ] ZIP bundle download for `cut-at-beats` mode (JSZip or fflate; replaces sequential browser downloads).
+### Export
+
+- [ ] **MP3 export**: browser-side MP3 encoding via `lamejs` or `mp3-encoder-js`; surface format selector (WAV / MP3) and bitrate control (128 / 192 / 256 / 320 kbps) in ExportPanel and settings. Types and store keys already exist (`ExportFormat`, `mp3Bitrate`).
+- [ ] **ZIP bundle** for `cut-at-beats` mode (`fflate` — pure JS, no WASM); replaces sequential browser downloads that browsers may block.
+- [ ] **CSV / JSON beat list export**: copy to clipboard or download from BeatList footer.
+
+### Changelog & What's New
+
+- [ ] **In-app changelog**: add a `/changelog` route (or modal) that displays a `CHANGELOG.md`; link from the version badge in NavBar and from the Settings About section.
+- [ ] **"What's New" banner**: on app load, compare the stored `lastSeenVersion` (in `localStorage`) with `NEXT_PUBLIC_APP_VERSION`. If they differ, show a dismissible banner summarising new features. Dismiss updates `lastSeenVersion`. Only shown to returning users (first-time visitors skip it).
+- [ ] **`CHANGELOG.md`**: create at repo root following Keep a Changelog format; log all v0.2.0 and v0.3.0 entries.
+
+### Stability & Performance
+
 - [ ] Analysis cancellation via `AbortController` — allow user to stop mid-flight.
-- [ ] CSV / JSON beat list export (copy to clipboard or download from BeatList).
-- [ ] PWA manifest: `site.webmanifest`, `apple-touch-icon`, offline support.
-- [ ] File size limit guard: validate before decoding; show friendly error for files over a configurable threshold (e.g., 200 MB).
-- [ ] Virtual scrolling in BeatList for tracks with 500+ beats (react-virtual or similar).
-- [ ] MP3 export: surface format selector and bitrate control in ExportPanel / settings.
-- [ ] Waveform zoom: add slider to WaveformPlayer; wire to `waveformZoom` setting.
-- [ ] Settings page: add Zustand persist migration strategy for future schema changes.
+- [ ] File size limit guard: validate before decoding; friendly error for files over a configurable threshold (e.g., 200 MB).
+- [ ] Virtual scrolling in BeatList for tracks with 500+ beats (`react-virtual` or similar).
 - [ ] Error boundary: wrap result components to prevent full-page crash on render error.
+- [ ] Settings page: add Zustand persist migration strategy for future schema changes.
+
+### Progressive Web App
+
+- [ ] PWA manifest: `site.webmanifest`, `apple-touch-icon`, offline support via service worker.
+
+### Other
+
+- [ ] Waveform zoom: add slider to WaveformPlayer; wire to `waveformZoom` setting (already in store).
