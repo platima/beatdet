@@ -1,13 +1,12 @@
 /**
  * Audio export utilities: slicing, isolating, and encoding audio.
  *
- * All export functions return a Blob that can be downloaded directly by
- * the browser. WAV encoding is implemented natively without any third-party
- * library; MP3 export degrades gracefully to WAV when a native encoder is
- * unavailable.
+ * Supports WAV (native) and MP3 (via @breezystack/lamejs browser encoder).
+ * Cut-at-beats exports are bundled into a single ZIP archive using fflate.
  */
 
 import type { Beat, ExportOptions } from '@/types';
+import { zipSync, type Zippable } from 'fflate';
 
 /* ============================================================
    WAV encoding
@@ -64,6 +63,59 @@ function writeString(view: DataView, offset: number, str: string): void {
   for (let i = 0; i < str.length; i++) {
     view.setUint8(offset + i, str.charCodeAt(i));
   }
+}
+
+/* ============================================================
+   MP3 encoding (lamejs)
+   ============================================================ */
+
+/**
+ * Encode an AudioBuffer as an MP3 Blob using @breezystack/lamejs.
+ * The encoder works channel-by-channel with 16-bit int PCM chunks.
+ */
+export async function encodeMp3(
+  buffer: AudioBuffer,
+  bitrate: 128 | 192 | 256 | 320 = 192
+): Promise<Blob> {
+  // Dynamic import to avoid including lamejs in the SSR/server bundle.
+  const { Mp3Encoder } = await import('@breezystack/lamejs');
+
+  const numChannels = Math.min(buffer.numberOfChannels, 2) as 1 | 2;
+  const sampleRate = buffer.sampleRate;
+  const encoder = new Mp3Encoder(numChannels, sampleRate, bitrate);
+
+  // Convert float32 channel data to int16
+  const toInt16 = (floatData: Float32Array): Int16Array => {
+    const out = new Int16Array(floatData.length);
+    for (let i = 0; i < floatData.length; i++) {
+      const s = Math.max(-1, Math.min(1, floatData[i]));
+      out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+    }
+    return out;
+  };
+
+  const leftData = toInt16(buffer.getChannelData(0));
+  const rightData = numChannels === 2
+    ? toInt16(buffer.getChannelData(1))
+    : leftData;
+
+  // Encode in chunks to avoid blocking for long files
+  const CHUNK = 1152;
+  const parts: Uint8Array[] = [];
+
+  for (let i = 0; i < leftData.length; i += CHUNK) {
+    const leftChunk = leftData.subarray(i, i + CHUNK);
+    const rightChunk = rightData.subarray(i, i + CHUNK);
+    const encoded = numChannels === 2
+      ? encoder.encodeBuffer(leftChunk, rightChunk)
+      : encoder.encodeBuffer(leftChunk);
+    if (encoded.length > 0) parts.push(new Uint8Array(encoded));
+  }
+
+  const flushed = encoder.flush();
+  if (flushed.length > 0) parts.push(new Uint8Array(flushed));
+
+  return new Blob(parts as BlobPart[], { type: 'audio/mpeg' });
 }
 
 /* ============================================================
@@ -159,6 +211,24 @@ export function normalisePeak(buffer: AudioBuffer): AudioBuffer {
 }
 
 /* ============================================================
+   ZIP bundling (fflate)
+   ============================================================ */
+
+/**
+ * Bundle an array of ExportedSlice objects into a single ZIP Blob.
+ * All slices are encoded as-is; filenames are preserved.
+ */
+export async function bundleZip(slices: ExportedSlice[]): Promise<Blob> {
+  const files: Zippable = {};
+  for (const slice of slices) {
+    const ab = await slice.blob.arrayBuffer();
+    files[slice.filename] = new Uint8Array(ab);
+  }
+  const zipped = zipSync(files, { level: 0 }); // level 0 = store only (audio is already compressed)
+  return new Blob([zipped as BlobPart], { type: 'application/zip' });
+}
+
+/* ============================================================
    High-level export functions
    ============================================================ */
 
@@ -186,6 +256,20 @@ export interface ExportedSlice {
 }
 
 /**
+ * Encode an AudioBuffer to the format specified in options (WAV or MP3).
+ */
+async function encodeBuffer(
+  buffer: AudioBuffer,
+  options: ExportOptions
+): Promise<{ blob: Blob; ext: string }> {
+  if (options.format === 'mp3') {
+    const blob = await encodeMp3(buffer, options.mp3Bitrate);
+    return { blob, ext: 'mp3' };
+  }
+  return { blob: encodeWav(buffer), ext: 'wav' };
+}
+
+/**
  * Export the full audio file (optionally normalised), with no slicing.
  */
 export async function exportFull(
@@ -195,8 +279,8 @@ export async function exportFull(
 ): Promise<ExportedSlice[]> {
   const buffer = await decodeAudio(arrayBuffer);
   if (options.normalise) normalisePeak(buffer);
-  const blob = encodeWav(buffer);
-  return [{ index: 1, filename: `${baseName}.wav`, blob }];
+  const { blob, ext } = await encodeBuffer(buffer, options);
+  return [{ index: 1, filename: `${baseName}.${ext}`, blob }];
 }
 
 /**
@@ -234,13 +318,13 @@ export async function exportIsolatedBeats(
   const slices = merged.map((r) => sliceBuffer(buffer, r.start, r.end));
   const combined = concatenateBuffers(slices);
   if (options.normalise) normalisePeak(combined);
-  const blob = encodeWav(combined);
+  const { blob, ext } = await encodeBuffer(combined, options);
 
-  return [{ index: 1, filename: `${baseName}_beats.wav`, blob }];
+  return [{ index: 1, filename: `${baseName}_beats.${ext}`, blob }];
 }
 
 /**
- * Cut the audio at each beat boundary and return individual slices.
+ * Cut the audio at each beat boundary and bundle slices into a single ZIP archive.
  * Each slice starts at one beat and ends at the next.
  */
 export async function exportCutAtBeats(
@@ -250,7 +334,7 @@ export async function exportCutAtBeats(
   baseName: string
 ): Promise<ExportedSlice[]> {
   const buffer = await decodeAudio(arrayBuffer);
-  const slices: ExportedSlice[] = [];
+  const rawSlices: ExportedSlice[] = [];
 
   // Build cut points: [0, beat1, beat2, ..., beatN, duration]
   const cutPoints = [0, ...beats.map((b) => b.time), buffer.duration];
@@ -264,12 +348,14 @@ export async function exportCutAtBeats(
 
     const slice = sliceBuffer(buffer, start, end);
     if (options.normalise) normalisePeak(slice);
-    const blob = encodeWav(slice);
-    const filename = `${baseName}_slice_${String(i + 1).padStart(3, '0')}.wav`;
-    slices.push({ index: i + 1, filename, blob });
+    const { blob, ext } = await encodeBuffer(slice, options);
+    const filename = `${baseName}_slice_${String(i + 1).padStart(3, '0')}.${ext}`;
+    rawSlices.push({ index: i + 1, filename, blob });
   }
 
-  return slices;
+  // Bundle all slices into a single ZIP for a clean one-click download
+  const zipBlob = await bundleZip(rawSlices);
+  return [{ index: 1, filename: `${baseName}_slices.zip`, blob: zipBlob }];
 }
 
 /**
@@ -285,8 +371,8 @@ export async function exportCustomRange(
   const end = options.rangeEnd ?? buffer.duration;
   const slice = sliceBuffer(buffer, start, end);
   if (options.normalise) normalisePeak(slice);
-  const blob = encodeWav(slice);
-  return [{ index: 1, filename: `${baseName}_custom.wav`, blob }];
+  const { blob, ext } = await encodeBuffer(slice, options);
+  return [{ index: 1, filename: `${baseName}_custom.${ext}`, blob }];
 }
 
 /**

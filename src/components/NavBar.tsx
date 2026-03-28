@@ -7,7 +7,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, Settings, Sun, Moon, Monitor } from 'lucide-react';
+import { Activity, Settings, Sun, Moon, Monitor, ScrollText } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
 // Version is injected at build time from the VERSION file via next.config.ts.
@@ -37,16 +37,19 @@ export function NavBar() {
         >
           <Activity size={22} strokeWidth={2} />
           <span className="text-lg font-semibold tracking-tight">BeatDet</span>
-          <span
-            className="hidden rounded px-1.5 py-0.5 text-xs font-mono sm:inline"
-            style={{
-              backgroundColor: 'var(--bg)',
-              color: 'var(--text-muted)',
-              border: '1px solid var(--border)',
-            }}
-          >
-            v{VERSION}
-          </span>
+        </Link>
+        {/* Version badge links to the in-app changelog */}
+        <Link
+          href="/changelog"
+          title="View changelog"
+          className="hidden rounded px-1.5 py-0.5 text-xs font-mono sm:inline transition-colors hover:border-[var(--accent)]"
+          style={{
+            backgroundColor: 'var(--bg)',
+            color: 'var(--text-muted)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          v{VERSION}
         </Link>
 
         {/* Right-side actions */}
@@ -60,6 +63,21 @@ export function NavBar() {
           >
             <ThemeIcon size={18} />
           </button>
+
+          {/* Changelog link */}
+          <Link
+            href="/changelog"
+            title="Changelog"
+            aria-label="Changelog"
+            className={[
+              'flex h-9 w-9 items-center justify-center rounded-lg transition-colors',
+              pathname === '/changelog'
+                ? 'text-[var(--accent)] bg-[var(--bg)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-[var(--bg)]',
+            ].join(' ')}
+          >
+            <ScrollText size={18} />
+          </Link>
 
           {/* Settings link */}
           <Link

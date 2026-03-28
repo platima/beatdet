@@ -21,6 +21,8 @@ import { BeatList } from '@/components/BeatList';
 import { BpmHistogram } from '@/components/BpmHistogram';
 import { ExportPanel } from '@/components/ExportPanel';
 import { Button } from '@/components/Button';
+import { WhatsNewBanner } from '@/components/WhatsNewBanner';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useAudioAnalysis } from '@/hooks/useAudioAnalysis';
 import { useSettingsStore } from '@/store/settingsStore';
 import { RefreshCw, AlertCircle, History, RotateCcw } from 'lucide-react';
@@ -173,6 +175,10 @@ export default function HomePage() {
         <>
           {/* Anchor used by auto-scroll after analysis */}
           <div id="results" />
+
+          {/* What's New banner - shown to returning users after an upgrade */}
+          <WhatsNewBanner />
+
           {/* Restored session banner - shown when audio was not saved */}
           {!fileInfo.objectUrl && (
             <div
@@ -207,33 +213,46 @@ export default function HomePage() {
           )}
 
           {/* BPM card */}
-          <BpmDisplay
-            result={result}
-            bpmMultiplier={bpmMultiplier}
-            onMultiplierChange={setBpmMultiplier}
-          />
+          <ErrorBoundary label="BPM display">
+            <BpmDisplay
+              result={result}
+              bpmMultiplier={bpmMultiplier}
+              onMultiplierChange={setBpmMultiplier}
+            />
+          </ErrorBoundary>
 
           {/* Charts: two-column only when both charts are visible */}
           <div className={`grid grid-cols-1 gap-5${
             showOnsetCurve ? ' lg:grid-cols-2' : ''
           }`}>
-            {showOnsetCurve && <OnsetChart result={result} />}
-            <BpmHistogram result={result} />
+            {showOnsetCurve && (
+              <ErrorBoundary label="Onset chart">
+                <OnsetChart result={result} />
+              </ErrorBoundary>
+            )}
+            <ErrorBoundary label="BPM histogram">
+              <BpmHistogram result={result} />
+            </ErrorBoundary>
           </div>
 
           {/* Beat timeline */}
-          <BeatList
-            beats={result.beats}
-            onBeatClick={fileInfo.objectUrl ? setSeekTime : undefined}
-          />
+          <ErrorBoundary label="Beat timeline">
+            <BeatList
+              beats={result.beats}
+              onBeatClick={fileInfo.objectUrl ? setSeekTime : undefined}
+              baseName={fileInfo.name.replace(/\.[^.]+$/, '')}
+            />
+          </ErrorBoundary>
 
           {/* Export */}
           {audioBuffer && (
-            <ExportPanel
-              audioBuffer={audioBuffer}
-              result={result}
-              fileName={fileInfo.name}
-            />
+            <ErrorBoundary label="Export panel">
+              <ExportPanel
+                audioBuffer={audioBuffer}
+                result={result}
+                fileName={fileInfo.name}
+              />
+            </ErrorBoundary>
           )}
 
           {/* Re-analyse / New file footer */}

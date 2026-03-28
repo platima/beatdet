@@ -53,19 +53,23 @@ Browser (static site)
 |---------------------------------|---------------------------------------------------|
 | `src/app/page.tsx`              | Main beat detection page                          |
 | `src/app/settings/page.tsx`     | Settings page                                     |
+| `src/app/changelog/page.tsx`    | Changelog page (server component, reads CHANGELOG.md) |
 | `src/app/layout.tsx`            | Root layout (NavBar, ThemeInitialiser)             |
 | `src/app/globals.css`           | Solarised CSS variables + Tailwind                |
 | `src/components/`               | All React components (UI, charts, waveform, etc.) |
+| `src/components/WhatsNewBanner.tsx` | Dismissible upgrade banner (localStorage-based) |
+| `src/components/ErrorBoundary.tsx` | React class error boundary for result panels   |
 | `src/hooks/useAudioAnalysis.ts` | File upload + analysis lifecycle hook             |
 | `src/hooks/useTheme.ts`         | Theme preference hook                             |
 | `src/lib/beatDetection.ts`      | Beat detection engine (spectral flux, peak pick)  |
-| `src/lib/audioExport.ts`        | WAV encoding and audio slicing                    |
+| `src/lib/audioExport.ts`        | WAV/MP3 encoding, ZIP bundling, and audio slicing |
 | `src/lib/sessionStorage.ts`     | Session persistence helpers                       |
 | `src/store/settingsStore.ts`    | Zustand settings store (localStorage backed)      |
 | `src/types/index.ts`            | Shared TypeScript type definitions                |
 | `src/lib/__tests__/`            | Unit + integration tests                          |
 | `testfiles/`                    | Kevin MacLeod MP3 benchmark tracks for tests      |
 | `src/app/icon.svg`              | App favicon (Solarised blue waveform icon)        |
+| `CHANGELOG.md`                  | Full release history (Keep a Changelog format)    |
 | `next.config.ts`                | Next.js config (static export + version injection)|
 | `jest.config.js`                | Jest config (SWC transformer, path aliases)       |
 | `TODO.md`                       | Planned features and milestone tracking           |
@@ -175,10 +179,18 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.2.0
+- **Version:** 0.3.0
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
   four export modes (full track, isolate beats, cut at beats, custom range).
+- **MP3 export** via `@breezystack/lamejs` (128/192/256/320 kbps selectable).
+- **ZIP bundling** via `fflate` — cut-at-beats downloads as a single `.zip` archive.
+- **Beat data export** — CSV and JSON download buttons in the Beat Timeline header.
+- **Waveform zoom slider** in WaveformPlayer controls; persisted to settings.
+- **In-app changelog** at `/changelog` (server component reads `CHANGELOG.md` at build time).
+- **What's New banner** shown to returning users after an upgrade (localStorage-based).
+- **Error boundaries** wrap all major result panels; failed panels show a recovery UI.
+- **File size guard** blocks uploads over 200 MB with a clear error message.
 - Version string injected at build time from `VERSION` file via `next.config.ts`
   `env.NEXT_PUBLIC_APP_VERSION`; no more hardcoded version constants in components.
 - Space bar toggles waveform play/pause globally (excludes inputs/buttons).
@@ -186,7 +198,7 @@ The app is a fully static Next.js export (no server runtime required).
 - BPM ÷2 / ×2 display-only quick-correct buttons on the BPM card for octave error correction.
 - Re-analyse button re-runs detection on the last uploaded file with current settings.
 - Export panel shows visible error messages (not just `console.error`).
-- Cut-at-beats mode shows a file count preview before downloading.
+- Cut-at-beats mode shows a ZIP preview badge before downloading.
 - Waveform colours update on theme toggle (WaveSurfer re-created with new theme dep).
 - Indeterminate progress shimmer during file-load phase (before analysis begins).
 - Session restore banner explains why waveform is unavailable and prompts re-upload.
@@ -203,5 +215,6 @@ The app is a fully static Next.js export (no server runtime required).
 - Duration display uses `Math.floor` (prevents `0:60` rounding edge case).
 - Session persistence restores the last analysis on reload.
 - All detection and display settings are configurable via the settings page.
+- Settings store migrates from v1 to v2 schema without losing existing preferences.
 - Light / Dark / System theme with Solarised colour palette.
-- 50 tests (34 unit + 16 real-audio integration; 48 pass, 2 skipped as known limitations).
+- 50 tests (34 unit + 16 real-audio integration; 47 pass, 1 fail known, 2 skipped).

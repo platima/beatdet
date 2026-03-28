@@ -44,7 +44,12 @@
 			"/^cd \"d:\\\\Repos\\\\beatdet\" ; node sergio-check\\.mjs 2>&1$/": {
 				"approve": true,
 				"matchCommandLine": true
-			}
+			},
+			"git checkout": true,
+			"git merge": true,
+			"npx tsc": true,
+			"git stash": true,
+			"Set-Content": true
 		}
 	}
 }

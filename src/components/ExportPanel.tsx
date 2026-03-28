@@ -3,7 +3,8 @@
  *
  * Provides controls for:
  *   - Export mode (full, isolate beats, cut at beats, custom range)
- *   - Output format (WAV only; MP3 via native encoder if available)
+ *   - Output format (WAV or MP3 via lamejs)
+ *   - MP3 bitrate selector (128 / 192 / 256 / 320 kbps)
  *   - Pre/post-roll for beat slicing
  *   - Custom time range selection
  *   - Normalisation toggle
@@ -140,6 +141,53 @@ export function ExportPanel({ audioBuffer, result, fileName }: ExportPanelProps)
         </div>
       </div>
 
+      {/* Format + bitrate selectors */}
+      <div className="flex flex-wrap items-end gap-4">
+        <label className="space-y-1.5">
+          <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+            Format
+          </span>
+          <select
+            value={exportOptions.format}
+            onChange={(e) => updateExport({ format: e.target.value as 'wav' | 'mp3' })}
+            className="block rounded-lg px-3 py-1.5 text-sm"
+            style={{
+              backgroundColor: 'var(--bg)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-body)',
+            }}
+          >
+            <option value="wav">WAV (lossless)</option>
+            <option value="mp3">MP3 (compressed)</option>
+          </select>
+        </label>
+
+        {exportOptions.format === 'mp3' && (
+          <label className="space-y-1.5">
+            <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+              Bitrate
+            </span>
+            <select
+              value={exportOptions.mp3Bitrate}
+              onChange={(e) =>
+                updateExport({ mp3Bitrate: Number(e.target.value) as 128 | 192 | 256 | 320 })
+              }
+              className="block rounded-lg px-3 py-1.5 text-sm"
+              style={{
+                backgroundColor: 'var(--bg)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-body)',
+              }}
+            >
+              <option value={128}>128 kbps</option>
+              <option value={192}>192 kbps</option>
+              <option value={256}>256 kbps</option>
+              <option value={320}>320 kbps</option>
+            </select>
+          </label>
+        )}
+      </div>
+
       {/* Options row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {/* Pre-roll */}
@@ -264,10 +312,10 @@ export function ExportPanel({ audioBuffer, result, fileName }: ExportPanelProps)
           {exporting ? 'Exporting…' : 'Download'}
         </Button>
 
-        {/* File count preview for multi-file modes */}
+        {/* ZIP preview for cut-at-beats mode */}
         {exportOptions.mode === 'cut-at-beats' && !exporting && (
           <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Will download {result.beats.length} file{result.beats.length !== 1 ? 's' : ''}
+            Will create 1 ZIP with {result.beats.length} slice{result.beats.length !== 1 ? 's' : ''}
           </span>
         )}
 
