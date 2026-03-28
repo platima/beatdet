@@ -1,17 +1,22 @@
 /**
  * BeatList: scrollable table of all detected beats with timestamps and
  * confidence values (if enabled in display settings).
+ *
+ * Includes CSV and JSON download buttons in the header.
  */
 
 'use client';
 
 import type { Beat } from '@/types';
 import { useSettingsStore } from '@/store/settingsStore';
+import { FileDown } from 'lucide-react';
 
 interface BeatListProps {
   beats: Beat[];
   /** Optional callback fired when a row is clicked; receives the beat time in seconds. */
   onBeatClick?: (time: number) => void;
+  /** Base filename (without extension) used for exported CSV/JSON downloads. */
+  baseName?: string;
 }
 
 function formatTime(s: number): string {
@@ -47,10 +52,41 @@ function ConfidenceBar({ value }: { value: number }) {
   );
 }
 
-export function BeatList({ beats, onBeatClick }: BeatListProps) {
+/** Trigger a browser download for text/blob data. */
+function downloadText(content: string, filename: string, mimeType: string): void {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+export function BeatList({ beats, onBeatClick, baseName = 'beats' }: BeatListProps) {
   const showConfidence = useSettingsStore(
     (s) => s.settings.display.showBeatConfidence
   );
+
+  const handleDownloadCsv = () => {
+    const header = 'index,time_formatted,seconds,confidence\n';
+    const rows = beats
+      .map((b, i) => `${i + 1},${formatTime(b.time)},${b.time.toFixed(4)},${b.confidence.toFixed(4)}`)
+      .join('\n');
+    downloadText(header + rows, `${baseName}_beats.csv`, 'text/csv;charset=utf-8;');
+  };
+
+  const handleDownloadJson = () => {
+    const data = {
+      beats: beats.map((b, i) => ({
+        index: i + 1,
+        time: formatTime(b.time),
+        seconds: parseFloat(b.time.toFixed(4)),
+        confidence: parseFloat(b.confidence.toFixed(4)),
+      })),
+    };
+    downloadText(JSON.stringify(data, null, 2), `${baseName}_beats.json`, 'application/json');
+  };
 
   if (beats.length === 0) {
     return (
@@ -68,11 +104,33 @@ export function BeatList({ beats, onBeatClick }: BeatListProps) {
       className="rounded-xl overflow-hidden"
       style={{ border: '1px solid var(--border)' }}
     >
-      <div className="px-4 py-3" style={{ backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid var(--border)' }}>
+      <div className="px-4 py-3 flex items-center justify-between" style={{ backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid var(--border)' }}>
         <p className="text-xs font-medium uppercase tracking-widest"
           style={{ color: 'var(--text-muted)' }}>
           Beat Timeline - {beats.length} beats
         </p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleDownloadCsv}
+            className="flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors hover:bg-[var(--bg-alt)]"
+            style={{ color: 'var(--text-muted)', border: '1px solid var(--border)' }}
+            title="Download beats as CSV"
+            aria-label="Download beats as CSV"
+          >
+            <FileDown size={12} />
+            CSV
+          </button>
+          <button
+            onClick={handleDownloadJson}
+            className="flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors hover:bg-[var(--bg-alt)]"
+            style={{ color: 'var(--text-muted)', border: '1px solid var(--border)' }}
+            title="Download beats as JSON"
+            aria-label="Download beats as JSON"
+          >
+            <FileDown size={12} />
+            JSON
+          </button>
+        </div>
       </div>
 
       <div

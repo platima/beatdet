@@ -321,6 +321,27 @@ export default function SettingsPage() {
             onChange={(v) => updateDisplay({ histogramBins: v })}
           />
         </FieldRow>
+
+        {/* Waveform zoom */}
+        <FieldRow label="Default waveform zoom" hint="Initial zoom level for the waveform player (1× = full track).">
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={1}
+              max={8}
+              step={0.5}
+              value={settings.display.waveformZoom}
+              onChange={(e) => updateDisplay({ waveformZoom: parseFloat(e.target.value) })}
+              className="w-40 accent-[var(--accent)]"
+            />
+            <span
+              className="w-10 text-right text-sm tabular-nums font-mono"
+              style={{ color: 'var(--accent)' }}
+            >
+              {settings.display.waveformZoom}×
+            </span>
+          </div>
+        </FieldRow>
       </SettingsSection>
 
       {/* ── Beat Detection ──────────────────────────────────────────── */}
@@ -447,10 +468,27 @@ export default function SettingsPage() {
             value={settings.export.format}
             options={[
               { value: 'wav', label: 'WAV (lossless)' },
+              { value: 'mp3', label: 'MP3 (compressed)' },
             ]}
             onChange={(v) => updateExport({ format: v as 'wav' | 'mp3' })}
           />
         </FieldRow>
+
+        {/* MP3 bitrate — shown only when format is mp3 */}
+        {settings.export.format === 'mp3' && (
+          <FieldRow label="MP3 bitrate" hint="Output quality for MP3 exports.">
+            <SelectInput
+              value={settings.export.mp3Bitrate}
+              options={[
+                { value: 128, label: '128 kbps' },
+                { value: 192, label: '192 kbps (default)' },
+                { value: 256, label: '256 kbps' },
+                { value: 320, label: '320 kbps' },
+              ]}
+              onChange={(v) => updateExport({ mp3Bitrate: Number(v) as 128 | 192 | 256 | 320 })}
+            />
+          </FieldRow>
+        )}
 
         {/* Normalise by default */}
         <FieldRow label="Normalise by default" hint="Apply peak normalisation (–1 dBFS) to all exports.">

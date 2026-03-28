@@ -1,6 +1,6 @@
 {
   "name": "beatdet",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,8 +11,10 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@breezystack/lamejs": "^1.2.7",
     "@types/audioworklet": "^0.0.97",
     "chart.js": "^4.5.1",
+    "fflate": "^0.8.2",
     "lucide-react": "^0.577.0",
     "next": "16.2.1",
     "react": "19.2.4",

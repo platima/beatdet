@@ -9,7 +9,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import WaveSurfer from 'wavesurfer.js';
-import { Play, Pause, SkipBack, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, SkipBack, Volume2, VolumeX, ZoomIn } from 'lucide-react';
 import type { AnalysisResult } from '@/types';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useTheme } from '@/hooks/useTheme';
@@ -52,9 +52,13 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
   const [isReady, setIsReady] = useState(false);
 
   const displaySettings = useSettingsStore((s) => s.settings.display);
+  const { updateDisplay } = useSettingsStore();
   const beatColour = SOLARISED_ACCENT[displaySettings.beatMarkerColour] ?? '#cb4b16';
   // Re-create WaveSurfer when theme changes so it picks up new CSS variable values
   const { preference: theme } = useTheme();
+
+  // Local zoom state mirrors the persisted display setting
+  const [zoom, setZoom] = useState(displaySettings.waveformZoom);
 
   // Initialise WaveSurfer
   useEffect(() => {
@@ -83,6 +87,8 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
       setIsReady(true);
       setDuration(ws.getDuration());
       ws.setVolume(volume);
+      // Apply persisted zoom level
+      ws.zoom(zoom * 50);
     });
 
     ws.on('audioprocess', (t) => setCurrentTime(t));
@@ -103,6 +109,11 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
   useEffect(() => {
     wsRef.current?.setVolume(muted ? 0 : volume);
   }, [volume, muted]);
+
+  // Apply zoom to WaveSurfer when slider changes (only once ready)
+  useEffect(() => {
+    if (isReady) wsRef.current?.zoom(zoom * 50);
+  }, [zoom, isReady]);
 
   // Seek to a specific time (driven by BeatList click-to-seek)
   useEffect(() => {
@@ -235,6 +246,26 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
           title="Volume"
           aria-label="Volume"
         />
+
+        {/* Zoom slider */}
+        <div className="ml-2 flex items-center gap-1.5 shrink-0">
+          <ZoomIn size={14} style={{ color: 'var(--text-muted)' }} aria-hidden />
+          <input
+            type="range"
+            min={1}
+            max={8}
+            step={0.5}
+            value={zoom}
+            onChange={(e) => {
+              const v = parseFloat(e.target.value);
+              setZoom(v);
+              updateDisplay({ waveformZoom: v });
+            }}
+            className="h-1.5 w-20 accent-[var(--accent)] cursor-pointer"
+            title={`Zoom: ${zoom}×`}
+            aria-label="Waveform zoom"
+          />
+        </div>
 
         {/* Beat count badge */}
         <span

@@ -47,7 +47,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   detection: DEFAULT_DETECTION,
   display: DEFAULT_DISPLAY,
   export: DEFAULT_EXPORT,
-  settingsVersion: '1.0.0',
+  settingsVersion: '2.0.0',
 };
 
 /* ============================================================
@@ -100,6 +100,37 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'beatdet-settings',
+      // Migrate persisted settings from older schema versions so returning
+      // users don't lose their preferences when new keys are added.
+      version: 2,
+      migrate: (persisted: unknown, fromVersion: number) => {
+        const prev = persisted as Partial<{ settings: Partial<AppSettings> }>;
+        const settings = prev?.settings ?? {};
+
+        if (fromVersion < 2) {
+          // v1 → v2: add mp3Bitrate and format fields to export, waveformZoom to display
+          return {
+            ...prev,
+            settings: {
+              ...settings,
+              export: {
+                ...DEFAULT_EXPORT,
+                ...(settings.export ?? {}),
+                mp3Bitrate: (settings.export as Partial<typeof DEFAULT_EXPORT>)?.mp3Bitrate ?? 192,
+                format: (settings.export as Partial<typeof DEFAULT_EXPORT>)?.format ?? 'wav',
+              },
+              display: {
+                ...DEFAULT_DISPLAY,
+                ...(settings.display ?? {}),
+                waveformZoom: (settings.display as Partial<typeof DEFAULT_DISPLAY>)?.waveformZoom ?? 1,
+              },
+              settingsVersion: '2.0.0',
+            },
+          };
+        }
+
+        return persisted;
+      },
     }
   )
 );
