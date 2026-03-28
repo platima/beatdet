@@ -60,11 +60,11 @@
 
 ### Stability & Performance
 
-- [ ] Analysis cancellation via `AbortController` — allow user to stop mid-flight.
-- [ ] File size limit guard: validate before decoding; friendly error for files over a configurable threshold (e.g., 200 MB).
-- [ ] Virtual scrolling in BeatList for tracks with 500+ beats (`react-virtual` or similar).
-- [ ] Error boundary: wrap result components to prevent full-page crash on render error.
-- [ ] Settings page: add Zustand persist migration strategy for future schema changes.
+- [x] Analysis cancellation via `AbortController` — allow user to stop mid-flight.
+- [x] File size limit guard: validate before decoding; friendly error for files over 100 MB (Cloudflare limit).
+- [x] Virtual scrolling in BeatList for tracks with 500+ beats (`@tanstack/react-virtual`).
+- [x] Error boundary: wrap result components to prevent full-page crash on render error.
+- [x] Settings page: add Zustand persist migration strategy for future schema changes.
 
 ### Progressive Web App
 

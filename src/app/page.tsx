@@ -68,6 +68,7 @@ export default function HomePage() {
     clearAll,
     restoreSession,
     reanalyse,
+    cancel,
   } = useAudioAnalysis();
 
   const showOnsetCurve = useSettingsStore(
@@ -154,12 +155,25 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Progress */}
+      {/* Progress + cancel */}
       {isProcessing && (
-        <ProgressBar
-          value={progress}
-          label={getStatusLabel(status)}
-        />
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <ProgressBar
+              value={progress}
+              label={getStatusLabel(status)}
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={cancel}
+            className="shrink-0"
+            aria-label="Cancel analysis"
+          >
+            Cancel
+          </Button>
+        </div>
       )}
 
       {/* Visually-hidden live region for screen reader announcements */}

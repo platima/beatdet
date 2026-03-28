@@ -1,12 +1,17 @@
 /**
- * BeatList: scrollable table of all detected beats with timestamps and
- * confidence values (if enabled in display settings).
+ * BeatList: virtualised scrollable table of all detected beats with timestamps
+ * and confidence values (if enabled in display settings).
+ *
+ * Uses TanStack Virtual to render only the visible rows, keeping DOM node count
+ * low even for tracks with hundreds or thousands of beats.
  *
  * Includes CSV and JSON download buttons in the header.
  */
 
 'use client';
 
+import { useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import type { Beat } from '@/types';
 import { useSettingsStore } from '@/store/settingsStore';
 import { FileDown } from 'lucide-react';
@@ -67,6 +72,27 @@ export function BeatList({ beats, onBeatClick, baseName = 'beats' }: BeatListPro
   const showConfidence = useSettingsStore(
     (s) => s.settings.display.showBeatConfidence
   );
+
+  // Ref for the scrollable container, required by useVirtualizer
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Number of columns changes when confidence column is shown
+  const colCount = showConfidence ? 4 : 3;
+
+  // Virtual row renderer — only mounts visible rows + overscan buffer
+  const rowVirtualizer = useVirtualizer({
+    count: beats.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 33, // approximate row height in px
+    overscan: 8,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+  const topPad = virtualItems.length > 0 ? virtualItems[0].start : 0;
+  const bottomPad = virtualItems.length > 0
+    ? totalSize - virtualItems[virtualItems.length - 1].end
+    : 0;
 
   const handleDownloadCsv = () => {
     const header = 'index,time_formatted,seconds,confidence\n';
@@ -133,7 +159,9 @@ export function BeatList({ beats, onBeatClick, baseName = 'beats' }: BeatListPro
         </div>
       </div>
 
+      {/* Scroll container — ref required by useVirtualizer */}
       <div
+        ref={scrollRef}
         className="max-h-64 overflow-x-auto overflow-y-auto"
         style={{ backgroundColor: 'var(--bg-panel)' }}
       >
@@ -154,38 +182,50 @@ export function BeatList({ beats, onBeatClick, baseName = 'beats' }: BeatListPro
             </tr>
           </thead>
           <tbody>
-            {beats.map((beat, i) => (
-              <tr
-                key={beat.time}
-                className={[
-                  'border-b transition-colors',
-                  onBeatClick
-                    ? 'cursor-pointer hover:bg-[var(--bg-alt)]'
-                    : 'hover:bg-[var(--bg-alt)]',
-                ].join(' ')}
-                style={{ borderColor: 'var(--border)' }}
-                onClick={() => onBeatClick?.(beat.time)}
-                title={onBeatClick ? `Seek to ${beat.time.toFixed(3)} s` : undefined}
-              >
-                <td className="px-4 py-1.5 font-mono tabular-nums text-xs"
-                  style={{ color: 'var(--text-muted)' }}>
-                  {i + 1}
-                </td>
-                <td className="px-4 py-1.5 font-mono tabular-nums text-xs"
-                  style={{ color: 'var(--text-body)' }}>
-                  {formatTime(beat.time)}
-                </td>
-                <td className="px-4 py-1.5 font-mono tabular-nums text-xs text-right"
-                  style={{ color: 'var(--accent)' }}>
-                  {beat.time.toFixed(4)}
-                </td>
-                {showConfidence && (
-                  <td className="px-4 py-1.5 w-36">
-                    <ConfidenceBar value={beat.confidence} />
+            {/* Top spacer — fills the gap above the first visible row */}
+            {topPad > 0 && (
+              <tr><td colSpan={colCount} style={{ height: topPad }} /></tr>
+            )}
+            {virtualItems.map((virtualRow) => {
+              const beat = beats[virtualRow.index];
+              const i = virtualRow.index;
+              return (
+                <tr
+                  key={beat.time}
+                  className={[
+                    'border-b transition-colors',
+                    onBeatClick
+                      ? 'cursor-pointer hover:bg-[var(--bg-alt)]'
+                      : 'hover:bg-[var(--bg-alt)]',
+                  ].join(' ')}
+                  style={{ borderColor: 'var(--border)' }}
+                  onClick={() => onBeatClick?.(beat.time)}
+                  title={onBeatClick ? `Seek to ${beat.time.toFixed(3)} s` : undefined}
+                >
+                  <td className="px-4 py-1.5 font-mono tabular-nums text-xs"
+                    style={{ color: 'var(--text-muted)' }}>
+                    {i + 1}
                   </td>
-                )}
-              </tr>
-            ))}
+                  <td className="px-4 py-1.5 font-mono tabular-nums text-xs"
+                    style={{ color: 'var(--text-body)' }}>
+                    {formatTime(beat.time)}
+                  </td>
+                  <td className="px-4 py-1.5 font-mono tabular-nums text-xs text-right"
+                    style={{ color: 'var(--accent)' }}>
+                    {beat.time.toFixed(4)}
+                  </td>
+                  {showConfidence && (
+                    <td className="px-4 py-1.5 w-36">
+                      <ConfidenceBar value={beat.confidence} />
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+            {/* Bottom spacer — fills the gap below the last visible row */}
+            {bottomPad > 0 && (
+              <tr><td colSpan={colCount} style={{ height: bottomPad }} /></tr>
+            )}
           </tbody>
         </table>
       </div>

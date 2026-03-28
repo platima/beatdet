@@ -444,14 +444,26 @@ export type ProgressCallback = (progress: number) => void;
  * @param settings     Detection parameters from user settings.
  * @param onProgress   Optional callback for progress updates (0–1).
  */
+/**
+ * Throw a DOM AbortError if the given signal has been aborted.
+ * Used to cancel analysis between processing stages.
+ */
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new DOMException('Analysis was cancelled.', 'AbortError');
+  }
+}
+
 export async function analyseAudio(
   arrayBuffer: ArrayBuffer,
   settings: DetectionSettings,
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
+  signal?: AbortSignal
 ): Promise<AnalysisResult> {
+  throwIfAborted(signal);
   onProgress?.(0.05);
 
-  // Decode the audio using an OfflineAudioContext (no need for an output device).
+  // Decode the audio using a regular AudioContext (no output device needed).
   const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
   let audioBuffer: AudioBuffer;
 
@@ -461,6 +473,8 @@ export async function analyseAudio(
     await audioCtx.close();
   }
 
+  // Bail out if cancelled during the async decode step.
+  throwIfAborted(signal);
   onProgress?.(0.2);
 
   const sampleRate = audioBuffer.sampleRate;
@@ -470,6 +484,7 @@ export async function analyseAudio(
 
   // Mix down to mono for analysis
   const mono = mixDownToMono(audioBuffer);
+  throwIfAborted(signal);
   onProgress?.(0.3);
 
   // Compute onset strength
@@ -479,11 +494,13 @@ export async function analyseAudio(
   } else {
     rawOnsets = computeEnergyEnvelope(mono, hopSize);
   }
+  throwIfAborted(signal);
   onProgress?.(0.6);
 
   // Smooth and normalise
   const smoothed = smoothArray(rawOnsets, settings.smoothingWindow);
   const onsets = normalise(smoothed);
+  throwIfAborted(signal);
   onProgress?.(0.7);
 
   // Times for each hop frame
@@ -496,6 +513,7 @@ export async function analyseAudio(
   const effectiveMinBeatGap = Math.min(settings.minBeatGap, 60 / settings.bpmMax);
   const minGapFrames = Math.max(1, Math.round(effectiveMinBeatGap / hopDuration));
   const peakFrames = pickPeaks(onsets, settings.peakThreshold, minGapFrames, 0.25);
+  throwIfAborted(signal);
   onProgress?.(0.8);
 
   // Convert peak frame indices to Beat objects

@@ -34,6 +34,8 @@ export interface UseAudioAnalysisReturn {
   restoreSession: () => boolean;
   /** Re-run analysis on the last uploaded file using current settings. */
   reanalyse: (() => Promise<void>) | null;
+  /** Cancel any in-progress analysis without clearing results. */
+  cancel: () => void;
 }
 
 export function useAudioAnalysis(): UseAudioAnalysisReturn {
@@ -50,8 +52,13 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
   const objectUrlRef = useRef<string | null>(null);
   // Keep a reference to the last uploaded File for re-analysis
   const lastFileRef = useRef<File | null>(null);
+  // AbortController for the currently-running analysis
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const clearAll = useCallback(() => {
+    // Cancel any in-progress analysis before clearing state
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
       objectUrlRef.current = null;
@@ -63,6 +70,14 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
     setResult(null);
     setError(null);
     clearSession();
+  }, []);
+
+  /** Cancel any in-progress analysis; leaves existing results intact. */
+  const cancel = useCallback(() => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setStatus('idle');
+    setProgress(0);
   }, []);
 
   /**
@@ -148,17 +163,23 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
       // Store reference so the user can re-analyse with updated settings
       lastFileRef.current = file;
 
+      // Cancel any previous analysis before starting a new one
+      abortControllerRef.current?.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
         // Read file as ArrayBuffer
         const arrayBuffer = await file.arrayBuffer();
         setAudioBuffer(arrayBuffer);
         setStatus('analysing');
 
-        // Run beat detection
+        // Run beat detection (passes signal so it can be cancelled mid-flight)
         const analysisResult = await analyseAudio(
           arrayBuffer,
           settings,
-          (p) => setProgress(p)
+          (p) => setProgress(p),
+          controller.signal
         );
 
         setResult(analysisResult);
@@ -167,11 +188,20 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
         // Persist session
         saveSession(file, analysisResult, arrayBuffer);
       } catch (err) {
+        // AbortError means the user cancelled — not a failure
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return;
+        }
         const message =
           err instanceof Error ? err.message : 'An unexpected error occurred.';
         setError(`Analysis failed: ${message}`);
         setStatus('error');
         console.error('[BeatDet] Analysis error:', err);
+      } finally {
+        // Clear the controller ref if it's still ours (not replaced by a newer analysis)
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = null;
+        }
       }
     },
     [settings]
@@ -187,6 +217,7 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
     analyseFile,
     clearAll,
     restoreSession,
+    cancel,
     reanalyse: lastFileRef.current ? () => analyseFile(lastFileRef.current!) : null,
   };
 }
