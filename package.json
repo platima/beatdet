@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@breezystack/lamejs": "^1.2.7",
+    "@tanstack/react-virtual": "^3.13.23",
     "@types/audioworklet": "^0.0.97",
     "chart.js": "^4.5.1",
     "fflate": "^0.8.2",

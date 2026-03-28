@@ -182,7 +182,7 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.3.1
+- **Version:** 0.3.2
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
   four export modes (full track, isolate beats, cut at beats, custom range).
@@ -209,6 +209,10 @@ The app is a fully static Next.js export (no server runtime required).
   `aria-live` region announces analysis start/completion.
 - Screen-reader `<p className="sr-only">` summaries added to BpmHistogram and OnsetChart.
 - BpmDisplay stats row stacks on mobile (`grid-cols-1 sm:grid-cols-3`).
+- Analysis cancellation via **Cancel button** during analysis (`AbortController` passed to `analyseAudio`;
+  `AbortError` caught silently in the hook); starting a new upload also cancels any in-flight analysis.
+- **BeatList** is virtualised via `@tanstack/react-virtual` — only visible rows are mounted;
+  handles 500+ beat tracks without DOM bloat; column alignment preserved with spacer rows.
 - BeatList table wrapped in `overflow-x-auto` with `min-width` for mobile.
 - Charts grid is single-column when onset curve is hidden (no half-width histogram).
 - Open Graph and Twitter Card metadata in `layout.tsx`; `lang="en-AU"`.

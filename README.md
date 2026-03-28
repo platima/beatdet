@@ -106,7 +106,7 @@ src/
 │       └── page.tsx        # Settings page
 ├── components/
 │   ├── AudioUploader.tsx   # Drag-and-drop file input
-│   ├── BeatList.tsx        # Scrollable beat timeline table
+│   ├── BeatList.tsx        # Virtualised beat timeline table (@tanstack/react-virtual)
 │   ├── BpmDisplay.tsx      # BPM card with confidence meter
 │   ├── BpmHistogram.tsx    # Bar chart of BPM distribution
 │   ├── Button.tsx          # Reusable button component
