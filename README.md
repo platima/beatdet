@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.2.0** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.3.0** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -21,24 +21,29 @@ Drop in any WAV, MP3, M4A, or AAC file and get BPM, beat markers, and export opt
 
 ## Features
 
-- **Upload** WAV, MP3, M4A, or AAC audio files via drag-and-drop or file picker.
+- **Upload** WAV, MP3, M4A, or AAC audio files via drag-and-drop or file picker (max 200 MB).
 - **Beat detection**: spectral-flux onset detection with adaptive peak picking.
 - **BPM estimation**: multi-lag IOI accumulation with Gaussian histogram smoothing
   and harmonic octave correction.
 - **BPM correction**: ÷2 / ×2 display-only quick-correct buttons for common octave errors.
 - **Waveform player**: interactive playback with beat markers overlaid; Space bar toggles play/pause.
+- **Waveform zoom**: adjustable zoom slider; setting is persisted automatically.
 - **Click-to-seek**: click any row in the beat timeline to jump the waveform to that beat.
 - **Onset strength chart**: onset curve with beat positions highlighted.
 - **BPM histogram**: inter-beat interval distribution chart.
 - **Beat timeline**: scrollable table of all detected beats with timestamps
-  and confidence bars.
-- **Export**: four export modes:
-  - Full track (lossless WAV)
+  and confidence bars; download as CSV or JSON.
+- **Export**: four export modes with WAV or MP3 output:
+  - Full track
   - Isolate beats (merge beat regions into one file)
-  - Cut at beats (one file per slice)
+  - Cut at beats (slices bundled into a single ZIP)
   - Custom time range
+- **MP3 export**: 128 / 192 / 256 / 320 kbps selectable via `@breezystack/lamejs`.
 - **Re-analyse**: re-run beat detection on the same file after changing settings without re-uploading.
 - **Session persistence**: last analysis is restored automatically on reload.
+- **In-app changelog**: `/changelog` page with full release history.
+- **What's New banner**: shown to returning users after an upgrade.
+- **Error boundaries**: failed panels show a recovery UI without crashing the page.
 - **Settings page**: all parameters configurable without restarting.
 - **Light / Dark / System theme** with Solarised colour palette throughout; waveform colours update live on theme change.
 - **Accessible**: ARIA labels, live regions, and screen-reader chart summaries throughout.
@@ -57,6 +62,8 @@ Drop in any WAV, MP3, M4A, or AAC file and get BPM, beat markers, and export opt
 | Audio engine | Web Audio API (native browser)    |
 | Waveform     | wavesurfer.js                     |
 | Charts       | Chart.js / react-chartjs-2        |
+| MP3 export   | @breezystack/lamejs               |
+| ZIP export   | fflate                            |
 | Icons        | lucide-react                      |
 
 ---
