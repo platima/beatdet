@@ -21,7 +21,7 @@ Drop in any WAV, MP3, M4A, or AAC file and get BPM, beat markers, and export opt
 
 ## Features
 
-- **Upload** WAV, MP3, M4A, or AAC audio files via drag-and-drop or file picker (max 200 MB).
+- **Upload** WAV, MP3, M4A, or AAC audio files via drag-and-drop or file picker (max 100 MB).
 - **Beat detection**: spectral-flux onset detection with adaptive peak picking.
 - **BPM estimation**: multi-lag IOI accumulation with Gaussian histogram smoothing
   and harmonic octave correction.
