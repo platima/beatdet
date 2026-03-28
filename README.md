@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.3.0** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.3.2** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -31,8 +31,9 @@ Drop in any WAV, MP3, M4A, or AAC file and get BPM, beat markers, and export opt
 - **Click-to-seek**: click any row in the beat timeline to jump the waveform to that beat.
 - **Onset strength chart**: onset curve with beat positions highlighted.
 - **BPM histogram**: inter-beat interval distribution chart.
-- **Beat timeline**: scrollable table of all detected beats with timestamps
-  and confidence bars; download as CSV or JSON.
+- **Beat timeline**: virtualised table of all detected beats with timestamps
+  and confidence bars; handles 500+ beats without DOM bloat; download as CSV or JSON.
+- **Cancellable analysis**: cancel button shown during processing; uploading a new file automatically cancels any in-flight analysis.
 - **Export**: four export modes with WAV or MP3 output:
   - Full track
   - Isolate beats (merge beat regions into one file)

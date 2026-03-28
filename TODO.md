@@ -48,15 +48,15 @@
 
 ### Export
 
-- [ ] **MP3 export**: browser-side MP3 encoding via `lamejs` or `mp3-encoder-js`; surface format selector (WAV / MP3) and bitrate control (128 / 192 / 256 / 320 kbps) in ExportPanel and settings. Types and store keys already exist (`ExportFormat`, `mp3Bitrate`).
-- [ ] **ZIP bundle** for `cut-at-beats` mode (`fflate` — pure JS, no WASM); replaces sequential browser downloads that browsers may block.
-- [ ] **CSV / JSON beat list export**: copy to clipboard or download from BeatList footer.
+- [x] **MP3 export**: browser-side MP3 encoding via `@breezystack/lamejs`; format selector (WAV / MP3) and bitrate control (128 / 192 / 256 / 320 kbps) in ExportPanel and settings.
+- [x] **ZIP bundle** for `cut-at-beats` mode (`fflate` — pure JS, no WASM); replaces sequential browser downloads.
+- [x] **CSV / JSON beat list export**: download from BeatList header.
 
 ### Changelog & What's New
 
-- [ ] **In-app changelog**: add a `/changelog` route (or modal) that displays a `CHANGELOG.md`; link from the version badge in NavBar and from the Settings About section.
-- [ ] **"What's New" banner**: on app load, compare the stored `lastSeenVersion` (in `localStorage`) with `NEXT_PUBLIC_APP_VERSION`. If they differ, show a dismissible banner summarising new features. Dismiss updates `lastSeenVersion`. Only shown to returning users (first-time visitors skip it).
-- [ ] **`CHANGELOG.md`**: create at repo root following Keep a Changelog format; log all v0.2.0 and v0.3.0 entries.
+- [x] **In-app changelog**: `/changelog` route displaying `CHANGELOG.md`; version badge in NavBar links to it.
+- [x] **"What's New" banner**: compares `lastSeenVersion` in `localStorage` with `NEXT_PUBLIC_APP_VERSION`; dismissible per-version; skipped for first-time visitors.
+- [x] **`CHANGELOG.md`**: created at repo root in Keep a Changelog format.
 
 ### Stability & Performance
 

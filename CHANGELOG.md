@@ -6,6 +6,33 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.3.2] - 2026-03-28
+
+### Added
+
+- **Analysis cancellation**: Cancel button shown during loading/analysing; `AbortController` passed through to `analyseAudio`; uploading a new file automatically aborts any in-flight analysis.
+- **Virtual scrolling in BeatList**: table rows rendered via `@tanstack/react-virtual`; only visible rows are mounted with overscan=8; handles 500+ beat tracks without DOM bloat.
+
+### Fixed
+
+- `scrollIntoView` option key was `behaviour` (ignored by browsers); corrected to `behavior`.
+- Removed unused `useRef` import from `page.tsx`.
+
+---
+
+## [0.3.1] - 2026-03-28
+
+### Changed
+
+- File size guard lowered from 200 MB to 100 MB (Cloudflare Pages upload limit).
+- `audioExport.ts`: replaced `OfflineAudioContext` buffer factory with a lazy `AudioContext` singleton (`getBufferContext()`) for improved testability.
+
+### Added
+
+- `audioExport.test.ts`: 23 unit tests covering `encodeWav`, `normalisePeak`, `sliceBuffer`, `concatenateBuffers`, `bundleZip`, and `MAX_FILE_BYTES`.
+
+---
+
 ## [0.3.0] - 2026-03-27
 
 ### Added
@@ -17,7 +44,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **In-app changelog**: `/changelog` route listing all release notes; version badge in the nav bar links to it.
 - **"What's New" banner**: shown once to returning users after an upgrade; dismissed per-version in `localStorage`.
 - **Error boundary**: wraps result components to prevent a render error crashing the entire page.
-- **File size guard**: friendly error shown before decoding if the selected file exceeds 200 MB.
+- **File size guard**: friendly error shown before decoding if the selected file exceeds 100 MB (Cloudflare Pages limit).
 - **Settings migration**: Zustand persist version field incremented; stale settings are merged safely with defaults.
 
 ### Changed

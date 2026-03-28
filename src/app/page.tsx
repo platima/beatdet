@@ -12,7 +12,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AudioUploader } from '@/components/AudioUploader';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -94,9 +94,9 @@ export default function HomePage() {
       // Smooth-scroll results into view
       setTimeout(() => {
         document.getElementById('results')?.scrollIntoView({
-          behaviour: 'smooth',
+          behavior: 'smooth',
           block: 'start',
-        } as ScrollIntoViewOptions);
+        });
       }, 100);
     }
   }, [status]);
