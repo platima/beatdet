@@ -123,6 +123,20 @@ export async function encodeMp3(
    ============================================================ */
 
 /**
+ * Lazy AudioContext singleton used solely as a factory for AudioBuffer
+ * objects in sliceBuffer and concatenateBuffers.  Using AudioContext here
+ * (rather than OfflineAudioContext) avoids pulling in the offline renderer
+ * in test environments where OfflineAudioContext may not be polyfilled.
+ */
+let _bufCtx: AudioContext | null = null;
+function getBufferContext(): AudioContext {
+  if (!_bufCtx || _bufCtx.state === 'closed') {
+    _bufCtx = new AudioContext();
+  }
+  return _bufCtx;
+}
+
+/**
  * Extract a time slice from an AudioBuffer.
  *
  * @param source    The original decoded audio buffer.
@@ -139,12 +153,7 @@ export function sliceBuffer(
   const endSample = Math.min(source.length, Math.round(endSec * sampleRate));
   const length = Math.max(1, endSample - startSample);
 
-  const offline = new OfflineAudioContext(
-    source.numberOfChannels,
-    length,
-    sampleRate
-  );
-  const out = offline.createBuffer(source.numberOfChannels, length, sampleRate);
+  const out = getBufferContext().createBuffer(source.numberOfChannels, length, sampleRate);
 
   for (let ch = 0; ch < source.numberOfChannels; ch++) {
     const src = source.getChannelData(ch);
@@ -167,8 +176,7 @@ export function concatenateBuffers(buffers: AudioBuffer[]): AudioBuffer {
   const { numberOfChannels, sampleRate } = buffers[0];
   const totalLength = buffers.reduce((sum, b) => sum + b.length, 0);
 
-  const offline = new OfflineAudioContext(numberOfChannels, totalLength, sampleRate);
-  const out = offline.createBuffer(numberOfChannels, totalLength, sampleRate);
+  const out = getBufferContext().createBuffer(numberOfChannels, totalLength, sampleRate);
 
   let offset = 0;
   for (const buf of buffers) {

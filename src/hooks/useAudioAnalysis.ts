@@ -19,8 +19,8 @@ import { useSettingsStore } from '@/store/settingsStore';
 
 const ACCEPTED_TYPES = ['audio/wav', 'audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/aac'];
 const ACCEPTED_EXTENSIONS = ['.wav', '.mp3', '.m4a', '.aac'];
-// Maximum file size before prompting the user (200 MB)
-const MAX_FILE_BYTES = 200 * 1024 * 1024;
+// Maximum file size accepted by the app (100 MB — Cloudflare Pages upload limit)
+const MAX_FILE_BYTES = 100 * 1024 * 1024;
 
 export interface UseAudioAnalysisReturn {
   status: AnalysisStatus;
@@ -117,7 +117,7 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
       // Guard against very large files that may OOM the browser tab
       if (file.size > MAX_FILE_BYTES) {
         setError(
-          `File is too large (${(file.size / (1024 * 1024)).toFixed(0)} MB). Maximum supported size is 200 MB.`
+          `File is too large (${(file.size / (1024 * 1024)).toFixed(0)} MB). Maximum supported size is 100 MB.`
         );
         setStatus('error');
         return;

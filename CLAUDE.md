@@ -160,6 +160,9 @@ npm run test:coverage
 - **Unit tests** (`beatDetection.test.ts`): 34 tests covering FFT correctness,
   onset strength functions, peak picking (including absolute height floor), and
   BPM estimation.
+- **Unit tests** (`audioExport.test.ts`): 23 tests covering `encodeWav`,
+  `normalisePeak`, `sliceBuffer`, `concatenateBuffers`, `bundleZip`, and the
+  `MAX_FILE_BYTES` constant. Uses `node-web-audio-api` for `AudioContext` in Node.
 - **Real-audio integration tests** (`realAudio.test.ts`): 16 Kevin MacLeod
   tracks spanning 60-204 BPM, decoded via `node-web-audio-api` and run through
   the full spectral-flux -> peak-pick -> BPM-estimate pipeline. Tests live in
@@ -179,7 +182,7 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.3.0
+- **Version:** 0.3.1
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
   four export modes (full track, isolate beats, cut at beats, custom range).
@@ -190,7 +193,7 @@ The app is a fully static Next.js export (no server runtime required).
 - **In-app changelog** at `/changelog` (server component reads `CHANGELOG.md` at build time).
 - **What's New banner** shown to returning users after an upgrade (localStorage-based).
 - **Error boundaries** wrap all major result panels; failed panels show a recovery UI.
-- **File size guard** blocks uploads over 200 MB with a clear error message.
+- **File size guard** blocks uploads over 100 MB with a clear error message.
 - Version string injected at build time from `VERSION` file via `next.config.ts`
   `env.NEXT_PUBLIC_APP_VERSION`; no more hardcoded version constants in components.
 - Space bar toggles waveform play/pause globally (excludes inputs/buttons).
@@ -217,4 +220,4 @@ The app is a fully static Next.js export (no server runtime required).
 - All detection and display settings are configurable via the settings page.
 - Settings store migrates from v1 to v2 schema without losing existing preferences.
 - Light / Dark / System theme with Solarised colour palette.
-- 50 tests (34 unit + 16 real-audio integration; 47 pass, 1 fail known, 2 skipped).
+- 73 tests (57 unit + 16 real-audio integration; 70 pass, 1 fail known, 2 skipped).
