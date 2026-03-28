@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# local test audio files — kept for development but not committed to the repo
+/testfiles
+
 # next.js
 /.next/
 /.swc/
