@@ -25,22 +25,30 @@ const { AudioContext } = require('node-web-audio-api') as {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).AudioContext = AudioContext;
 
-import { encodeWav, sliceBuffer, concatenateBuffers, normalisePeak, bundleZip } from '../audioExport';
+import { encodeWav, sliceBuffer, concatenateBuffers, normalisePeak, bundleZip, closeBufferContext } from '../audioExport';
 import type { ExportedSlice } from '../audioExport';
+
+// A single shared AudioContext for all buffer creation, plus the lazy
+// singleton inside audioExport.ts.  Closing both in afterAll lets Jest
+// exit cleanly without --forceExit or "open handles" warnings.
+const sharedCtx = new AudioContext();
+afterAll(async () => {
+  if (sharedCtx.state !== 'closed') await sharedCtx.close();
+  await closeBufferContext();
+});
 
 /* ============================================================
    Helpers
    ============================================================ */
 
-/** Synthesise an AudioBuffer using a real (polyfilled) AudioContext. */
+/** Synthesise an AudioBuffer using the shared (polyfilled) AudioContext. */
 function makeBuffer(
   numChannels: number,
   numSamples: number,
   sampleRate: number,
   fill?: (ch: number, i: number) => number
 ): AudioBuffer {
-  const ctx = new AudioContext();
-  const buf = ctx.createBuffer(numChannels, numSamples, sampleRate);
+  const buf = sharedCtx.createBuffer(numChannels, numSamples, sampleRate);
   if (fill) {
     for (let ch = 0; ch < numChannels; ch++) {
       const data = buf.getChannelData(ch);

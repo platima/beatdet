@@ -137,6 +137,17 @@ function getBufferContext(): AudioContext {
 }
 
 /**
+ * Close the lazy AudioContext singleton.  Call this in test teardown to
+ * prevent "open handles" warnings in Jest.  No-op in production.
+ */
+export async function closeBufferContext(): Promise<void> {
+  if (_bufCtx && _bufCtx.state !== 'closed') {
+    await _bufCtx.close();
+  }
+  _bufCtx = null;
+}
+
+/**
  * Extract a time slice from an AudioBuffer.
  *
  * @param source    The original decoded audio buffer.
