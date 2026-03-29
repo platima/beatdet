@@ -73,4 +73,22 @@
 ### Other
 
 - [ ] Waveform zoom: add slider to WaveformPlayer; wire to `waveformZoom` setting (already in store).
-- [ ] **Tempo confidence hints**: when detection confidence is low or the top two BPM candidates are in a common harmonic ratio (2:1, 3:1, 4:3), display an inline tip on the BPM card — e.g. "If this feels wrong, try the ÷2 button" or "Common issue with waltz tracks — the true tempo may be 3× this value". Extend the existing ×2 / ÷2 display-correction buttons to include ×3 / ÷3 for slow-waltz and fast-subdivision cases.
+- [ ] **Tempo confidence hints**: display contextual tips on the BPM card when the result may be unreliable. Trigger conditions and suggested copy are based on every edge case encountered during development:
+
+  | Condition | Detection signal | Suggested hint |
+  |---|---|---|
+  | **Octave high** — subdivisions dominate | Strong histogram energy at ½× detected BPM | "If this feels fast, try the ÷2 button" |
+  | **Octave low** — every-other beat missed | Strong histogram energy at 2× detected BPM | "If this feels slow, try the ×2 button" |
+  | **Triple-tempo** — only bar-1 downbeat triggered | Top candidate ≈ ⅓ of #2 candidate | "Waltz or 3/4 track? The true tempo may be 3× this value" |
+  | **Sesquialtera** — half-speed groupings | Detected / #2 candidate ≈ 3:2 | "Try the ×1.5 mental adjustment for shuffle/swing tracks" |
+  | **4:3 ratio** — strong subdivision at 4/3 of true | Top two candidates ≈ 4:3 apart, low confidence | "Result is uncertain — if it feels off by a third, the true tempo may be ¾ of this" |
+  | **Triplet 3:2 ambiguity** — onset locks on triplet subdivisions | Tempogram energy strongly favours ½×, ratio ≈ 3:2 | "Heavy triplet feel detected — BPM could be off by a third" |
+  | **Sparse or ambient texture** — true BPM absent from histogram | Low confidence; winner not harmonically close to #2 | "Low confidence — the track may lack a strong, regular beat" |
+  | **Very short clip** — fewer than ~60 detected beats | Beat count below threshold | "Short clip — accuracy improves with longer audio (30 s+)" |
+  | **Waltz / 3/4 feel** — result near ⅓ or 3× a round number | Detected BPM divisible by 3 with strong ÷3 candidate | "3/4 time signature? The beat rate may be 3× or ⅓ of this value" |
+
+  Implementation notes:
+  - Expose `candidates` array and `confidence` score from `analyseAudio` result (already returned by `estimateBpm`).
+  - Compute inter-candidate ratios in `BpmDisplay` to match the table above.
+  - Extend the existing ×2 / ÷2 display-correction buttons to include ×3 / ÷3 for slow-waltz and subdivision cases.
+  - Hints should be dismissible per-analysis and not shown when confidence ≥ 0.8 and no harmonic ratio is close.
