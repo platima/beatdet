@@ -64,11 +64,11 @@ export function NavBar() {
             <ThemeIcon size={18} />
           </button>
 
-          {/* Changelog link */}
+          {/* Changelog link — goes back to home when already on the changelog page */}
           <Link
-            href="/changelog"
-            title="Changelog"
-            aria-label="Changelog"
+            href={pathname === '/changelog' ? '/' : '/changelog'}
+            title={pathname === '/changelog' ? 'Back to home' : 'Changelog'}
+            aria-label={pathname === '/changelog' ? 'Back to home' : 'Changelog'}
             className={[
               'flex h-9 w-9 items-center justify-center rounded-lg transition-colors',
               pathname === '/changelog'

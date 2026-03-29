@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.3.8] - 2026-03-29
+
+### Added
+
+- Changelog nav icon now navigates back to the home page when already on the changelog page (toggles between changelog and home).
+
+### Fixed
+
+- CHANGELOG.md: back-filled v0.3.4, v0.3.5, and v0.3.6 entries that were previously folded into v0.3.7.
+
+---
+
 ## [0.3.7] - 2026-03-29
 
 ### Added
@@ -17,13 +29,39 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Default `bpmMin` lowered from 60 → 55 in settings store (allows detection of slower tempos without user adjusting settings).
 - Test suite `bpmMin` floor lowered from 55 → 50, enabling the 54 BPM Nightdreams track to pass.
-- `testfiles/` excluded from Git via `.gitignore`; all binary test assets kept locally only.
-- Git history rewritten with `git filter-repo` to remove previously committed MP3 blobs; pack size reduced from multi-MB to ~207 KiB.
 
 ### Fixed
 
-- Jest open-handles warning: `makeBuffer()` test helper now uses a single shared `AudioContext` closed in `afterAll` instead of creating a new instance per call.
-- Canon In D For 8 Bit Synths BPM corrected from 133 → 132 (per incompetech source).
+- `AudioContext` creation moved from module scope into `beforeAll()` in `audioExport.test.ts` to prevent "no output device available" errors on cold Jest runs.
+
+---
+
+## [0.3.6] - 2026-03-29
+
+### Fixed
+
+- Canon In D For 8 Bit Synths BPM corrected from 133 → 132 in filename and test suite (per incompetech source PDF).
+
+---
+
+## [0.3.5] - 2026-03-29
+
+### Changed
+
+- `testfiles/` excluded from Git via `.gitignore`; binary test assets kept locally only.
+- Git history rewritten with `git filter-repo` to remove previously committed MP3 blobs; pack size reduced from multi-MB to ~207 KiB.
+
+---
+
+## [0.3.4] - 2026-03-29
+
+### Added
+
+- `closeBufferContext()` export in `audioExport.ts` for clean test teardown.
+
+### Fixed
+
+- Jest open-handles warning: `audioExport.test.ts` now uses a single shared `AudioContext` closed in `afterAll`, instead of creating a new instance per helper call.
 
 ---
 
