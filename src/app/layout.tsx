@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,15 @@ export const metadata: Metadata = {
   },
 };
 
+// theme-color metadata: light and dark variants so the browser chrome and
+// PWA install UI use the correct Solarised palette colour.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fdf6e3' },
+    { media: '(prefers-color-scheme: dark)', color: '#002b36' },
+  ],
+};
+
 // Inline theme script applied in <head> before the browser paints the first
 // frame. Using a plain render-blocking <script> here (not next/script) is
 // intentional: next/script beforeInteractive does not reliably inject before
@@ -57,6 +67,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
         <NavBar />
+        <ServiceWorkerRegistrar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {children}
         </main>

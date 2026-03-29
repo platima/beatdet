@@ -78,7 +78,7 @@
 
 ## v0.5.0 — Progressive Web App
 
-- [ ] PWA manifest: `site.webmanifest`, `apple-touch-icon`, offline support via service worker.
+- [x] PWA manifest: `site.webmanifest`, `apple-touch-icon`, offline support via service worker.
 
 ---
 
@@ -104,7 +104,19 @@
 
 ---
 
-## v0.7.0 — Library Release
+## v0.7.0 — UI and UX Polish
+
+- [ ] **Tap tempo tool**: a tap button on the BPM card that measures inter-tap interval to let the user manually verify or override the detected BPM.
+- [ ] **Playback speed control**: expose WaveSurfer's `playbackRate` (0.5x, 0.75x, 1x) for slowed-down beat verification.
+- [ ] **Loop region**: allow marking a time range on the waveform and looping playback within it.
+- [ ] **Waveform region selection for export**: wire the waveform region to the custom time-range export mode, replacing manual input.
+- [ ] **Keyboard shortcuts reference**: small help popover listing all keyboard shortcuts (Space, etc.).
+- [ ] **Improved mobile layout**: review ExportPanel and BeatList on narrow viewports; ensure no horizontal scroll on 360px screen width.
+- [ ] **Accessibility audit**: verify WCAG 2.1 AA colour contrast for all Solarised semantic tokens; fix any failures; add missing `aria-live` regions.
+
+---
+
+## v0.8.0 — Library Release
 
 - [ ] **Expose beat detection engine as a standalone npm package** (`beatdet-core` or similar), so developers can `import { analyseAudio, estimateBpm } from 'beatdet-core'` in their own projects.
 

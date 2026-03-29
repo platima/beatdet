@@ -62,7 +62,8 @@
 			"/^node -e \"const p = require\\('next/package\\.json'\\); console\\.log\\(p\\.version\\)\"$/": {
 				"approve": true,
 				"matchCommandLine": true
-			}
+			},
+			"audioExport": true
 		}
 	}
 }

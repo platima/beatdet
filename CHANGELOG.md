@@ -6,6 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.5.0] - 2026-03-30
+
+### Added
+
+- **PWA support**: BeatDet is now installable as a Progressive Web App on desktop and mobile.
+  - `app/manifest.ts`: web app manifest with name, `display: standalone`, Solarised dark background (`#002b36`), blue theme colour (`#268bd2`), and music/utilities categories.
+  - `app/apple-icon.tsx`: 180x180 PNG apple touch icon generated at build time via `ImageResponse` (blue background, white waveform polyline); Next.js automatically adds `<link rel="apple-touch-icon">`.
+  - `app/icon1.tsx`: 192x192 PNG icon for Android/Chrome install prompts; generates `/icon1.png` referenced in the manifest.
+  - `app/icon2.tsx`: 512x512 PNG icon for Lighthouse PWA audit and splash screens; generates `/icon2.png` referenced in the manifest.
+  - `public/sw.js`: service worker with network-first navigation (fresh pages when online, cached shell fallback offline) and cache-first/stale-while-revalidate for static assets. Pre-caches `/`, `/settings`, and `/changelog` on install. Activate handler clears all caches from previous `CACHE_VERSION` values.
+  - `ServiceWorkerRegistrar` component: client component that calls `navigator.serviceWorker.register('/sw.js')` on mount; renders nothing; placed once in the root layout.
+  - `layout.tsx` `Viewport` export: `themeColor` set to `#fdf6e3` for light and `#002b36` for dark schemes, enabling browser chrome colouring on mobile.
+
+### Changed
+
+- **Milestone plan**: v0.7.0 repurposed as UI and UX Polish (tap tempo, playback speed, loop region, waveform region for export, keyboard shortcuts, mobile layout, accessibility audit); library release (`beatdet-core`) moved to v0.8.0.
+
+---
+
 ## [0.4.11] - 2026-03-29
 
 ### Changed

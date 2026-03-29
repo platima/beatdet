@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.4.10** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.5.0** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -47,6 +47,7 @@ BeatDet was more accurate more often than both [Tunebat](https://tunebat.com/Ana
 - **MP3 export**: 128 / 192 / 256 / 320 kbps selectable via `@breezystack/lamejs`.
 - **Re-analyse**: re-run beat detection on the same file after changing settings without re-uploading.
 - **Session persistence**: last analysis is restored automatically on reload.
+- **Installable PWA**: add to home screen on mobile or install on desktop; offline shell cached by the service worker with network-first navigation.
 - **In-app changelog**: `/changelog` page with full release history.
 - **What's New banner**: shown to returning users after an upgrade.
 - **Error boundaries**: failed panels show a recovery UI without crashing the page.
@@ -103,9 +104,15 @@ npm run lint
 ## Project Structure
 
 ```
+public/
+└── sw.js               # Service worker (offline cache, network-first navigation)
 src/
 ├── app/
-│   ├── layout.tsx          # Root layout (NavBar, inline theme script)
+│   ├── layout.tsx          # Root layout (NavBar, viewport, inline theme script)
+│   ├── manifest.ts         # PWA web app manifest
+│   ├── apple-icon.tsx      # 180x180 apple touch icon (ImageResponse)
+│   ├── icon1.tsx           # 192x192 PWA icon (ImageResponse)
+│   ├── icon2.tsx           # 512x512 PWA icon (ImageResponse)
 │   ├── page.tsx            # Main beat detection page
 │   ├── globals.css         # Solarised CSS variables + Tailwind
 │   └── settings/
@@ -119,8 +126,9 @@ src/
 │   ├── ExportPanel.tsx     # Export mode and download controls
 │   ├── NavBar.tsx          # Top navigation with theme toggle
 │   ├── OnsetChart.tsx      # Onset strength line chart
-│   ├── ProgressBar.tsx     # Animated analysis progress bar
-│   └── WaveformPlayer.tsx  # wavesurfer.js waveform + controls
+│   ├── ProgressBar.tsx             # Animated analysis progress bar
+│   ├── ServiceWorkerRegistrar.tsx  # Service worker registration (PWA)
+│   └── WaveformPlayer.tsx          # wavesurfer.js waveform + controls
 ├── hooks/
 │   ├── useAudioAnalysis.ts # File upload + analysis lifecycle hook
 │   └── useTheme.ts         # Theme preference hook

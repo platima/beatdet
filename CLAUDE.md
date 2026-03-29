@@ -183,8 +183,8 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Milestone:** v0.4.x = waveform zoom + polish; v0.5.0 = PWA
-- **Current version:** v0.4.10
+- **Milestone:** v0.5.x = PWA; v0.6.0 = Key Detection; v0.7.0 = UI/UX Polish; v0.8.0 = Library Release
+- **Current version:** v0.5.0
 - **Settings store:** schema v3 (`settingsVersion: '3.0.0'`); migrates v1 -> v2 -> v3 automatically.
 - **Tests:** 88 unit + 26 real-audio integration; run `npm test` for current counts.
 - **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.
@@ -197,4 +197,5 @@ The app is a fully static Next.js export (no server runtime required).
 - **Version string** injected at build time via `NEXT_PUBLIC_APP_VERSION` (source: `VERSION` file).
 - **Waveform height** default 120 px, configurable 80/120/160/200 px, applied live via `setOptions`.
 - **Detection hints** shown in a toast; `src/lib/hintUtils.ts` is extracted for independent testing.
+- **PWA**: manifest via `app/manifest.ts`; icons via `app/apple-icon.tsx` (180x180), `icon1.tsx` (192x192), `icon2.tsx` (512x512) using Next.js `ImageResponse` file convention; service worker at `public/sw.js` uses network-first for navigation and cache-first/stale-while-revalidate for static assets; `CACHE_VERSION` constant in `sw.js` must be bumped manually on significant releases (static file has no access to Next.js build-time env).
 - `testfiles/` excluded from Git (local only); required for real-audio integration tests.
