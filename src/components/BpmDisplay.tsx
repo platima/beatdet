@@ -6,13 +6,16 @@
  *   - Confidence percentage
  *   - Alternative tempo candidates
  *   - Beat count and average interval
+ *   - Contextual detection hints with optional Wikipedia "more info" links
  */
 
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
-import type { AnalysisResult, BpmEstimate } from '@/types';
+import type { AnalysisResult } from '@/types';
+import { buildHints } from '@/lib/hintUtils';
+import type { Hint } from '@/lib/hintUtils';
 
 interface BpmDisplayProps {
   result: AnalysisResult;
@@ -23,69 +26,6 @@ interface BpmDisplayProps {
 
 function formatSeconds(s: number): string {
   return s.toFixed(3);
-}
-
-/** Check if a ratio is within a fractional tolerance of a target value. */
-function isCloseRatio(ratio: number, target: number, tol = 0.08): boolean {
-  return Math.abs(ratio - target) / target <= tol;
-}
-
-/**
- * Derive contextual hints from the BPM estimate to surface common detection
- * edge cases to the user: octave errors, 4:3 ratio ambiguity, low confidence,
- * and short-clip warnings.
- *
- * Ratio hints are suppressed when the algorithm already auto-corrected the
- * same ratio (correctionRatio is set), to avoid contradicting the output.
- */
-function buildHints(bpmEstimate: BpmEstimate, beatCount: number): string[] {
-  const hints: string[] = [];
-  const { bpm, candidates, confidence, correctionRatio } = bpmEstimate;
-  if (bpm === 0) return hints;
-
-  // Short clip: fewer beats reduce IOI statistics reliability.
-  if (beatCount < 30) {
-    hints.push('Short clip — accuracy improves with longer audio (30 s+).');
-  }
-
-  // Low overall confidence with sufficient data: sparse or ambiguous texture.
-  if (confidence < 0.35 && beatCount >= 30) {
-    hints.push('Low confidence — this track may lack a strong, regular beat.');
-  }
-
-  // Harmonic ratio hints between winner and runner-up. Skipped when the
-  // algorithm already applied a correction for the same ratio.
-  if (candidates.length >= 2 && correctionRatio === undefined) {
-    const a = candidates[0].bpm;
-    const b = candidates[1].bpm;
-    const ratio = Math.max(a, b) / Math.min(a, b);
-
-    if (isCloseRatio(ratio, 2)) {
-      hints.push(
-        a > b
-          ? 'If this feels fast, try the ÷2 button — a half-tempo candidate was also detected.'
-          : 'If this feels slow, try the ×2 button — a double-tempo candidate was also detected.',
-      );
-    } else if (isCloseRatio(ratio, 4 / 3, 0.06)) {
-      hints.push(
-        'Uncertain result — candidates at a 4:3 ratio were detected. The true tempo may be ¾ of this value.',
-      );
-    } else if (isCloseRatio(ratio, 3 / 2, 0.07)) {
-      hints.push(
-        a > b
-          ? 'A 3:2 ratio candidate was detected — the true tempo may be ⅔ of this value.'
-          : 'A 3:2 ratio candidate was detected — the true tempo may be 1.5× this value.',
-      );
-    } else if (isCloseRatio(ratio, 3, 0.10)) {
-      hints.push(
-        a > b
-          ? 'Waltz or 3/4 feel? A candidate at ⅓ of this value was also detected — the true tempo may be lower.'
-          : 'Waltz or 3/4 feel? The true tempo may be 3× this value.',
-      );
-    }
-  }
-
-  return hints;
 }
 
 export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: BpmDisplayProps) {
@@ -282,8 +222,22 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
               Detection note
             </p>
             {hints.map((hint) => (
-              <p key={hint} className="text-xs leading-snug" style={{ color: 'var(--text-body)' }}>
-                {hint}
+              <p key={hint.text} className="text-xs leading-snug" style={{ color: 'var(--text-body)' }}>
+                {hint.text}
+                {hint.url && (
+                  <>
+                    {' '}
+                    <a
+                      href={hint.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+                      style={{ color: 'var(--warning)' }}
+                    >
+                      More info
+                    </a>
+                  </>
+                )}
               </p>
             ))}
           </div>

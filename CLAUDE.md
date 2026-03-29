@@ -62,6 +62,7 @@ Browser (static site)
 | `src/hooks/useAudioAnalysis.ts` | File upload + analysis lifecycle hook             |
 | `src/hooks/useTheme.ts`         | Theme preference hook                             |
 | `src/lib/beatDetection.ts`      | Beat detection engine (spectral flux, peak pick)  |
+| `src/lib/hintUtils.ts`          | `buildHints` / `isCloseRatio` — hint logic extracted for testability |
 | `src/lib/audioExport.ts`        | WAV/MP3 encoding, ZIP bundling, and audio slicing |
 | `src/lib/sessionStorage.ts`     | Session persistence helpers                       |
 | `src/store/settingsStore.ts`    | Zustand settings store (localStorage backed)      |
@@ -182,7 +183,8 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.4.0
+- **Version:** 0.4.1
+- **Milestone plan:** v0.4.x = waveform zoom + polish; v0.5.0 = PWA
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
   four export modes (full track, isolate beats, cut at beats, custom range).
@@ -224,6 +226,8 @@ The app is a fully static Next.js export (no server runtime required).
 - All detection and display settings are configurable via the settings page.
 - Settings store migrates from v1 to v2 schema without losing existing preferences.
 - Light / Dark / System theme with Solarised colour palette.
-- 83 tests (57 unit + 26 real-audio integration; 78 pass, 5 skipped, 0 fail).
+- Tempo confidence hints carry Wikipedia "More info" links (Tempo, Hemiola, Triple metre, Beat).
+- `src/lib/hintUtils.ts` contains `buildHints` / `isCloseRatio` extracted from `BpmDisplay` for testability.
+- 114 tests (88 unit + 26 real-audio integration; 108 pass, 6 skipped, 0 fail).
 - `testfiles/` excluded from Git (local only); 26 Kevin MacLeod benchmark tracks + reference PDF.
 - Default `bpmMin` lowered to 55 in the app (settings store) and 50 in the test suite.

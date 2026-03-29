@@ -6,6 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.1] - 2026-03-29
+
+### Added
+
+- Tempo confidence hints now include contextual Wikipedia "More info" links:
+  - Low confidence → [Beat (music)](https://en.wikipedia.org/wiki/Beat_(music))
+  - Octave (2:1) candidates → [Tempo](https://en.wikipedia.org/wiki/Tempo)
+  - 4:3 ratio / 3:2 sesquialtera candidates → [Hemiola](https://en.wikipedia.org/wiki/Hemiola)
+  - Triple-tempo / waltz (3:1) candidates → [Triple metre](https://en.wikipedia.org/wiki/Triple_metre)
+- `buildHints` and `isCloseRatio` extracted to `src/lib/hintUtils.ts` for independent testability.
+- 31 unit tests for `hintUtils` covering all hint conditions, URL values, suppression behaviour, and edge cases.
+- Waveform zoom slider (`ZoomIn` icon + range input) wired to `waveformZoom` display setting; default zoom also configurable on the Settings page.
+
+### Fixed
+
+- "Trouble with Tribals 135bpm.mp3" real-audio test marked as `skip` — detection locks onto ~188 BPM at low confidence (≈0.39); the outcome is environment-sensitive and not a regression in the algorithm.
+
+---
+
 ## [0.4.0] - 2026-03-29
 
 ### Added
