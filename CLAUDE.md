@@ -183,7 +183,7 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.4.3
+- **Version:** 0.4.4
 - **Milestone plan:** v0.4.x = waveform zoom + polish; v0.5.0 = PWA
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
@@ -191,6 +191,7 @@ The app is a fully static Next.js export (no server runtime required).
 - **MP3 export** via `@breezystack/lamejs` (128/192/256/320 kbps selectable).
 - **ZIP bundling** via `fflate` — cut-at-beats downloads as a single `.zip` archive.
 - **Beat data export** — CSV and JSON download buttons in the Beat Timeline header.
+- **Waveform scrollbar** hidden by default, revealed on hover via WaveSurfer's `hideScrollbar` option toggled by `mouseenter`/`mouseleave` listeners on the waveform container (works correctly inside WaveSurfer's shadow DOM).
 - **Waveform zoom slider** in WaveformPlayer controls; persisted to settings. Zoom slider is `w-36` (144 px) with an adjacent numeric input for precise/repeatable values.
 - **Waveform height** configurable from Settings page (80 / 120 / 160 / 200 px); applied live via WaveSurfer `setOptions`.
 - **In-app changelog** at `/changelog` (server component reads `CHANGELOG.md` at build time).

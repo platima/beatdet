@@ -129,26 +129,9 @@ textarea {
   animation: pulse-border 1s ease-in-out infinite;
 }
 
-/* Waveform player scroll area: scrollbar hidden until the user hovers.
- * The global ::-webkit-scrollbar rules above give visible scrollbars
- * everywhere else; these overrides make the waveform area clean by
- * default and show a thin scrollbar only while interacting. */
-.waveform-scroll-area ::-webkit-scrollbar {
-  height: 0;
-}
-.waveform-scroll-area:hover ::-webkit-scrollbar {
-  height: 8px;
-}
-.waveform-scroll-area:hover ::-webkit-scrollbar-track {
-  background: var(--bg-alt);
-}
-.waveform-scroll-area:hover ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-.waveform-scroll-area:hover ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
+/* WaveSurfer renders into a shadow DOM, so its scrollbar cannot be styled
+ * from outside. Hover-to-reveal is handled in WaveformPlayer.tsx via
+ * WaveSurfer's built-in hideScrollbar option and JS mouse-event listeners.  */
 
 /* Beat marker flash animation */
 @keyframes beat-flash {

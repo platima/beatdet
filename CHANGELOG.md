@@ -6,6 +6,14 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.4] - 2026-03-29
+
+### Fixed
+
+- **Waveform scrollbar**: the scrollbar is now correctly hidden. WaveSurfer renders into a shadow DOM, so the previous CSS approach (targeting `::webkit-scrollbar` on the outer container) had no effect. The fix uses WaveSurfer's built-in `hideScrollbar: true` option, which applies the style inside the shadow DOM, combined with JavaScript `mouseenter`/`mouseleave` listeners that toggle the hidden state so the scrollbar reappears on hover.
+
+---
+
 ## [0.4.3] - 2026-03-29
 
 ### Fixed

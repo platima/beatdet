@@ -43,6 +43,7 @@ function formatTime(secs: number): string {
 
 export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -67,6 +68,9 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Tracks hover listener cleanup so we can tear it down with the effect.
+    let hoverCleanup: (() => void) | undefined;
+
     // Determine theme colours from CSS variables
     const style = getComputedStyle(document.documentElement);
     const waveColour = style.getPropertyValue('--sol-blue').trim() || '#268bd2';
@@ -82,6 +86,10 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
       normalize: true,
       interact: true,
       url: audioUrl,
+      // Hide the scrollbar via WaveSurfer's own shadow-DOM mechanism; the
+      // hover listeners below reveal it only while the pointer is over the
+      // waveform section.
+      hideScrollbar: true,
     });
 
     wsRef.current = ws;
@@ -92,6 +100,22 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
       ws.setVolume(volume);
       // Apply persisted zoom level
       ws.zoom(zoom * 50);
+
+      // Reveal the scrollbar on hover by toggling the shadow-DOM class that
+      // WaveSurfer uses for its hideScrollbar option.
+      const host = containerRef.current?.firstElementChild;
+      const scrollEl = host?.shadowRoot?.querySelector('.scroll') as HTMLElement | null;
+      const area = scrollAreaRef.current;
+      if (scrollEl && area) {
+        const reveal = () => scrollEl.classList.remove('noScrollbar');
+        const conceal = () => scrollEl.classList.add('noScrollbar');
+        area.addEventListener('mouseenter', reveal);
+        area.addEventListener('mouseleave', conceal);
+        hoverCleanup = () => {
+          area.removeEventListener('mouseenter', reveal);
+          area.removeEventListener('mouseleave', conceal);
+        };
+      }
     });
 
     ws.on('audioprocess', (t) => setCurrentTime(t));
@@ -101,6 +125,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
     ws.on('finish', () => setIsPlaying(false));
 
     return () => {
+      hoverCleanup?.();
       ws.destroy();
       wsRef.current = null;
       setIsReady(false);
@@ -164,7 +189,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
       }}
     >
       {/* Waveform canvas */}
-      <div className="relative px-4 pt-4 waveform-scroll-area">
+      <div ref={scrollAreaRef} className="relative px-4 pt-4">
         {!isReady && (
           <div
             className="absolute inset-0 flex items-center justify-center"
