@@ -178,7 +178,7 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
             Tempo candidates
           </p>
           <div className="flex flex-wrap gap-2">
-            {bpmEstimate.candidates.map(({ bpm, score }, i) => {
+            {bpmEstimate.candidates.map(({ bpm, score }) => {
               // The multiplier needed to display this candidate as the primary BPM.
               const candidateMultiplier = bpmEstimate.bpm > 0 ? bpm / bpmEstimate.bpm : 1;
               const isSelected = Math.abs(candidateMultiplier - bpmMultiplier) < 0.01;

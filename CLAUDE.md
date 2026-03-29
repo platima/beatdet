@@ -54,7 +54,7 @@ Browser (static site)
 | `src/app/page.tsx`              | Main beat detection page                          |
 | `src/app/settings/page.tsx`     | Settings page                                     |
 | `src/app/changelog/page.tsx`    | Changelog page (server component, reads CHANGELOG.md) |
-| `src/app/layout.tsx`            | Root layout (NavBar, ThemeInitialiser)             |
+| `src/app/layout.tsx`            | Root layout (NavBar, inline theme script in head)  |
 | `src/app/globals.css`           | Solarised CSS variables + Tailwind                |
 | `src/components/`               | All React components (UI, charts, waveform, etc.) |
 | `src/components/WhatsNewBanner.tsx` | Dismissible upgrade banner (localStorage-based) |
@@ -184,13 +184,16 @@ The app is a fully static Next.js export (no server runtime required).
 ## Current State
 
 - **Milestone:** v0.4.x = waveform zoom + polish; v0.5.0 = PWA
+- **Current version:** v0.4.10
 - **Settings store:** schema v3 (`settingsVersion: '3.0.0'`); migrates v1 -> v2 -> v3 automatically.
 - **Tests:** 88 unit + 26 real-audio integration; run `npm test` for current counts.
 - **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.
 - **BeatList** virtualised via `@tanstack/react-virtual` for long beat lists.
 - **Session persistence** restores last analysis on reload; waveform requires re-upload.
 - **Analysis cancellation** via `AbortController` passed to `analyseAudio`.
-- **WaveSurfer scrollbar** hidden via `hideScrollbar: true` (shadow DOM); toggled by JS hover listeners on the waveform container.
+- **FOUC prevention**: plain render-blocking `<script>` in `<head>` in `layout.tsx` (not `next/script`); `globals.css` also has `@media (prefers-color-scheme: dark) :root:not([data-theme=light])` as a CSS-only fallback for system-dark users.
+- **Tempo candidates** in `BpmDisplay` are clickable buttons; selecting one sets `bpmMultiplier` to `candidate.bpm / baseBpm`.
+- **Cancel race guard**: `analyseFile` checks `controller.signal.aborted` after `analyseAudio` returns before calling `setStatus('complete')`.
 - **Version string** injected at build time via `NEXT_PUBLIC_APP_VERSION` (source: `VERSION` file).
 - **Waveform height** default 120 px, configurable 80/120/160/200 px, applied live via `setOptions`.
 - **Detection hints** shown in a toast; `src/lib/hintUtils.ts` is extracted for independent testing.

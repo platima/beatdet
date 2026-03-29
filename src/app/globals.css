@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Solarised colour palette — CSS custom properties
+   Solarised colour palette: CSS custom properties
    Light theme uses base3 (lightest) as background,
    dark theme uses base03 (darkest) as background.
    ============================================================ */
@@ -42,7 +42,7 @@
   --highlight:   var(--sol-orange);
 }
 
-/* Dark theme — applied via [data-theme="dark"] on <html> */
+/* Dark theme: applied via [data-theme="dark"] on <html> */
 [data-theme="dark"] {
   --bg:          var(--sol-base03);
   --bg-alt:      var(--sol-base02);
@@ -59,7 +59,7 @@
   --highlight:   var(--sol-orange);
 }
 
-/* System dark preference fallback — applied before JS runs so the first
+/* System dark preference fallback: applied before JS runs so the first
    paint is already dark for users whose OS uses dark mode. The :not clause
    lets an explicit [data-theme="light"] override this rule (for users who
    have chosen light in the app settings despite their OS being dark). */

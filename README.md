@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.4.2** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.4.10** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -30,7 +30,7 @@ BeatDet was more accurate more often than both [Tunebat](https://tunebat.com/Ana
 - **Beat detection**: spectral-flux onset detection with adaptive peak picking.
 - **BPM estimation**: multi-lag IOI accumulation with Gaussian histogram smoothing
   and harmonic octave correction.
-- **BPM correction**: ÷2 / ×2 display-only quick-correct buttons for common octave errors.
+- **BPM correction**: clickable tempo candidates and ÷2 / ×2 display-only quick-correct buttons for common octave errors. Clicking a candidate sets that tempo as the displayed BPM.
 - **Waveform player**: interactive playback with beat markers overlaid; Space bar toggles play/pause.
 - **Waveform zoom**: adjustable zoom slider; setting is persisted automatically.
 - **Click-to-seek**: click any row in the beat timeline to jump the waveform to that beat.
@@ -105,7 +105,7 @@ npm run lint
 ```
 src/
 ├── app/
-│   ├── layout.tsx          # Root layout (NavBar, ThemeInitialiser)
+│   ├── layout.tsx          # Root layout (NavBar, inline theme script)
 │   ├── page.tsx            # Main beat detection page
 │   ├── globals.css         # Solarised CSS variables + Tailwind
 │   └── settings/
@@ -113,14 +113,13 @@ src/
 ├── components/
 │   ├── AudioUploader.tsx   # Drag-and-drop file input
 │   ├── BeatList.tsx        # Virtualised beat timeline table (@tanstack/react-virtual)
-│   ├── BpmDisplay.tsx      # BPM card with confidence meter
+│   ├── BpmDisplay.tsx      # BPM card with confidence meter and clickable candidates
 │   ├── BpmHistogram.tsx    # Bar chart of BPM distribution
 │   ├── Button.tsx          # Reusable button component
 │   ├── ExportPanel.tsx     # Export mode and download controls
 │   ├── NavBar.tsx          # Top navigation with theme toggle
 │   ├── OnsetChart.tsx      # Onset strength line chart
 │   ├── ProgressBar.tsx     # Animated analysis progress bar
-│   ├── ThemeInitialiser.tsx # FOUC-prevention script tag
 │   └── WaveformPlayer.tsx  # wavesurfer.js waveform + controls
 ├── hooks/
 │   ├── useAudioAnalysis.ts # File upload + analysis lifecycle hook

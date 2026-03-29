@@ -52,7 +52,7 @@ export function ProgressBar({
         aria-valuemax={100}
         aria-label={label}
       >
-        {/* Determinate fill — always sized to pct% so there is no jump
+        {/* Determinate fill: always sized to pct% so there is no jump
             when the shimmer overlay disappears and real progress begins. */}
         <div
           className="absolute inset-y-0 left-0 h-full rounded-full transition-all duration-300 ease-out"
@@ -61,7 +61,7 @@ export function ProgressBar({
             backgroundColor: pct === 100 ? 'var(--sol-green)' : 'var(--accent)',
           }}
         />
-        {/* Indeterminate shimmer overlay — covers the full track during the
+        {/* Indeterminate shimmer overlay: covers the full track during the
             loading and decode phases. Disappears once real progress starts. */}
         {isIndeterminate && (
           <div className="absolute inset-0 h-full w-full rounded-full progress-shimmer" />

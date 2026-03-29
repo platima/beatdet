@@ -447,17 +447,6 @@ export function estimateBpm(
 export type ProgressCallback = (progress: number) => void;
 
 /**
- * Analyse an audio file (as an ArrayBuffer) and return beat detection results.
- *
- * This function is designed to be called from the main thread but does
- * heavy lifting synchronously; for large files (~10 minutes of audio)
- * expect up to a few seconds of processing.
- *
- * @param arrayBuffer  Raw audio file bytes.
- * @param settings     Detection parameters from user settings.
- * @param onProgress   Optional callback for progress updates (0–1).
- */
-/**
  * Throw a DOM AbortError if the given signal has been aborted.
  * Used to cancel analysis between processing stages.
  */
@@ -482,6 +471,18 @@ function yieldToBrowser(): Promise<void> {
   });
 }
 
+/**
+ * Analyse an audio file (as an ArrayBuffer) and return beat detection results.
+ *
+ * This function is designed to be called from the main thread but does
+ * heavy lifting synchronously; for large files (~10 minutes of audio)
+ * expect up to a few seconds of processing.
+ *
+ * @param arrayBuffer  Raw audio file bytes.
+ * @param settings     Detection parameters from user settings.
+ * @param onProgress   Optional callback for progress updates (0 to 1).
+ * @param signal       Optional AbortSignal for cancellation.
+ */
 export async function analyseAudio(
   arrayBuffer: ArrayBuffer,
   settings: DetectionSettings,
@@ -489,7 +490,7 @@ export async function analyseAudio(
   signal?: AbortSignal
 ): Promise<AnalysisResult> {
   throwIfAborted(signal);
-  // Do NOT call onProgress here — the caller already shows an indeterminate
+  // Do NOT call onProgress here: the caller already shows an indeterminate
   // shimmer during the loading phase. We keep the shimmer going through the
   // decode stage (unknown duration), then begin reporting real progress once
   // the synchronous pipeline stages start.
@@ -506,7 +507,7 @@ export async function analyseAudio(
 
   // Bail out if cancelled during the async decode step.
   throwIfAborted(signal);
-  // Decode complete — switch from indeterminate shimmer to real progress.
+  // Decode complete: switch from indeterminate shimmer to real progress.
   onProgress?.(0.2);
   // Yield to the browser render loop so the 0.2 update paints before
   // the synchronous mono-mixdown work begins.

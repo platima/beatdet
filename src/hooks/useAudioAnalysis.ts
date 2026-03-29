@@ -19,7 +19,7 @@ import { useSettingsStore } from '@/store/settingsStore';
 
 const ACCEPTED_TYPES = ['audio/wav', 'audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/aac'];
 const ACCEPTED_EXTENSIONS = ['.wav', '.mp3', '.m4a', '.aac'];
-// Maximum file size accepted by the app (100 MB — Cloudflare Pages upload limit)
+// Maximum file size accepted by the app (100 MB; matches the Cloudflare Pages upload limit)
 const MAX_FILE_BYTES = 100 * 1024 * 1024;
 
 export interface UseAudioAnalysisReturn {
@@ -194,7 +194,7 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
         // Persist session
         saveSession(file, analysisResult, arrayBuffer);
       } catch (err) {
-        // AbortError means the user cancelled — not a failure
+        // AbortError means the user cancelled; not a failure
         if (err instanceof DOMException && err.name === 'AbortError') {
           return;
         }

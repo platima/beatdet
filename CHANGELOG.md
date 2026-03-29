@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.11] - 2026-03-29
+
+### Changed
+
+- **Code review / housekeeping**: no behaviour changes.
+  - Fixed orphaned `analyseAudio` JSDoc that had been left above `throwIfAborted` after the v0.4.9 refactor; JSDoc now sits directly above the function it documents.
+  - Removed unused `i` index parameter from the tempo candidates `map` call in `BpmDisplay`.
+  - Replaced all em-dashes in source comments with colons or semicolons to comply with the Australian English no-em-dash convention across `beatDetection.ts`, `ProgressBar.tsx`, `useAudioAnalysis.ts`, `layout.tsx`, and `globals.css`.
+  - README: updated version badge to v0.4.10, removed `ThemeInitialiser.tsx` from project structure, updated `layout.tsx` comment, expanded BPM correction feature description to mention clickable tempo candidates.
+  - CLAUDE.md: updated stale `layout.tsx` table entry; added notes for FOUC prevention approach, tempo candidate button behaviour, and cancel race guard.
+
+---
+
 ## [0.4.10] - 2026-03-29
 
 ### Fixed

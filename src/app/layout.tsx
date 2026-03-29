@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 };
 
 // Inline theme script applied in <head> before the browser paints the first
-// frame. Using a plain render-blocking <script> here — not next/script — is
+// frame. Using a plain render-blocking <script> here (not next/script) is
 // intentional: next/script beforeInteractive does not reliably inject before
 // the first paint in static-export mode or the Next.js dev server.
 //
