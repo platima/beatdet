@@ -59,6 +59,28 @@
   --highlight:   var(--sol-orange);
 }
 
+/* System dark preference fallback — applied before JS runs so the first
+   paint is already dark for users whose OS uses dark mode. The :not clause
+   lets an explicit [data-theme="light"] override this rule (for users who
+   have chosen light in the app settings despite their OS being dark). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:          var(--sol-base03);
+    --bg-alt:      var(--sol-base02);
+    --bg-panel:    var(--sol-base02);
+    --border:      var(--sol-base01);
+    --text-body:   var(--sol-base0);
+    --text-muted:  var(--sol-base01);
+    --text-heading: var(--sol-base1);
+    --accent:      var(--sol-blue);
+    --accent-alt:  var(--sol-cyan);
+    --success:     var(--sol-green);
+    --warning:     var(--sol-yellow);
+    --danger:      var(--sol-red);
+    --highlight:   var(--sol-orange);
+  }
+}
+
 /* Override Tailwind's background/foreground to use Solarised vars */
 @theme inline {
   --color-background: var(--bg);

@@ -6,6 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.8] - 2026-03-29
+
+### Fixed
+
+- **Theme FOUC (still flashing light on dark mode)**: Replaced `next/script beforeInteractive` approach (v0.4.6) with a plain render-blocking `<script>` placed directly inside `<head>` in the root layout. The `next/script` approach does not reliably inject before the first paint in static-export or dev-server mode. A plain `<script>` in `<head>` is parse-order guaranteed to execute before any pixel is painted. Added a `@media (prefers-color-scheme: dark)` CSS rule in `globals.css` as a zero-JS fallback for the most common system-dark case, so the correct palette is applied even before the script runs. Removed the now-unnecessary `ThemeInitialiser` component.
+- **Progress bar jump-back animation**: Suppressed CSS transition when the bar switches from indeterminate (100% width shimmer) to the first real progress value, preventing visible backward animation.
+- **Sparse progress bar updates**: Added `await Promise.resolve()` yields in `analyseAudio` after the 20%, 30%, and 60% milestones so React can flush state between synchronous pipeline stages.
+
+---
+
+## [0.4.7] - 2026-03-29
+
+### Fixed
+
+- **Progress bar jump-back animation**: Suppressed CSS transition on the single frame when switching from indeterminate (shimmer at full width) to the first real progress value.
+- **Sparse progress bar updates**: Added micro-yields (`await Promise.resolve()`) in `analyseAudio` so React flushes intermediate progress state between pipeline stages.
+
+---
+
 ## [0.4.6] - 2026-03-29
 
 ### Fixed
