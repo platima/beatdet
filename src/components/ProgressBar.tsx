@@ -8,6 +8,8 @@
 
 'use client';
 
+import { useRef } from 'react';
+
 interface ProgressBarProps {
   /** 0–1 progress value. Pass -1 for indeterminate (loading) state. */
   value: number;
@@ -23,6 +25,13 @@ export function ProgressBar({
   // Treat any negative value as indeterminate (file-load phase)
   const isIndeterminate = value < 0;
   const pct = isIndeterminate ? 0 : Math.round(Math.max(0, Math.min(1, value)) * 100);
+
+  // Suppress the CSS transition on the single frame where we switch from
+  // indeterminate (bar at 100% width) to the first real progress value.
+  // Without this, the bar visually animates backwards from 100% → e.g. 5%.
+  const prevValueRef = useRef<number>(value);
+  const justBecameDeterminate = prevValueRef.current < 0 && !isIndeterminate;
+  prevValueRef.current = value;
 
   return (
     <div className="w-full space-y-2">
@@ -48,7 +57,7 @@ export function ProgressBar({
         aria-label={label}
       >
         <div
-          className="h-full rounded-full transition-all duration-300 ease-out progress-shimmer"
+          className={`h-full rounded-full progress-shimmer${!isIndeterminate && !justBecameDeterminate ? ' transition-all duration-300 ease-out' : ''}`}
           style={{
             // Indeterminate: full-width shimmer. Determinate: sized bar.
             width: isIndeterminate ? '100%' : `${pct}%`,

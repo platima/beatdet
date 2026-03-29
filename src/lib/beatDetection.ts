@@ -489,6 +489,8 @@ export async function analyseAudio(
   // Bail out if cancelled during the async decode step.
   throwIfAborted(signal);
   onProgress?.(0.2);
+  // Yield so React can flush the 0.2 update before synchronous work begins.
+  await Promise.resolve();
 
   const sampleRate = audioBuffer.sampleRate;
   const duration = audioBuffer.duration;
@@ -499,6 +501,9 @@ export async function analyseAudio(
   const mono = mixDownToMono(audioBuffer);
   throwIfAborted(signal);
   onProgress?.(0.3);
+  // Yield before the expensive spectral flux computation so 0.3 renders.
+  await Promise.resolve();
+  throwIfAborted(signal);
 
   // Compute onset strength
   let rawOnsets: Float32Array;
@@ -509,6 +514,9 @@ export async function analyseAudio(
   }
   throwIfAborted(signal);
   onProgress?.(0.6);
+  // Yield after the most expensive stage so 0.6 renders before finishing.
+  await Promise.resolve();
+  throwIfAborted(signal);
 
   // Smooth and normalise
   const smoothed = smoothArray(rawOnsets, settings.smoothingWindow);
