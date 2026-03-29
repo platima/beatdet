@@ -35,6 +35,9 @@ const SOLARISED_ACCENT: Record<string, string> = {
   green:   '#859900',
 };
 
+/** Height of the WaveSurfer canvas in pixels. Must match the `height` option passed to WaveSurfer.create(). */
+const WAVEFORM_HEIGHT = 80;
+
 function formatTime(secs: number): string {
   const m = Math.floor(secs / 60);
   const s = Math.floor(secs % 60);
@@ -75,7 +78,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
       progressColor: progressColour,
       cursorColor: '#dc322f',
       cursorWidth: 2,
-      height: 80,
+      height: WAVEFORM_HEIGHT,
       normalize: true,
       interact: true,
       url: audioUrl,
@@ -165,24 +168,32 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
             <span className="text-sm">Loading waveform…</span>
           </div>
         )}
-        <div ref={containerRef} className="w-full" />
+        {/*
+         * Relative wrapper scopes the beat-marker overlay to the waveform
+         * canvas only (WAVEFORM_HEIGHT px). Without this, the overlay's
+         * h-full would extend into the WaveSurfer horizontal scrollbar zone
+         * when zoomed in, obscuring it.
+         */}
+        <div className="relative" style={{ height: WAVEFORM_HEIGHT }}>
+          <div ref={containerRef} className="w-full" />
 
-        {/* Beat markers overlay - drawn as absolute vertical lines */}
-        {isReady && (
-          <div className="absolute inset-x-4 top-0 h-full pointer-events-none">
-            {result.beats.map((beat) => (
-              <div
-                key={beat.time}
-                className="absolute top-0 bottom-0 w-0.5 opacity-60"
-                style={{
-                  left: `${(beat.time / duration) * 100}%`,
-                  backgroundColor: beatColour,
-                }}
-                title={`Beat at ${beat.time.toFixed(3)} s`}
-              />
-            ))}
-          </div>
-        )}
+          {/* Beat markers overlay - drawn as absolute vertical lines */}
+          {isReady && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {result.beats.map((beat) => (
+                <div
+                  key={beat.time}
+                  className="absolute top-0 bottom-0 w-0.5 opacity-60"
+                  style={{
+                    left: `${(beat.time / duration) * 100}%`,
+                    backgroundColor: beatColour,
+                  }}
+                  title={`Beat at ${beat.time.toFixed(3)} s`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Controls */}

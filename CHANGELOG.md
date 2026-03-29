@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.3.9] - 2026-03-29
+
+### Added
+
+- README: accuracy comparison note — tested more accurate more often than Tunebat and AudioAlter across 26 randomly sampled Kevin MacLeod tracks (60-204 BPM).
+- README: explicit call-out that all processing is in-browser with no upload required, and works well on mobile.
+
+### Fixed
+
+- WaveformPlayer: beat-marker overlay now scoped to the waveform canvas height only (`WAVEFORM_HEIGHT` constant); previously `h-full` extended into the WaveSurfer horizontal scrollbar zone when zoomed in, obscuring it.
+- Page: session restore no longer triggers auto-scroll to results on refresh. Auto-scroll now only fires when a new analysis completes (previous status was `'analysing'`), not when a stored session is rehydrated (`idle → complete`).
+
+---
+
 ## [0.3.8] - 2026-03-29
 
 ### Added

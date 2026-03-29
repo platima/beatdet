@@ -92,3 +92,21 @@
   - Compute inter-candidate ratios in `BpmDisplay` to match the table above.
   - Extend the existing ×2 / ÷2 display-correction buttons to include ×3 / ÷3 for slow-waltz and subdivision cases.
   - Hints should be dismissible per-analysis and not shown when confidence ≥ 0.8 and no harmonic ratio is close.
+
+- [ ] **Key detection and relative key hints**: detect the musical key of the uploaded track and display it alongside the BPM.
+
+  | Sub-feature | Notes |
+  |---|---|
+  | **Primary key display** | Show detected key (e.g. "C Major", "A Minor") on the BPM card next to BPM. |
+  | **Relative key hint** | Always show the relative major/minor counterpart (e.g. "Relative minor: A Minor"). |
+  | **Camelot / Open Key wheel** | Show the Camelot notation (e.g. "8B") for DJ-friendly harmonic mixing; compatible-neighbour keys highlighted. |
+  | **Alternate key candidates** | List top key candidates with confidence, similar to tempo candidates. |
+  | **Mixed/ambiguous key hint** | Show a hint when no key dominates (modal, chromatic, or atonal material). |
+
+  Implementation notes:
+  - Use a **Krumhansl-Schmuckler key-finding algorithm** or a simplified chroma profile correlation against major/minor templates. Both run purely in JavaScript with no external dependencies.
+  - Compute a **12-bin chroma vector** (pitch-class energy sums) from the decoded mono PCM using the FFT already available in `beatDetection.ts`.
+  - Correlate the chroma vector against Krumhansl-Kessler major and minor key profiles for all 24 keys; rank by correlation coefficient.
+  - Expose `key`, `keyConfidence`, and `keyCandidates` from `analyseAudio` / `AnalysisResult`.
+  - Camelot mapping is a static 24-entry lookup table (no extra dependency needed).
+  - Key display should be suppressible (settings toggle `showKey`) for users who do not need it.

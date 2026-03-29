@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.3.7** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.3.8** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -13,9 +13,14 @@ No login required. No data leaves your browser; all processing uses the
 
 ## Try It
 
-**[beatdet.plati.ma](https://beatdet.plati.ma/)** — live on Cloudflare Pages, no install needed.
+**[beatdet.plati.ma](https://beatdet.plati.ma/)** - live on Cloudflare Pages, no install needed.
 
 Drop in any WAV, MP3, M4A, or AAC file and get BPM, beat markers, and export options in seconds.
+
+Everything runs **locally in your browser** — no upload, no server, no account needed. Works great on mobile too.
+
+In informal testing across 26 randomly sampled [Kevin MacLeod](https://incompetech.com) tracks (60-204 BPM),
+BeatDet was more accurate more often than both [Tunebat](https://tunebat.com/Analyzer) and [AudioAlter](https://audioalter.com/bpm-detector).
 
 ---
 
