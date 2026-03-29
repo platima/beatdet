@@ -6,6 +6,14 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.6] - 2026-03-29
+
+### Fixed
+
+- **Theme FOUC (flash of light on dark mode)**: `ThemeInitialiser` now uses `next/script` with `strategy="beforeInteractive"`, which injects the inline theme-detection script into the document `<head>` before any page content is painted. Previously the script was a plain `<script>` inside `<body>`, which ran too late and caused a brief flash of the light (Solarised Light) palette before the dark theme was applied.
+
+---
+
 ## [0.4.5] - 2026-03-29
 
 ### Changed

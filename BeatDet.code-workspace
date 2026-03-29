@@ -58,6 +58,10 @@
 			"/^npx jest --forceExit --testPathPatterns=\"beatDetection\\|audioExport\\|hintUtils\" 2>&1 \\| Select-Object -Last 12$/": {
 				"approve": true,
 				"matchCommandLine": true
+			},
+			"/^node -e \"const p = require\\('next/package\\.json'\\); console\\.log\\(p\\.version\\)\"$/": {
+				"approve": true,
+				"matchCommandLine": true
 			}
 		}
 	}
