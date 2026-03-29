@@ -182,7 +182,7 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.3.4
+- **Version:** 0.3.7
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
   four export modes (full track, isolate beats, cut at beats, custom range).
@@ -224,4 +224,6 @@ The app is a fully static Next.js export (no server runtime required).
 - All detection and display settings are configurable via the settings page.
 - Settings store migrates from v1 to v2 schema without losing existing preferences.
 - Light / Dark / System theme with Solarised colour palette.
-- 73 tests (57 unit + 16 real-audio integration; 70 pass, 1 fail known, 2 skipped).
+- 83 tests (57 unit + 26 real-audio integration; 78 pass, 5 skipped, 0 fail).
+- `testfiles/` excluded from Git (local only); 26 Kevin MacLeod benchmark tracks + reference PDF.
+- Default `bpmMin` lowered to 55 in the app (settings store) and 50 in the test suite.

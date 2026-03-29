@@ -6,6 +6,38 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.3.7] - 2026-03-29
+
+### Added
+
+- **×3 upward harmonic correction** in `estimateBpm`: detects tracks where the onset detector locks onto every-third-beat downbeats (e.g. slow waltzes); threshold 70%.
+- **10 new real-audio benchmark tracks** (batch 3) in `realAudio.test.ts`, covering 54-186 BPM across funk, classical, electronica, and world genres.
+
+### Changed
+
+- Default `bpmMin` lowered from 60 → 55 in settings store (allows detection of slower tempos without user adjusting settings).
+- Test suite `bpmMin` floor lowered from 55 → 50, enabling the 54 BPM Nightdreams track to pass.
+- `testfiles/` excluded from Git via `.gitignore`; all binary test assets kept locally only.
+- Git history rewritten with `git filter-repo` to remove previously committed MP3 blobs; pack size reduced from multi-MB to ~207 KiB.
+
+### Fixed
+
+- Jest open-handles warning: `makeBuffer()` test helper now uses a single shared `AudioContext` closed in `afterAll` instead of creating a new instance per call.
+- Canon In D For 8 Bit Synths BPM corrected from 133 → 132 (per incompetech source).
+
+---
+
+## [0.3.3] - 2026-03-28
+
+### Fixed
+
+- `scrollIntoView` option `behaviour` (silently ignored) corrected to `behavior`.
+- Removed unused `useRef` import from `page.tsx`.
+- README version header, package.json version, and CHANGELOG 200 MB reference all synced.
+- TODO.md: ticked all shipped v0.3.0 export and changelog items.
+
+---
+
 ## [0.3.2] - 2026-03-28
 
 ### Added

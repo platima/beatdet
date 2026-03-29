@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.3.2** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.3.7** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -148,9 +148,10 @@ src/
    1/lag) converted to BPM, accumulated into a Gaussian-smoothed histogram
    (0.5 BPM resolution, σ = 1.5 BPM), then passed through two-phase harmonic
    correction: downward (×0.5, ×1/3 at 40% threshold) to prefer the slower
-   fundamental when subdivisions dominate, and upward (×1.5 at 60% threshold)
-   to promote the faster tempo when the detector locked onto half-speed
-   groupings. Histogram lookups use a ±1-bin maximum search for robustness
+   fundamental when subdivisions dominate, and upward (×1.5 at 60% threshold,
+   ×3 at 70% threshold) to promote the faster tempo when the detector locked
+   onto half-speed or third-speed groupings. Histogram lookups use a ±1-bin
+   maximum search for robustness
    against slight peak offsets. The minimum beat gap is automatically clamped
    to one beat period at the configured maximum BPM so fast tempos are never
    blocked.
@@ -170,7 +171,7 @@ All settings persist across sessions in `localStorage`.
 | Hop size          | 512     | Analysis frame hop in samples.              |
 | Spectral flux     | on      | Use spectral flux vs energy envelope.       |
 | Smoothing window  | 8       | Moving-average window in frames.            |
-| BPM range         | 60-200  | Tempo range for BPM estimation.             |
+| BPM range         | 55-200  | Tempo range for BPM estimation.             |
 
 ### Display
 
@@ -191,11 +192,11 @@ Two test suites cover the beat detection engine:
 - **Unit tests** (`beatDetection.test.ts`): 34 tests covering FFT correctness,
   onset strength functions, peak picking (including absolute height floor), and
   BPM estimation.
-- **Real-audio integration tests** (`realAudio.test.ts`): 16 Kevin MacLeod
-  tracks spanning 60-204 BPM, decoded via `node-web-audio-api` and run through
-  the full spectral-flux -> peak-pick -> BPM-estimate pipeline. 14 pass
-  outright (including 3 octave-tolerant), 2 are skipped as known limitations
-  (3:2 harmonic ambiguity and missing-candidate detection failures).
+- **Real-audio integration tests** (`realAudio.test.ts`): 26 Kevin MacLeod
+  tracks spanning 54-204 BPM, decoded via `node-web-audio-api` and run through
+  the full spectral-flux -> peak-pick -> BPM-estimate pipeline. 21 pass
+  outright (including 7 octave-tolerant), 5 are skipped as known limitations
+  (3:2 harmonic ambiguity, missing-candidate failures, too-short clips).
 
 ```bash
 # Run all tests

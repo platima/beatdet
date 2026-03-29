@@ -29,11 +29,13 @@ import { encodeWav, sliceBuffer, concatenateBuffers, normalisePeak, bundleZip, c
 import type { ExportedSlice } from '../audioExport';
 
 // A single shared AudioContext for all buffer creation, plus the lazy
-// singleton inside audioExport.ts.  Closing both in afterAll lets Jest
-// exit cleanly without --forceExit or "open handles" warnings.
-const sharedCtx = new AudioContext();
+// singleton inside audioExport.ts.  Created in beforeAll (not at module
+// scope) so node-web-audio-api has a chance to initialise first.
+// Closing both in afterAll lets Jest exit cleanly without open-handles warnings.
+let sharedCtx: InstanceType<typeof AudioContext>;
+beforeAll(() => { sharedCtx = new AudioContext(); });
 afterAll(async () => {
-  if (sharedCtx.state !== 'closed') await sharedCtx.close();
+  if (sharedCtx?.state !== 'closed') await sharedCtx?.close();
   await closeBufferContext();
 });
 
