@@ -6,6 +6,15 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.9] - 2026-03-29
+
+### Fixed
+
+- **Progress bar jump-back (properly fixed)**: The shimmer is now an absolutely-positioned overlay on the progress track rather than the fill bar itself. The fill bar is always sized to the real percentage, so when the shimmer disappears there is no visual jump from 100% to a small value.
+- **Progress bar stuck at 5% (properly fixed)**: Removed the `onProgress(0.05)` call before `decodeAudioData` — the indeterminate shimmer now covers the entire decode phase. Replaced `await Promise.resolve()` micro-task yields with `requestAnimationFrame`-based yields (`yieldToBrowser`), guaranteeing the browser paints each intermediate progress value before the next pipeline stage runs.
+
+---
+
 ## [0.4.8] - 2026-03-29
 
 ### Fixed

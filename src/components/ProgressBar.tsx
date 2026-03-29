@@ -2,13 +2,16 @@
  * ProgressBar: animated progress indicator used during audio analysis.
  * Shows percentage and a descriptive status label.
  *
- * A value of -1 triggers an indeterminate (full-width shimmer) state,
- * used during the file-loading phase before analysis begins.
+ * A value of -1 triggers an indeterminate (shimmer overlay) state,
+ * used during the file-loading and audio-decode phases.
+ *
+ * The shimmer is rendered as an absolutely-positioned overlay on top of
+ * the progress track. The actual fill bar is always sized to pct%, so
+ * there is no visual jump when the shimmer disappears and real progress
+ * takes over.
  */
 
 'use client';
-
-import { useRef } from 'react';
 
 interface ProgressBarProps {
   /** 0–1 progress value. Pass -1 for indeterminate (loading) state. */
@@ -22,16 +25,9 @@ export function ProgressBar({
   label = 'Analysing…',
   showPercent = true,
 }: ProgressBarProps) {
-  // Treat any negative value as indeterminate (file-load phase)
+  // Treat any negative value as indeterminate (file-load / decode phase)
   const isIndeterminate = value < 0;
   const pct = isIndeterminate ? 0 : Math.round(Math.max(0, Math.min(1, value)) * 100);
-
-  // Suppress the CSS transition on the single frame where we switch from
-  // indeterminate (bar at 100% width) to the first real progress value.
-  // Without this, the bar visually animates backwards from 100% → e.g. 5%.
-  const prevValueRef = useRef<number>(value);
-  const justBecameDeterminate = prevValueRef.current < 0 && !isIndeterminate;
-  prevValueRef.current = value;
 
   return (
     <div className="w-full space-y-2">
@@ -48,7 +44,7 @@ export function ProgressBar({
       </div>
 
       <div
-        className="h-2 w-full overflow-hidden rounded-full"
+        className="relative h-2 w-full overflow-hidden rounded-full"
         style={{ backgroundColor: 'var(--bg-alt)' }}
         role="progressbar"
         aria-valuenow={isIndeterminate ? undefined : pct}
@@ -56,14 +52,20 @@ export function ProgressBar({
         aria-valuemax={100}
         aria-label={label}
       >
+        {/* Determinate fill — always sized to pct% so there is no jump
+            when the shimmer overlay disappears and real progress begins. */}
         <div
-          className={`h-full rounded-full progress-shimmer${!isIndeterminate && !justBecameDeterminate ? ' transition-all duration-300 ease-out' : ''}`}
+          className="absolute inset-y-0 left-0 h-full rounded-full transition-all duration-300 ease-out"
           style={{
-            // Indeterminate: full-width shimmer. Determinate: sized bar.
-            width: isIndeterminate ? '100%' : `${pct}%`,
+            width: `${pct}%`,
             backgroundColor: pct === 100 ? 'var(--sol-green)' : 'var(--accent)',
           }}
         />
+        {/* Indeterminate shimmer overlay — covers the full track during the
+            loading and decode phases. Disappears once real progress starts. */}
+        {isIndeterminate && (
+          <div className="absolute inset-0 h-full w-full rounded-full progress-shimmer" />
+        )}
       </div>
     </div>
   );

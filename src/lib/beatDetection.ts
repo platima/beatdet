@@ -467,6 +467,21 @@ function throwIfAborted(signal?: AbortSignal): void {
   }
 }
 
+/**
+ * Yield to the browser's render loop so React can flush pending state
+ * updates and the browser can paint a frame before work resumes.
+ * Falls back to setTimeout in non-browser environments (e.g. Jest/Node).
+ */
+function yieldToBrowser(): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(() => resolve());
+    } else {
+      setTimeout(resolve, 0);
+    }
+  });
+}
+
 export async function analyseAudio(
   arrayBuffer: ArrayBuffer,
   settings: DetectionSettings,
@@ -474,7 +489,10 @@ export async function analyseAudio(
   signal?: AbortSignal
 ): Promise<AnalysisResult> {
   throwIfAborted(signal);
-  onProgress?.(0.05);
+  // Do NOT call onProgress here — the caller already shows an indeterminate
+  // shimmer during the loading phase. We keep the shimmer going through the
+  // decode stage (unknown duration), then begin reporting real progress once
+  // the synchronous pipeline stages start.
 
   // Decode the audio using a regular AudioContext (no output device needed).
   const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
@@ -488,9 +506,12 @@ export async function analyseAudio(
 
   // Bail out if cancelled during the async decode step.
   throwIfAborted(signal);
+  // Decode complete — switch from indeterminate shimmer to real progress.
   onProgress?.(0.2);
-  // Yield so React can flush the 0.2 update before synchronous work begins.
-  await Promise.resolve();
+  // Yield to the browser render loop so the 0.2 update paints before
+  // the synchronous mono-mixdown work begins.
+  await yieldToBrowser();
+  throwIfAborted(signal);
 
   const sampleRate = audioBuffer.sampleRate;
   const duration = audioBuffer.duration;
@@ -501,8 +522,8 @@ export async function analyseAudio(
   const mono = mixDownToMono(audioBuffer);
   throwIfAborted(signal);
   onProgress?.(0.3);
-  // Yield before the expensive spectral flux computation so 0.3 renders.
-  await Promise.resolve();
+  // Yield before the expensive spectral flux computation so 0.3 paints.
+  await yieldToBrowser();
   throwIfAborted(signal);
 
   // Compute onset strength
@@ -514,8 +535,8 @@ export async function analyseAudio(
   }
   throwIfAborted(signal);
   onProgress?.(0.6);
-  // Yield after the most expensive stage so 0.6 renders before finishing.
-  await Promise.resolve();
+  // Yield after the most expensive stage so 0.6 paints before finishing.
+  await yieldToBrowser();
   throwIfAborted(signal);
 
   // Smooth and normalise
