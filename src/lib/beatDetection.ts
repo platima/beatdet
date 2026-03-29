@@ -385,6 +385,9 @@ export function estimateBpm(
   const STRICT_HALF_THRESHOLD = 0.95;
   const DEFAULT_DOWN_THRESHOLD = 0.40;
   let corrected = false;
+  // Record which ratio was applied, if any, so the UI can suppress
+  // redundant harmonic hints when the algorithm already self-corrected.
+  let correctionRatio: number | undefined;
   for (const ratio of [0.5, 1 / 3]) {
     const altBpm = leader.bpm * ratio;
     if (altBpm < bpmMin || altBpm > bpmMax) continue;
@@ -397,6 +400,7 @@ export function estimateBpm(
     if (altScore >= leader.score * threshold) {
       candidates.unshift({ bpm: Math.round(altBpm * 2) / 2, score: altScore });
       corrected = true;
+      correctionRatio = ratio;
       break;
     }
   }
@@ -415,6 +419,7 @@ export function estimateBpm(
         const altScore = histScoreAt(altBpm);
         if (altScore >= leader.score * threshold) {
           candidates.unshift({ bpm: Math.round(altBpm * 2) / 2, score: altScore });
+          correctionRatio = ratio;
           break;
         }
       }
@@ -430,6 +435,7 @@ export function estimateBpm(
     bpm: Math.round(candidates[0].bpm),
     candidates: candidates.slice(0, 5).map((c) => ({ bpm: Math.round(c.bpm), score: c.score })),
     confidence,
+    correctionRatio,
   };
 }
 

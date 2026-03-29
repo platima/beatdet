@@ -182,7 +182,7 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.3.7
+- **Version:** 0.4.0
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
   four export modes (full track, isolate beats, cut at beats, custom range).

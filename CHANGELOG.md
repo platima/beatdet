@@ -6,6 +6,26 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.0] - 2026-03-29
+
+### Added
+
+- **Tempo confidence hints**: fixed bottom-right toast notification surfaces detection edge cases to the user after each analysis. Hints cover:
+  - Octave error (×2 / ÷2 suggestion when a 2:1 ratio candidate exists and no auto-correction was applied)
+  - 4:3 ratio ambiguity (e.g. detected 140 when true tempo is 105)
+  - 3:2 sesquialtera ratio
+  - Triple-tempo / waltz 3/4 feel
+  - Low overall confidence (< 35%)
+  - Short clip (fewer than 30 detected beats)
+  - Dismissible per analysis (re-appears on next upload).
+- `correctionRatio` field added to `BpmEstimate` type and returned from `estimateBpm`. Ratio hints are suppressed when the algorithm already auto-corrected the same ratio, preventing contradictory advice.
+
+### Changed
+
+- Auto-scroll to results removed. Results appear below the upload zone and modern display resolutions do not require the scroll.
+
+---
+
 ## [0.3.9] - 2026-03-29
 
 ### Added

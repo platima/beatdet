@@ -25,6 +25,12 @@ export interface BpmEstimate {
   candidates: Array<{ bpm: number; score: number }>;
   /** Overall confidence of the primary estimate (0–1). */
   confidence: number;
+  /**
+   * The harmonic ratio applied to auto-correct the raw winner, if any.
+   * e.g. 0.5 means the raw leader was halved; 1.5 means it was promoted.
+   * undefined when no correction was applied.
+   */
+  correctionRatio?: number;
 }
 
 /** Full result produced by the beat detection engine. */

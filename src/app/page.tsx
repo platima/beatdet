@@ -12,7 +12,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AudioUploader } from '@/components/AudioUploader';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -79,9 +79,6 @@ export default function HomePage() {
   const [bpmMultiplier, setBpmMultiplier] = useState(1);
   // Seek target propagated from BeatList row clicks to WaveformPlayer
   const [seekTime, setSeekTime] = useState<number | null>(null);
-  // Track the previous analysis status so we can distinguish a freshly
-  // completed analysis from a session restore (both end at 'complete').
-  const prevStatusRef = useRef<string>('idle');
 
   // Attempt to restore the last session on mount
   useEffect(() => {
@@ -89,22 +86,12 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reset multiplier/seek and scroll into view only when a *new* analysis
-  // completes (i.e. previous status was 'analysing', not a session restore
-  // which goes idle → complete directly).
+  // Reset BPM multiplier and seek target when a new analysis completes.
   useEffect(() => {
-    if (status === 'complete' && prevStatusRef.current === 'analysing') {
+    if (status === 'complete') {
       setBpmMultiplier(1);
       setSeekTime(null);
-      // Smooth-scroll results into view
-      setTimeout(() => {
-        document.getElementById('results')?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }, 100);
     }
-    prevStatusRef.current = status;
   }, [status]);
 
   const isProcessing = status === 'loading' || status === 'analysing';

@@ -73,7 +73,7 @@
 ### Other
 
 - [ ] Waveform zoom: add slider to WaveformPlayer; wire to `waveformZoom` setting (already in store).
-- [ ] **Tempo confidence hints**: display contextual tips on the BPM card when the result may be unreliable. Trigger conditions and suggested copy are based on every edge case encountered during development:
+- [x] **Tempo confidence hints**: display contextual tips on the BPM card when the result may be unreliable. Trigger conditions and suggested copy are based on every edge case encountered during development:
 
   | Condition | Detection signal | Suggested hint |
   |---|---|---|
