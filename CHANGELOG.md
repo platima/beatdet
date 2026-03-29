@@ -6,6 +6,15 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.10] - 2026-03-29
+
+### Fixed
+
+- **Cancel race condition leaving UI stuck**: If the user pressed Cancel just as analysis completed, `status` was set back to `'idle'` but `fileInfo` remained set with no clear button visible. Two fixes applied: (1) `AudioUploader`'s clear button is now shown whenever `fileInfo` is present, regardless of `status`; (2) added a `controller.signal.aborted` guard in `analyseFile` after `analyseAudio` returns so a late cancel cannot be overridden by `setStatus('complete')`.
+- **Tempo candidates not clickable**: Candidate tempo chips were rendered as `<div>` elements with no interaction. They are now `<button>` elements that select the candidate as the displayed BPM (by computing `candidate.bpm / baseBpm` as the multiplier). The currently-selected candidate is highlighted in accent colour, matching the ÷2/×2 button behaviour. Clicking a 3/4-feel track's 3× candidate now works as expected.
+
+---
+
 ## [0.4.9] - 2026-03-29
 
 ### Fixed

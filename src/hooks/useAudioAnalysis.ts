@@ -182,6 +182,12 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
           controller.signal
         );
 
+        // Guard against the race where cancel fires just as the last stage
+        // completes: analyseAudio returned successfully but the signal was
+        // aborted between RAF yields. Without this check, setStatus('complete')
+        // would overwrite the 'idle' status already set by cancel().
+        if (controller.signal.aborted) return;
+
         setResult(analysisResult);
         setStatus('complete');
 

@@ -115,7 +115,7 @@ export default function HomePage() {
       {/* Upload area */}
       <AudioUploader
         onFileSelect={analyseFile}
-        onClear={status !== 'idle' ? clearAll : undefined}
+        onClear={fileInfo ? clearAll : undefined}
         fileInfo={fileInfo}
         disabled={isProcessing}
       />

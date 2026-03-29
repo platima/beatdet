@@ -178,22 +178,33 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
             Tempo candidates
           </p>
           <div className="flex flex-wrap gap-2">
-            {bpmEstimate.candidates.map(({ bpm, score }, i) => (
-              <div
-                key={bpm}
-                className="rounded-lg px-3 py-1.5 text-sm font-mono tabular-nums"
-                style={{
-                  backgroundColor: i === 0 ? 'var(--accent)' : 'var(--bg-alt)',
-                  color: i === 0 ? 'white' : 'var(--text-muted)',
-                  border: '1px solid var(--border)',
-                }}
-              >
-                {bpm} BPM
-                <span className="ml-1 text-xs opacity-70">
-                  ({Math.round(score * 10) / 10})
-                </span>
-              </div>
-            ))}
+            {bpmEstimate.candidates.map(({ bpm, score }, i) => {
+              // The multiplier needed to display this candidate as the primary BPM.
+              const candidateMultiplier = bpmEstimate.bpm > 0 ? bpm / bpmEstimate.bpm : 1;
+              const isSelected = Math.abs(candidateMultiplier - bpmMultiplier) < 0.01;
+              return (
+                <button
+                  key={bpm}
+                  onClick={() => onMultiplierChange?.(candidateMultiplier)}
+                  disabled={!onMultiplierChange}
+                  className="rounded-lg px-3 py-1.5 text-sm font-mono tabular-nums transition-colors hover:opacity-80"
+                  style={{
+                    backgroundColor: isSelected ? 'var(--accent)' : 'var(--bg-alt)',
+                    color: isSelected ? 'white' : 'var(--text-muted)',
+                    border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+                    cursor: onMultiplierChange ? 'pointer' : 'default',
+                  }}
+                  title={`Use ${bpm} BPM as displayed tempo`}
+                  aria-label={`Select ${bpm} BPM`}
+                  aria-pressed={isSelected}
+                >
+                  {bpm} BPM
+                  <span className="ml-1 text-xs opacity-70">
+                    ({Math.round(score * 10) / 10})
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
