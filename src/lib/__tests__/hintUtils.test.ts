@@ -56,10 +56,10 @@ describe('isCloseRatio', () => {
 });
 
 /* ============================================================
-   buildHints — no-hint conditions
+   buildHints: no-hint conditions
    ============================================================ */
 
-describe('buildHints — no hints', () => {
+describe('buildHints: no hints', () => {
   test('returns empty array when bpm is 0', () => {
     const estimate = makeEstimate({ bpm: 0 });
     expect(buildHints(estimate, 100)).toHaveLength(0);
@@ -75,7 +75,7 @@ describe('buildHints — no hints', () => {
   });
 
   test('ratio hints suppressed when correctionRatio is set', () => {
-    // 2:1 candidates but algorithm already corrected — no hint expected.
+    // 2:1 candidates but algorithm already corrected; no hint expected.
     const estimate = makeEstimate({
       bpm: 120,
       candidates: [{ bpm: 120, score: 1 }, { bpm: 60, score: 0.8 }],
@@ -87,10 +87,10 @@ describe('buildHints — no hints', () => {
 });
 
 /* ============================================================
-   buildHints — short clip
+   buildHints: short clip
    ============================================================ */
 
-describe('buildHints — short clip', () => {
+describe('buildHints: short clip', () => {
   test('fires when beatCount < 30', () => {
     const hints = buildHints(makeEstimate(), 20);
     expect(hints.some((h) => h.text.includes('Short clip'))).toBe(true);
@@ -109,10 +109,10 @@ describe('buildHints — short clip', () => {
 });
 
 /* ============================================================
-   buildHints — low confidence
+   buildHints: low confidence
    ============================================================ */
 
-describe('buildHints — low confidence', () => {
+describe('buildHints: low confidence', () => {
   test('fires when confidence < 0.35 and beatCount >= 30', () => {
     const estimate = makeEstimate({ confidence: 0.30, candidates: [{ bpm: 120, score: 1 }] });
     const hints = buildHints(estimate, 50);
@@ -140,10 +140,10 @@ describe('buildHints — low confidence', () => {
 });
 
 /* ============================================================
-   buildHints — 2:1 ratio (octave)
+   buildHints: 2:1 ratio (octave)
    ============================================================ */
 
-describe('buildHints — 2:1 ratio', () => {
+describe('buildHints: 2:1 ratio', () => {
   test('suggests ÷2 when winner is double the runner-up', () => {
     const estimate = makeEstimate({
       candidates: [{ bpm: 120, score: 1 }, { bpm: 60, score: 0.8 }],
@@ -170,10 +170,10 @@ describe('buildHints — 2:1 ratio', () => {
 });
 
 /* ============================================================
-   buildHints — 4:3 ratio (hemiola)
+   buildHints: 4:3 ratio (hemiola)
    ============================================================ */
 
-describe('buildHints — 4:3 ratio', () => {
+describe('buildHints: 4:3 ratio', () => {
   test('fires for candidates at a 4:3 ratio (e.g. 140 vs 105)', () => {
     const estimate = makeEstimate({
       candidates: [{ bpm: 140, score: 1 }, { bpm: 105, score: 0.9 }],
@@ -202,10 +202,10 @@ describe('buildHints — 4:3 ratio', () => {
 });
 
 /* ============================================================
-   buildHints — 3:2 ratio (sesquialtera / hemiola)
+   buildHints: 3:2 ratio (sesquialtera / hemiola)
    ============================================================ */
 
-describe('buildHints — 3:2 ratio', () => {
+describe('buildHints: 3:2 ratio', () => {
   test('fires for candidates at a 3:2 ratio (e.g. 120 vs 80)', () => {
     const estimate = makeEstimate({
       candidates: [{ bpm: 120, score: 1 }, { bpm: 80, score: 0.8 }],
@@ -240,10 +240,10 @@ describe('buildHints — 3:2 ratio', () => {
 });
 
 /* ============================================================
-   buildHints — 3:1 ratio (triple-tempo / waltz)
+   buildHints: 3:1 ratio (triple-tempo / waltz)
    ============================================================ */
 
-describe('buildHints — 3:1 ratio', () => {
+describe('buildHints: 3:1 ratio', () => {
   test('fires for candidates at a 3:1 ratio (e.g. 180 vs 60)', () => {
     const estimate = makeEstimate({
       candidates: [{ bpm: 180, score: 1 }, { bpm: 60, score: 0.7 }],
@@ -278,10 +278,10 @@ describe('buildHints — 3:1 ratio', () => {
 });
 
 /* ============================================================
-   buildHints — correctionRatio suppression
+   buildHints: correctionRatio suppression
    ============================================================ */
 
-describe('buildHints — correctionRatio suppression', () => {
+describe('buildHints: correctionRatio suppression', () => {
   test('ratio hints not returned when correctionRatio is defined', () => {
     // 3:1 candidates but algorithm already corrected for it.
     const estimate = makeEstimate({

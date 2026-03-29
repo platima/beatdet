@@ -125,7 +125,7 @@ const TRACKS: TrackDef[] = [
   { file: 'Grand Dark Waltz Trio Vivace 140bpm.mp3',     expectedBpm: 140, tolerance: 5 },
   { file: 'Lord of the Rangs 104bpm.mp3',                expectedBpm: 104, tolerance: 5, octaveTolerant: true },
   // Paradise_Found: detector locks onto 4:3 ratio (140 ≈ 105 × 4/3). The
-  // 4:3 harmonic is not corrected — it is too common as coincidence and
+  // 4:3 harmonic is not corrected; it is too common as coincidence and
   // would cause false corrections on other tracks.
   { file: 'Paradise_Found 105bpm.mp3',                   expectedBpm: 105, tolerance: 5, octaveTolerant: true, skip: true },
   { file: 'Valse Gymnopedie 77bpm.mp3',                  expectedBpm: 77,  tolerance: 5 },

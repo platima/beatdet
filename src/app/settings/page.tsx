@@ -488,7 +488,7 @@ export default function SettingsPage() {
           />
         </FieldRow>
 
-        {/* MP3 bitrate — shown only when format is mp3 */}
+        {/* MP3 bitrate: shown only when format is mp3 */}
         {settings.export.format === 'mp3' && (
           <FieldRow label="MP3 bitrate" hint="Output quality for MP3 exports.">
             <SelectInput

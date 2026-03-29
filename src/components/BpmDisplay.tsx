@@ -65,7 +65,7 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
             >
               {bpmEstimate.bpm > 0
                 ? Math.round(bpmEstimate.bpm * bpmMultiplier)
-                : '—'}
+                : '-'}
             </span>
             <span className="text-xl font-medium" style={{ color: 'var(--text-muted)' }}>
               BPM
@@ -148,7 +148,7 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
           { label: 'Beats detected', value: beats.length.toString() },
           {
             label: 'Avg interval',
-            value: avgInterval > 0 ? `${formatSeconds(avgInterval)} s` : '—',
+            value: avgInterval > 0 ? `${formatSeconds(avgInterval)} s` : '-',
           },
           {
             label: 'Duration',
@@ -199,10 +199,10 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
       )}
     </div>
 
-    {/* Detection hints — fixed bottom-right toast, dismissible per analysis */}
+    {/* Detection hints: fixed bottom-right toast, dismissible per analysis */}
     {hints.length > 0 && hintsVisible && (
       <div
-        className="fixed bottom-4 right-4 z-50 max-w-xs rounded-xl p-4 shadow-xl"
+        className="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl p-4 shadow-xl"
         style={{
           backgroundColor: 'var(--bg-panel)',
           border: '1px solid var(--warning)',
@@ -212,17 +212,17 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
       >
         <div className="flex items-start gap-2">
           <AlertTriangle
-            size={15}
+            size={18}
             className="shrink-0 mt-0.5"
             style={{ color: 'var(--warning)' }}
             aria-hidden
           />
           <div className="flex-1 space-y-1.5">
-            <p className="text-xs font-semibold" style={{ color: 'var(--warning)' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--warning)' }}>
               Detection note
             </p>
             {hints.map((hint) => (
-              <p key={hint.text} className="text-xs leading-snug" style={{ color: 'var(--text-body)' }}>
+              <p key={hint.text} className="text-sm leading-snug" style={{ color: 'var(--text-body)' }}>
                 {hint.text}
                 {hint.url && (
                   <>
@@ -246,7 +246,7 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
             className="shrink-0 rounded p-0.5 hover:bg-[var(--bg-alt)] transition-colors"
             aria-label="Dismiss detection hint"
           >
-            <X size={13} style={{ color: 'var(--text-muted)' }} />
+            <X size={15} style={{ color: 'var(--text-muted)' }} />
           </button>
         </div>
       </div>

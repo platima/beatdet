@@ -64,7 +64,7 @@ export function NavBar() {
             <ThemeIcon size={18} />
           </button>
 
-          {/* Changelog link — goes back to home when already on the changelog page */}
+          {/* Changelog link: goes back to home when already on the changelog page */}
           <Link
             href={pathname === '/changelog' ? '/' : '/changelog'}
             title={pathname === '/changelog' ? 'Back to home' : 'Changelog'}

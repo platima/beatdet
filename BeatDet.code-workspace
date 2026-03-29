@@ -54,7 +54,11 @@
 				"approve": true,
 				"matchCommandLine": true
 			},
-			"npx ts-node": true
+			"npx ts-node": true,
+			"/^npx jest --forceExit --testPathPatterns=\"beatDetection\\|audioExport\\|hintUtils\" 2>&1 \\| Select-Object -Last 12$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
 		}
 	}
 }

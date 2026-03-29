@@ -6,7 +6,7 @@
  * format-aware export helpers.
  *
  * AudioBuffer creation uses `node-web-audio-api` so these run in Node
- * without a browser — identical to the realAudio.test.ts approach.
+ * without a browser; identical to the realAudio.test.ts approach.
  *
  * Note: encodeMp3 and the high-level exportFull / exportCutAtBeats /
  * exportIsolatedBeats / exportCustomRange functions depend on

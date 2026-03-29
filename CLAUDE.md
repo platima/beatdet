@@ -62,7 +62,7 @@ Browser (static site)
 | `src/hooks/useAudioAnalysis.ts` | File upload + analysis lifecycle hook             |
 | `src/hooks/useTheme.ts`         | Theme preference hook                             |
 | `src/lib/beatDetection.ts`      | Beat detection engine (spectral flux, peak pick)  |
-| `src/lib/hintUtils.ts`          | `buildHints` / `isCloseRatio` — hint logic extracted for testability |
+| `src/lib/hintUtils.ts`          | `buildHints` / `isCloseRatio`: hint logic extracted for testability |
 | `src/lib/audioExport.ts`        | WAV/MP3 encoding, ZIP bundling, and audio slicing |
 | `src/lib/sessionStorage.ts`     | Session persistence helpers                       |
 | `src/store/settingsStore.ts`    | Zustand settings store (localStorage backed)      |
@@ -126,7 +126,7 @@ them silently; each must be visible in the plan.
 3. Run unit tests; fix and repeat until all pass.
 4. Update inline code comments (Australian English).
 5. Update `README.md` if the change affects usage, structure, or config.
-6. Update `CLAUDE.md` if the change affects project context.
+6. Update architectural facts in `CLAUDE.md` (settings schema version, non-obvious implementation choices). Do not add feature descriptions that belong in `README.md`.
 7. Bump version in `VERSION` (PATCH per commit, MINOR per milestone).
 8. `git add -A && git commit` with a Conventional Commits message.
 9. At milestone completion: bump MINOR, push, update README version.
@@ -183,53 +183,15 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.4.4
-- **Milestone plan:** v0.4.x = waveform zoom + polish; v0.5.0 = PWA
-- **Status:** Fully functional browser-based beat detection with interactive
-  waveform visualisation, BPM estimation, onset charts, beat timeline, and
-  four export modes (full track, isolate beats, cut at beats, custom range).
-- **MP3 export** via `@breezystack/lamejs` (128/192/256/320 kbps selectable).
-- **ZIP bundling** via `fflate` — cut-at-beats downloads as a single `.zip` archive.
-- **Beat data export** — CSV and JSON download buttons in the Beat Timeline header.
-- **Waveform scrollbar** hidden by default, revealed on hover via WaveSurfer's `hideScrollbar` option toggled by `mouseenter`/`mouseleave` listeners on the waveform container (works correctly inside WaveSurfer's shadow DOM).
-- **Waveform zoom slider** in WaveformPlayer controls; persisted to settings. Zoom slider is `w-36` (144 px) with an adjacent numeric input for precise/repeatable values.
-- **Waveform height** configurable from Settings page (80 / 120 / 160 / 200 px); applied live via WaveSurfer `setOptions`.
-- **In-app changelog** at `/changelog` (server component reads `CHANGELOG.md` at build time).
-- **What's New banner** shown to returning users after an upgrade (localStorage-based).
-- **Error boundaries** wrap all major result panels; failed panels show a recovery UI.
-- **File size guard** blocks uploads over 100 MB with a clear error message.
-- Version string injected at build time from `VERSION` file via `next.config.ts`
-  `env.NEXT_PUBLIC_APP_VERSION`; no more hardcoded version constants in components.
-- Space bar toggles waveform play/pause globally (excludes inputs/buttons).
-- Click any beat row to seek the waveform to that beat time.
-- BPM ÷2 / ×2 display-only quick-correct buttons on the BPM card for octave error correction.
-- Re-analyse button re-runs detection on the last uploaded file with current settings.
-- Export panel shows visible error messages (not just `console.error`).
-- Cut-at-beats mode shows a ZIP preview badge before downloading.
-- Waveform colours update on theme toggle (WaveSurfer re-created with new theme dep).
-- Indeterminate progress shimmer during file-load phase (before analysis begins).
-- Session restore banner explains why waveform is unavailable and prompts re-upload.
-- ARIA labels on all interactive controls; `role="alert"` on error banners;
-  `aria-live` region announces analysis start/completion.
-- Screen-reader `<p className="sr-only">` summaries added to BpmHistogram and OnsetChart.
-- BpmDisplay stats row stacks on mobile (`grid-cols-1 sm:grid-cols-3`).
-- Analysis cancellation via **Cancel button** during analysis (`AbortController` passed to `analyseAudio`;
-  `AbortError` caught silently in the hook); starting a new upload also cancels any in-flight analysis.
-- **BeatList** is virtualised via `@tanstack/react-virtual` — only visible rows are mounted;
-  handles 500+ beat tracks without DOM bloat; column alignment preserved with spacer rows.
-- BeatList table wrapped in `overflow-x-auto` with `min-width` for mobile.
-- Charts grid is single-column when onset curve is hidden (no half-width histogram).
-- Open Graph and Twitter Card metadata in `layout.tsx`; `lang="en-AU"`.
-- Favicon from `src/app/icon.svg` (Solarised blue waveform/Activity icon).
-- `next-themes` dependency removed (app uses its own `useTheme` + `ThemeInitialiser`).
-- AAC listed in upload zone label and error messages.
-- Duration display uses `Math.floor` (prevents `0:60` rounding edge case).
-- Session persistence restores the last analysis on reload.
-- All detection and display settings are configurable via the settings page.
-- Settings store migrates from v1 to v2 to v3 schema without losing existing preferences.
-- Light / Dark / System theme with Solarised colour palette.
-- Tempo confidence hints carry Wikipedia "More info" links (Tempo, Hemiola, Triple metre, Beat).
-- `src/lib/hintUtils.ts` contains `buildHints` / `isCloseRatio` extracted from `BpmDisplay` for testability.
-- 114 tests (88 unit + 26 real-audio integration; 108 pass, 6 skipped, 0 fail).
-- `testfiles/` excluded from Git (local only); 26 Kevin MacLeod benchmark tracks + reference PDF.
-- Default `bpmMin` lowered to 55 in the app (settings store) and 50 in the test suite.
+- **Milestone:** v0.4.x = waveform zoom + polish; v0.5.0 = PWA
+- **Settings store:** schema v3 (`settingsVersion: '3.0.0'`); migrates v1 -> v2 -> v3 automatically.
+- **Tests:** 88 unit + 26 real-audio integration; run `npm test` for current counts.
+- **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.
+- **BeatList** virtualised via `@tanstack/react-virtual` for long beat lists.
+- **Session persistence** restores last analysis on reload; waveform requires re-upload.
+- **Analysis cancellation** via `AbortController` passed to `analyseAudio`.
+- **WaveSurfer scrollbar** hidden via `hideScrollbar: true` (shadow DOM); toggled by JS hover listeners on the waveform container.
+- **Version string** injected at build time via `NEXT_PUBLIC_APP_VERSION` (source: `VERSION` file).
+- **Waveform height** default 120 px, configurable 80/120/160/200 px, applied live via `setOptions`.
+- **Detection hints** shown in a toast; `src/lib/hintUtils.ts` is extracted for independent testing.
+- `testfiles/` excluded from Git (local only); required for real-audio integration tests.

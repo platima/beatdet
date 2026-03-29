@@ -6,6 +6,16 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.5] - 2026-03-29
+
+### Changed
+
+- **Detection note toast size**: increased from `text-xs` to `text-sm` throughout; icon sizes grown proportionally; max width widened from `max-w-xs` to `max-w-sm`.
+- **Em-dash removal**: replaced all em-dashes (\u2014) with colons, semicolons, or restructured prose across all source files, comments, and user-facing strings (`hintUtils.ts`, `BpmDisplay.tsx`, `BeatList.tsx`, `WhatsNewBanner.tsx`, `NavBar.tsx`, `layout.tsx`, `page.tsx`, `settings/page.tsx`, `changelog/page.tsx`, and all test files). Null value indicators in `BpmDisplay` changed from `\u2014` to `-`.
+- **CLAUDE.md**: trimmed `Current State` section to key architectural facts only (removed exhaustive feature list that duplicated `README.md`); updated checklist step 6 to discourage adding feature descriptions; removed version number (source of truth is `VERSION` file).
+
+---
+
 ## [0.4.4] - 2026-03-29
 
 ### Fixed

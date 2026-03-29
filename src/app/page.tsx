@@ -198,7 +198,7 @@ export default function HomePage() {
             >
               <History size={14} />
               <span>
-                Restored from last session — {fileInfo.name}. The audio was too large
+                Restored from last session: {fileInfo.name}. The audio was too large
                 to save; re-upload the file to restore waveform playback.
               </span>
               <button

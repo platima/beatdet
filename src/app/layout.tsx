@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BeatDet: Audio Beat Detection",
     description:
-      "Upload audio files and detect beats, BPM, and rhythm with interactive waveform visualisation. No login required — all processing happens in your browser.",
+      "Upload audio files and detect beats, BPM, and rhythm with interactive waveform visualisation. No login required; all processing happens in your browser.",
     siteName: "BeatDet",
     type: "website",
   },

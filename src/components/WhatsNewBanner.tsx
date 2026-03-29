@@ -16,7 +16,7 @@ import { X, Sparkles } from 'lucide-react';
 const STORAGE_KEY = 'beatdet-last-seen-version';
 const CURRENT = process.env.NEXT_PUBLIC_APP_VERSION ?? '';
 
-// Short summary of what's new — update alongside each release.
+// Short summary of what's new; update alongside each release.
 const WHATS_NEW: Record<string, string[]> = {
   '0.3.0': [
     'MP3 export with selectable bitrate',
@@ -30,7 +30,7 @@ const WHATS_NEW: Record<string, string[]> = {
     'Space bar plays / pauses the waveform',
     'Click any beat row to seek to that time',
     'BPM ÷2 / ×2 quick-correct buttons',
-    'Re-analyse button — no re-upload needed',
+    'Re-analyse button (no re-upload needed)',
     'Export errors now shown in the panel',
     'Dark / light theme updates waveform colours live',
   ],
@@ -49,7 +49,7 @@ export function WhatsNewBanner() {
       // Always update stored version to current
       if (CURRENT) localStorage.setItem(STORAGE_KEY, CURRENT);
     } catch {
-      // localStorage unavailable — skip silently
+      // localStorage unavailable; skip silently
     }
   }, []);
 

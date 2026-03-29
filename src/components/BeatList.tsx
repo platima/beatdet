@@ -79,7 +79,7 @@ export function BeatList({ beats, onBeatClick, baseName = 'beats' }: BeatListPro
   // Number of columns changes when confidence column is shown
   const colCount = showConfidence ? 4 : 3;
 
-  // Virtual row renderer — only mounts visible rows + overscan buffer
+  // Virtual row renderer: only mounts visible rows + overscan buffer
   const rowVirtualizer = useVirtualizer({
     count: beats.length,
     getScrollElement: () => scrollRef.current,
@@ -159,7 +159,7 @@ export function BeatList({ beats, onBeatClick, baseName = 'beats' }: BeatListPro
         </div>
       </div>
 
-      {/* Scroll container — ref required by useVirtualizer */}
+      {/* Scroll container (ref required by useVirtualizer) */}
       <div
         ref={scrollRef}
         className="max-h-64 overflow-x-auto overflow-y-auto"
@@ -182,7 +182,7 @@ export function BeatList({ beats, onBeatClick, baseName = 'beats' }: BeatListPro
             </tr>
           </thead>
           <tbody>
-            {/* Top spacer — fills the gap above the first visible row */}
+            {/* Top spacer: fills the gap above the first visible row */}
             {topPad > 0 && (
               <tr><td colSpan={colCount} style={{ height: topPad }} /></tr>
             )}
@@ -222,7 +222,7 @@ export function BeatList({ beats, onBeatClick, baseName = 'beats' }: BeatListPro
                 </tr>
               );
             })}
-            {/* Bottom spacer — fills the gap below the last visible row */}
+            {/* Bottom spacer: fills the gap below the last visible row */}
             {bottomPad > 0 && (
               <tr><td colSpan={colCount} style={{ height: bottomPad }} /></tr>
             )}

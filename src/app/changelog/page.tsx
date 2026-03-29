@@ -9,7 +9,7 @@ import { join } from 'path';
 import { ChangelogRenderer } from './ChangelogRenderer';
 
 export const metadata: Metadata = {
-  title: 'Changelog — BeatDet',
+  title: 'Changelog | BeatDet',
   description: 'Release notes and version history for BeatDet.',
 };
 
