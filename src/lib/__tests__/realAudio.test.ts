@@ -127,7 +127,7 @@ const TRACKS: TrackDef[] = [
   { file: 'Paradise_Found 105bpm.mp3',                   expectedBpm: 105, tolerance: 5, octaveTolerant: true },
   { file: 'Valse Gymnopedie 77bpm.mp3',                  expectedBpm: 77,  tolerance: 5 },
   { file: 'Vibing Over Venus 94bpm.mp3',                 expectedBpm: 94,  tolerance: 5 },
-  { file: 'Canon In D For 8 Bit Synths 133bpm.mp3',      expectedBpm: 133, tolerance: 5 },
+  { file: 'Canon In D For 8 Bit Synths 132bpm.mp3',      expectedBpm: 132, tolerance: 5 },
 
   // --- Known limitations (skipped; see comments) ---
 
