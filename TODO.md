@@ -104,7 +104,7 @@
 
 ---
 
-## v1.0.0 — Library Release
+## v0.7.0 — Library Release
 
 - [ ] **Expose beat detection engine as a standalone npm package** (`beatdet-core` or similar), so developers can `import { analyseAudio, estimateBpm } from 'beatdet-core'` in their own projects.
 

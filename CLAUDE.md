@@ -183,7 +183,7 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Version:** 0.4.2
+- **Version:** 0.4.3
 - **Milestone plan:** v0.4.x = waveform zoom + polish; v0.5.0 = PWA
 - **Status:** Fully functional browser-based beat detection with interactive
   waveform visualisation, BPM estimation, onset charts, beat timeline, and
@@ -225,7 +225,7 @@ The app is a fully static Next.js export (no server runtime required).
 - Duration display uses `Math.floor` (prevents `0:60` rounding edge case).
 - Session persistence restores the last analysis on reload.
 - All detection and display settings are configurable via the settings page.
-- Settings store migrates from v1 to v2 schema without losing existing preferences.
+- Settings store migrates from v1 to v2 to v3 schema without losing existing preferences.
 - Light / Dark / System theme with Solarised colour palette.
 - Tempo confidence hints carry Wikipedia "More info" links (Tempo, Hemiola, Triple metre, Beat).
 - `src/lib/hintUtils.ts` contains `buildHints` / `isCloseRatio` extracted from `BpmDisplay` for testability.

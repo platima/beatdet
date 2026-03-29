@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.3] - 2026-03-29
+
+### Fixed
+
+- **Zoom controls**: removed the decorative `×` character that appeared after the zoom number input — it served no function and looked like a broken button.
+- **Waveform scrollbar visibility**: fixed the hover-to-show scrollbar logic. The previous implementation used `background: transparent`, which still reserved layout space. Replaced with `height: 0` on `::-webkit-scrollbar` so the bar is truly invisible until hover.
+- **Default waveform height**: raised default from 80 px (small) to 120 px (medium) in both `DEFAULT_DISPLAY` and the `??` fallback in `WaveformPlayer`. Settings store bumped to schema `version: 3` with a migration that preserves existing user preferences while upgrading unset values to 120 px.
+
+### Changed
+
+- **TODO milestone**: library-release milestone re-labelled `v0.7.0` (was `v1.0.0`).
+
+---
+
 ## [0.4.2] - 2026-03-29
 
 ### Added

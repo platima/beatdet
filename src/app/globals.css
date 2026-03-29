@@ -133,11 +133,11 @@ textarea {
  * The global ::-webkit-scrollbar rules above give visible scrollbars
  * everywhere else; these overrides make the waveform area clean by
  * default and show a thin scrollbar only while interacting. */
-.waveform-scroll-area ::-webkit-scrollbar-track {
-  background: transparent;
+.waveform-scroll-area ::-webkit-scrollbar {
+  height: 0;
 }
-.waveform-scroll-area ::-webkit-scrollbar-thumb {
-  background: transparent;
+.waveform-scroll-area:hover ::-webkit-scrollbar {
+  height: 8px;
 }
 .waveform-scroll-area:hover ::-webkit-scrollbar-track {
   background: var(--bg-alt);
@@ -145,6 +145,9 @@ textarea {
 .waveform-scroll-area:hover ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 4px;
+}
+.waveform-scroll-area:hover ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* Beat marker flash animation */

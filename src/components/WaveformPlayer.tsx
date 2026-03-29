@@ -58,7 +58,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
   const { preference: theme } = useTheme();
 
   // Waveform canvas height driven by the display setting.
-  const waveformHeight = displaySettings.waveformHeight ?? 80;
+  const waveformHeight = displaySettings.waveformHeight ?? 120;
 
   // Local zoom state mirrors the persisted display setting
   const [zoom, setZoom] = useState(displaySettings.waveformZoom);
@@ -305,7 +305,6 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
             title="Zoom level"
             aria-label="Waveform zoom level"
           />
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>×</span>
         </div>
 
         {/* Beat count badge */}

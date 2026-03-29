@@ -31,7 +31,7 @@ const DEFAULT_DISPLAY: DisplaySettings = {
   histogramBins: 40,
   showOnsetCurve: true,
   waveformZoom: 1,
-  waveformHeight: 80,
+  waveformHeight: 120,
   beatMarkerColour: 'orange',
 };
 
@@ -48,7 +48,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   detection: DEFAULT_DETECTION,
   display: DEFAULT_DISPLAY,
   export: DEFAULT_EXPORT,
-  settingsVersion: '2.0.0',
+  settingsVersion: '3.0.0',
 };
 
 /* ============================================================
@@ -103,7 +103,7 @@ export const useSettingsStore = create<SettingsStore>()(
       name: 'beatdet-settings',
       // Migrate persisted settings from older schema versions so returning
       // users don't lose their preferences when new keys are added.
-      version: 2,
+      version: 3,
       migrate: (persisted: unknown, fromVersion: number) => {
         const prev = persisted as Partial<{ settings: Partial<AppSettings> }>;
         const settings = prev?.settings ?? {};
@@ -126,6 +126,24 @@ export const useSettingsStore = create<SettingsStore>()(
                 waveformZoom: (settings.display as Partial<typeof DEFAULT_DISPLAY>)?.waveformZoom ?? 1,
               },
               settingsVersion: '2.0.0',
+            },
+          };
+        }
+
+        if (fromVersion < 3) {
+          // v2 → v3: waveformHeight gets a medium (120 px) default for returning
+          // users who were on v0.4.2 before this default was introduced.
+          return {
+            ...prev,
+            settings: {
+              ...settings,
+              display: {
+                ...DEFAULT_DISPLAY,
+                ...(settings.display ?? {}),
+                waveformHeight:
+                  (settings.display as Partial<typeof DEFAULT_DISPLAY>)?.waveformHeight ?? 120,
+              },
+              settingsVersion: '3.0.0',
             },
           };
         }

@@ -346,7 +346,7 @@ export default function SettingsPage() {
         {/* Waveform height */}
         <FieldRow label="Waveform height" hint="Height of the waveform canvas in pixels.">
           <SelectInput
-            value={settings.display.waveformHeight ?? 80}
+            value={settings.display.waveformHeight ?? 120}
             options={[
               { value: 80,  label: 'Short (80 px)' },
               { value: 120, label: 'Medium (120 px)' },
