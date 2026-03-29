@@ -218,6 +218,18 @@ const files = [
   ['Paradise_Found 105bpm.mp3', 105],
   ['Valse Gymnopedie 77bpm.mp3', 77],
   ['Vibing Over Venus 94bpm.mp3', 94],
+  // Batch 3
+  ['Adventures in Adventureland 135bpm.mp3', 135],
+  ['Aerosol of my Love 100bpm.mp3', 100],
+  ['Canon In D For 8 Bit Synths 132bpm.mp3', 132],
+  ['Flying Kerfuffle 144bpm.mp3', 144],
+  ['Fox Tale Waltz Part 1 Instrumental 186bpm.mp3', 186],
+  ['Funky Boxstep 95bpm.mp3', 95],
+  ['I Got a Stick Arr Bryan Teoh 121bpm.mp3', 121],
+  ['Mesmerizing Galaxy Loop 124bpm.mp3', 124],
+  ['Nightdreams 54bpm.mp3', 54],
+  ['Trouble with Tribals 135bpm.mp3', 135],
+  ['Waltz Primordial 107bpm.mp3', 107],
 ];
 
 for (const [file, bpm] of files) {

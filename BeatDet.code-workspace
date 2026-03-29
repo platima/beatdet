@@ -53,7 +53,8 @@
 			"/^node -e \"const \\{ AudioContext, OfflineAudioContext \\} = require\\('node-web-audio-api'\\); console\\.log\\('AudioContext:', !!AudioContext, 'OfflineAudioContext:', !!OfflineAudioContext\\)\"$/": {
 				"approve": true,
 				"matchCommandLine": true
-			}
+			},
+			"npx ts-node": true
 		}
 	}
 }

@@ -401,15 +401,22 @@ export function estimateBpm(
     }
   }
 
-  // Phase 2 - upward sesquialtera correction (x1.5)
-  // When the detector locks onto every-other-beat groupings (half-speed),
-  // the true tempo at ×1.5 will have strong histogram energy.
+  // Phase 2 - upward corrections (first match wins)
+  //
+  // ×1.5 (sesquialtera): detector locked onto every-other-beat groupings.
+  // ×3: detector locked onto every-third-beat (e.g. 62 detected for a 186 BPM
+  //   waltz where the strong downbeat is 3× the onset rate).
+  //   Threshold is kept tight (70 %) to avoid false promotions on tracks
+  //   whose true tempo genuinely sits near the ×3 candidate.
   if (!corrected) {
-    const altBpm = leader.bpm * 1.5;
-    if (altBpm >= bpmMin && altBpm <= bpmMax) {
-      const altScore = histScoreAt(altBpm);
-      if (altScore >= leader.score * 0.60) {
-        candidates.unshift({ bpm: Math.round(altBpm * 2) / 2, score: altScore });
+    for (const [ratio, threshold] of [[1.5, 0.60], [3, 0.70]] as const) {
+      const altBpm = leader.bpm * ratio;
+      if (altBpm >= bpmMin && altBpm <= bpmMax) {
+        const altScore = histScoreAt(altBpm);
+        if (altScore >= leader.score * threshold) {
+          candidates.unshift({ bpm: Math.round(altBpm * 2) / 2, score: altScore });
+          break;
+        }
       }
     }
   }

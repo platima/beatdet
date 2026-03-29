@@ -73,3 +73,4 @@
 ### Other
 
 - [ ] Waveform zoom: add slider to WaveformPlayer; wire to `waveformZoom` setting (already in store).
+- [ ] **Tempo confidence hints**: when detection confidence is low or the top two BPM candidates are in a common harmonic ratio (2:1, 3:1, 4:3), display an inline tip on the BPM card — e.g. "If this feels wrong, try the ÷2 button" or "Common issue with waltz tracks — the true tempo may be 3× this value". Extend the existing ×2 / ÷2 display-correction buttons to include ×3 / ÷3 for slow-waltz and fast-subdivision cases.

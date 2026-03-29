@@ -21,7 +21,7 @@ const DEFAULT_DETECTION: DetectionSettings = {
   hopSize: 512,
   useSpectralFlux: true,
   smoothingWindow: 8,
-  bpmMin: 60,
+  bpmMin: 55,
   bpmMax: 200,
 };
 
