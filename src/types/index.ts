@@ -141,6 +141,8 @@ export interface DisplaySettings {
   showOnsetCurve: boolean;
   /** Waveform zoom level (1 = full track, higher = more zoomed in). */
   waveformZoom: number;
+  /** Height of the waveform canvas in pixels. */
+  waveformHeight: number;
   /** Colour used for beat markers (Solarised colour name). */
   beatMarkerColour: SolarisedAccent;
 }

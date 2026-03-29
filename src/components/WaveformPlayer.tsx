@@ -35,9 +35,6 @@ const SOLARISED_ACCENT: Record<string, string> = {
   green:   '#859900',
 };
 
-/** Height of the WaveSurfer canvas in pixels. Must match the `height` option passed to WaveSurfer.create(). */
-const WAVEFORM_HEIGHT = 80;
-
 function formatTime(secs: number): string {
   const m = Math.floor(secs / 60);
   const s = Math.floor(secs % 60);
@@ -60,6 +57,9 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
   // Re-create WaveSurfer when theme changes so it picks up new CSS variable values
   const { preference: theme } = useTheme();
 
+  // Waveform canvas height driven by the display setting.
+  const waveformHeight = displaySettings.waveformHeight ?? 80;
+
   // Local zoom state mirrors the persisted display setting
   const [zoom, setZoom] = useState(displaySettings.waveformZoom);
 
@@ -78,7 +78,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
       progressColor: progressColour,
       cursorColor: '#dc322f',
       cursorWidth: 2,
-      height: WAVEFORM_HEIGHT,
+      height: waveformHeight,
       normalize: true,
       interact: true,
       url: audioUrl,
@@ -112,6 +112,11 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
   useEffect(() => {
     wsRef.current?.setVolume(muted ? 0 : volume);
   }, [volume, muted]);
+
+  // Apply waveform height when the setting changes (no full recreation needed).
+  useEffect(() => {
+    if (isReady) wsRef.current?.setOptions({ height: waveformHeight });
+  }, [waveformHeight, isReady]);
 
   // Apply zoom to WaveSurfer when slider changes (only once ready)
   useEffect(() => {
@@ -159,7 +164,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
       }}
     >
       {/* Waveform canvas */}
-      <div className="relative px-4 pt-4">
+      <div className="relative px-4 pt-4 waveform-scroll-area">
         {!isReady && (
           <div
             className="absolute inset-0 flex items-center justify-center"
@@ -170,11 +175,11 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
         )}
         {/*
          * Relative wrapper scopes the beat-marker overlay to the waveform
-         * canvas only (WAVEFORM_HEIGHT px). Without this, the overlay's
+         * canvas only (height determined by waveformHeight setting). Without this, the overlay's
          * h-full would extend into the WaveSurfer horizontal scrollbar zone
          * when zoomed in, obscuring it.
          */}
-        <div className="relative" style={{ height: WAVEFORM_HEIGHT }}>
+        <div className="relative" style={{ height: waveformHeight }}>
           <div ref={containerRef} className="w-full" />
 
           {/* Beat markers overlay - drawn as absolute vertical lines */}
@@ -258,7 +263,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
           aria-label="Volume"
         />
 
-        {/* Zoom slider */}
+        {/* Zoom slider + numeric readout */}
         <div className="ml-2 flex items-center gap-1.5 shrink-0">
           <ZoomIn size={14} style={{ color: 'var(--text-muted)' }} aria-hidden />
           <input
@@ -272,10 +277,35 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
               setZoom(v);
               updateDisplay({ waveformZoom: v });
             }}
-            className="h-1.5 w-20 accent-[var(--accent)] cursor-pointer"
+            className="h-1.5 w-36 accent-[var(--accent)] cursor-pointer"
             title={`Zoom: ${zoom}×`}
             aria-label="Waveform zoom"
           />
+          <input
+            type="number"
+            min={1}
+            max={8}
+            step={0.5}
+            value={zoom}
+            onChange={(e) => {
+              const raw = parseFloat(e.target.value);
+              if (!isNaN(raw)) {
+                // Snap to nearest 0.5, clamp to [1, 8]
+                const v = Math.max(1, Math.min(8, Math.round(raw * 2) / 2));
+                setZoom(v);
+                updateDisplay({ waveformZoom: v });
+              }
+            }}
+            className="w-12 rounded px-1 py-0.5 text-xs font-mono text-center tabular-nums"
+            style={{
+              backgroundColor: 'var(--bg)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-body)',
+            }}
+            title="Zoom level"
+            aria-label="Waveform zoom level"
+          />
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>×</span>
         </div>
 
         {/* Beat count badge */}

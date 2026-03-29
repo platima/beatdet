@@ -6,6 +6,21 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.2] - 2026-03-29
+
+### Added
+
+- **Waveform height setting**: new `waveformHeight` display preference (80 / 120 / 160 / 200 px) configurable on the Settings page. Applies live via WaveSurfer `setOptions` without reloading the audio. Defaults to 80 px (previous behaviour).
+- **Zoom number input**: a numeric text field sits next to the waveform zoom slider for precise, repeatable values. Accepts any value in [1, 8] and snaps to the nearest 0.5 step.
+- **Wider zoom slider**: zoom range input widened from 80 px to 144 px (Tailwind `w-36`) for finer control.
+
+### Fixed
+
+- **Chart panel gap**: increased inter-chart grid gap from `gap-5` (20 px) to `gap-6` (24 px) so the borders between "Onset Strength & Beat Markers" and "BPM Distribution Histogram" are no longer visually touching.
+- **Waveform scrollbar on hover**: the WaveSurfer horizontal scrollbar (visible when zoomed in) is now hidden by default and appears only on pointer hover over the waveform area. Implemented via `.waveform-scroll-area` CSS class in `globals.css`.
+
+---
+
 ## [0.4.1] - 2026-03-29
 
 ### Added

@@ -229,7 +229,7 @@ export default function HomePage() {
           </ErrorBoundary>
 
           {/* Charts: two-column only when both charts are visible */}
-          <div className={`grid grid-cols-1 gap-5${
+          <div className={`grid grid-cols-1 gap-6${
             showOnsetCurve ? ' lg:grid-cols-2' : ''
           }`}>
             {showOnsetCurve && (

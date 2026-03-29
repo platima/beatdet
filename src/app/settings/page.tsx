@@ -342,6 +342,20 @@ export default function SettingsPage() {
             </span>
           </div>
         </FieldRow>
+
+        {/* Waveform height */}
+        <FieldRow label="Waveform height" hint="Height of the waveform canvas in pixels.">
+          <SelectInput
+            value={settings.display.waveformHeight ?? 80}
+            options={[
+              { value: 80,  label: 'Short (80 px)' },
+              { value: 120, label: 'Medium (120 px)' },
+              { value: 160, label: 'Tall (160 px)' },
+              { value: 200, label: 'Extra tall (200 px)' },
+            ]}
+            onChange={(v) => updateDisplay({ waveformHeight: Number(v) })}
+          />
+        </FieldRow>
       </SettingsSection>
 
       {/* ── Beat Detection ──────────────────────────────────────────── */}

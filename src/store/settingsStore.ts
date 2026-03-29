@@ -31,6 +31,7 @@ const DEFAULT_DISPLAY: DisplaySettings = {
   histogramBins: 40,
   showOnsetCurve: true,
   waveformZoom: 1,
+  waveformHeight: 80,
   beatMarkerColour: 'orange',
 };
 

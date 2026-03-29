@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.4.1** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.4.2** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 

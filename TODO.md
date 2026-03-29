@@ -101,3 +101,17 @@
   - Expose `key`, `keyConfidence`, and `keyCandidates` from `analyseAudio` / `AnalysisResult`.
   - Camelot mapping is a static 24-entry lookup table (no extra dependency needed).
   - Key display should be suppressible (settings toggle `showKey`) for users who do not need it.
+
+---
+
+## v1.0.0 — Library Release
+
+- [ ] **Expose beat detection engine as a standalone npm package** (`beatdet-core` or similar), so developers can `import { analyseAudio, estimateBpm } from 'beatdet-core'` in their own projects.
+
+  | Sub-feature | Notes |
+  |---|---|
+  | **Package scaffold** | Separate `packages/beatdet-core/` workspace; build to ESM + CJS dual-package. |
+  | **Public API** | Export `analyseAudio`, `estimateBpm`, `buildHints`, `isCloseRatio`, and all associated TypeScript types. |
+  | **Tree-shaking** | Pure functions only — no React, no browser-only APIs in the core package. |
+  | **Docs** | Dedicated `README` for the package with minimal usage example and type reference. |
+  | **CI publish** | GitHub Actions workflow to publish to npm on tag push. |
