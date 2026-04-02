@@ -183,8 +183,8 @@ The app is a fully static Next.js export (no server runtime required).
 
 ## Current State
 
-- **Milestone:** v0.5.x = PWA; v0.6.0 = Key Detection; v0.7.0 = UI/UX Polish; v0.8.0 = Library Release
-- **Current version:** v0.6.0
+- **Milestone:** v0.5.x = PWA; v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Library Release
+- **Current version:** v0.6.1
 - **Settings store:** schema v4 (`settingsVersion: '4.0.0'`); migrates v1 -> v2 -> v3 -> v4 automatically.
 - **Tests:** 88 unit + 26 real-audio integration; run `npm test` for current counts.
 - **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.

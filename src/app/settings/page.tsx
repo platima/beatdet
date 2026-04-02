@@ -10,11 +10,11 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/components/Button';
-import { Sun, Moon, Monitor, RotateCcw } from 'lucide-react';
+import { Sun, Moon, Monitor, RotateCcw, Check } from 'lucide-react';
 import type { SolarisedAccent } from '@/types';
 
 // Version is injected at build time from the VERSION file via next.config.ts.
@@ -226,9 +226,41 @@ function ColourPicker({
    ============================================================ */
 
 export default function SettingsPage() {
-  const { settings, updateDetection, updateDisplay, updateExport, resetToDefaults } =
-    useSettingsStore();
-  const { preference, setTheme } = useTheme();
+  const {
+    settings,
+    updateDetection: _updateDetection,
+    updateDisplay: _updateDisplay,
+    updateExport: _updateExport,
+    resetToDefaults,
+  } = useSettingsStore();
+  const { preference, setTheme: _setTheme } = useTheme();
+
+  // Saved toast: briefly visible after any setting change.
+  const [savedVisible, setSavedVisible] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashSaved = useCallback(() => {
+    setSavedVisible(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setSavedVisible(false), 1500);
+  }, []);
+
+  // Shadow the store updaters so every onChange automatically flashes Saved.
+  const updateDisplay = useCallback(
+    (patch: Parameters<typeof _updateDisplay>[0]) => { _updateDisplay(patch); flashSaved(); },
+    [_updateDisplay, flashSaved]
+  );
+  const updateDetection = useCallback(
+    (patch: Parameters<typeof _updateDetection>[0]) => { _updateDetection(patch); flashSaved(); },
+    [_updateDetection, flashSaved]
+  );
+  const updateExport = useCallback(
+    (patch: Parameters<typeof _updateExport>[0]) => { _updateExport(patch); flashSaved(); },
+    [_updateExport, flashSaved]
+  );
+  const setTheme = useCallback(
+    (t: 'light' | 'dark' | 'system') => { _setTheme(t); flashSaved(); },
+    [_setTheme, flashSaved]
+  );
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -594,6 +626,23 @@ export default function SettingsPage() {
           </Button>
         </div>
       </SettingsSection>
+
+      {/* Saved toast: fades in after any setting is changed, then fades out */}
+      <div
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-lg pointer-events-none"
+        style={{
+          backgroundColor: 'var(--success)',
+          color: 'white',
+          opacity: savedVisible ? 1 : 0,
+          transform: savedVisible ? 'translateY(0)' : 'translateY(6px)',
+          transition: 'opacity 0.2s ease, transform 0.2s ease',
+        }}
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <Check size={14} />
+        Saved
+      </div>
     </div>
   );
 }

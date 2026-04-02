@@ -79,11 +79,11 @@ export function NavBar() {
             <ScrollText size={18} />
           </Link>
 
-          {/* Settings link */}
+          {/* Settings link: goes back to home when already on the settings page */}
           <Link
-            href="/settings"
-            title="Settings"
-            aria-label="Settings"
+            href={pathname === '/settings' ? '/' : '/settings'}
+            title={pathname === '/settings' ? 'Back to home' : 'Settings'}
+            aria-label={pathname === '/settings' ? 'Back to home' : 'Settings'}
             className={[
               'flex h-9 w-9 items-center justify-center rounded-lg transition-colors',
               pathname === '/settings'

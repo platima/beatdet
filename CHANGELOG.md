@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.6.1] - 2026-04-01
+
+### Added
+
+- **Settings nav toggle**: clicking the Settings icon when already on the Settings page now returns to the home page, matching the existing Changelog icon behaviour. Avoids having to move the mouse to navigate back.
+- **Settings Saved indicator**: a brief "Saved" toast fades in at the bottom-right of the screen after any setting is changed, confirming the auto-save.
+
+### Changed
+
+- **Milestone renumbering**: corrected milestone plan to v0.6.x = UI/UX Polish (current focus), v0.7.x = Key Detection, v0.8.x = Library Release. Updated TODO.md, CLAUDE.md, and CHANGELOG.md accordingly.
+
+---
+
 ## [0.6.0] - 2026-03-31
 
 ### Added
@@ -44,7 +57,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- **Milestone plan**: v0.7.0 repurposed as UI and UX Polish (tap tempo, playback speed, loop region, waveform region for export, keyboard shortcuts, mobile layout, accessibility audit); library release (`beatdet-core`) moved to v0.8.0.
+- **Milestone plan**: revised to v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Library Release (`beatdet-core`).
 
 ---
 

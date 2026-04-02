@@ -82,7 +82,7 @@
 
 ---
 
-## v0.6.0 — Key Detection
+## v0.7.0 — Key Detection
 
 - [ ] **Key detection and relative key hints**: detect the musical key of the uploaded track and display it alongside the BPM.
 
@@ -104,7 +104,12 @@
 
 ---
 
-## v0.7.0 — UI and UX Polish
+## v0.6.0 — UI and UX Polish
+
+- [x] **Modern UI**: elevated panels, box shadows, BPM hero card gradient, upload zone glow, accent-dot section headings, button hover lift, navbar drop shadow, and results fade-in animation. CSS-driven via `ui-*` hook classes gated on `html:not([data-ui="classic"])`.
+- [x] **Classic UI toggle**: `classicUi` setting in Appearance reverts to the pre-v0.5.2 flat look.
+- [x] **Settings nav toggle**: clicking the Settings icon when already on the Settings page returns to the home page (same toggle behaviour as the Changelog icon).
+- [x] **Settings Saved indicator**: brief "Saved" toast appears after any setting is changed.
 
 - [ ] **Tap tempo tool**: a tap button on the BPM card that measures inter-tap interval to let the user manually verify or override the detected BPM.
 - [ ] **Playback speed control**: expose WaveSurfer's `playbackRate` (0.5x, 0.75x, 1x) for slowed-down beat verification.
