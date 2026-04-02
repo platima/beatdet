@@ -125,7 +125,7 @@ export default function HomePage() {
         <div
           role="alert"
           aria-live="assertive"
-          className="flex items-start gap-3 rounded-xl p-4"
+          className="ui-panel flex items-start gap-3 rounded-xl p-4"
           style={{
             backgroundColor: 'var(--bg-panel)',
             border: '1px solid var(--danger)',
@@ -179,7 +179,7 @@ export default function HomePage() {
 
       {/* Results */}
       {status === 'complete' && result && fileInfo && (
-        <>
+        <div className="ui-animate-in space-y-6">
           {/* Anchor used by auto-scroll after analysis */}
           <div id="results" />
 
@@ -283,7 +283,7 @@ export default function HomePage() {
               New file
             </Button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

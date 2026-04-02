@@ -22,7 +22,7 @@ export function NavBar() {
 
   return (
     <header
-      className="sticky top-0 z-50 w-full border-b"
+      className="ui-navbar sticky top-0 z-50 w-full border-b"
       style={{
         backgroundColor: 'var(--bg-alt)',
         borderColor: 'var(--border)',

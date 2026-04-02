@@ -145,6 +145,8 @@ export interface DisplaySettings {
   waveformHeight: number;
   /** Colour used for beat markers (Solarised colour name). */
   beatMarkerColour: SolarisedAccent;
+  /** Use the pre-v0.5.2 flat UI instead of the modern elevated style. */
+  classicUi: boolean;
 }
 
 /** All application settings, persisted to localStorage. */

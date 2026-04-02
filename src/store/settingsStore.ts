@@ -33,6 +33,7 @@ const DEFAULT_DISPLAY: DisplaySettings = {
   waveformZoom: 1,
   waveformHeight: 120,
   beatMarkerColour: 'orange',
+  classicUi: false,
 };
 
 const DEFAULT_EXPORT: ExportOptions = {
@@ -48,7 +49,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   detection: DEFAULT_DETECTION,
   display: DEFAULT_DISPLAY,
   export: DEFAULT_EXPORT,
-  settingsVersion: '3.0.0',
+  settingsVersion: '4.0.0',
 };
 
 /* ============================================================
@@ -103,7 +104,7 @@ export const useSettingsStore = create<SettingsStore>()(
       name: 'beatdet-settings',
       // Migrate persisted settings from older schema versions so returning
       // users don't lose their preferences when new keys are added.
-      version: 3,
+      version: 4,
       migrate: (persisted: unknown, fromVersion: number) => {
         const prev = persisted as Partial<{ settings: Partial<AppSettings> }>;
         const settings = prev?.settings ?? {};
@@ -144,6 +145,24 @@ export const useSettingsStore = create<SettingsStore>()(
                   (settings.display as Partial<typeof DEFAULT_DISPLAY>)?.waveformHeight ?? 120,
               },
               settingsVersion: '3.0.0',
+            },
+          };
+        }
+
+        if (fromVersion < 4) {
+          // v3 → v4: classicUi toggle for returning users who prefer the
+          // flat look; defaults to false (modern UI enabled).
+          return {
+            ...prev,
+            settings: {
+              ...settings,
+              display: {
+                ...DEFAULT_DISPLAY,
+                ...(settings.display ?? {}),
+                classicUi:
+                  (settings.display as Partial<typeof DEFAULT_DISPLAY>)?.classicUi ?? false,
+              },
+              settingsVersion: '4.0.0',
             },
           };
         }

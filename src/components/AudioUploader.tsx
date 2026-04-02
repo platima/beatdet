@@ -73,7 +73,7 @@ export function AudioUploader({
   if (fileInfo) {
     return (
       <div
-        className="flex items-center gap-4 rounded-xl p-4"
+        className="ui-panel flex items-center gap-4 rounded-xl p-4"
         style={{
           backgroundColor: 'var(--bg-panel)',
           border: '1px solid var(--border)',
@@ -129,7 +129,7 @@ export function AudioUploader({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={[
-        'flex flex-col items-center justify-center gap-4 rounded-xl p-10',
+        'ui-upload-zone flex flex-col items-center justify-center gap-4 rounded-xl p-10',
         'border-2 border-dashed cursor-pointer',
         'transition-all duration-200 select-none',
         isDragging ? 'drop-active scale-[1.01]' : '',

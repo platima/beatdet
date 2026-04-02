@@ -92,13 +92,13 @@ export function ExportPanel({ audioBuffer, result, fileName }: ExportPanelProps)
 
   return (
     <div
-      className="rounded-xl p-5 space-y-5"
+      className="ui-panel rounded-xl p-5 space-y-5"
       style={{
         backgroundColor: 'var(--bg-panel)',
         border: '1px solid var(--border)',
       }}
     >
-      <p className="text-xs font-medium uppercase tracking-widest"
+      <p className="ui-section-heading text-xs font-medium uppercase tracking-widest"
         style={{ color: 'var(--text-muted)' }}>
         Export Audio
       </p>

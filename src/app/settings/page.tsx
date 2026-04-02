@@ -35,7 +35,7 @@ function SettingsSection({
 }) {
   return (
     <section
-      className="rounded-xl p-6 space-y-5"
+      className="ui-panel rounded-xl p-6 space-y-5"
       style={{
         backgroundColor: 'var(--bg-panel)',
         border: '1px solid var(--border)',
@@ -43,7 +43,7 @@ function SettingsSection({
     >
       <div>
         <h2
-          className="text-base font-semibold"
+          className="ui-section-heading text-base font-semibold"
           style={{ color: 'var(--text-heading)' }}
         >
           {title}
@@ -354,6 +354,14 @@ export default function SettingsPage() {
               { value: 200, label: 'Extra tall (200 px)' },
             ]}
             onChange={(v) => updateDisplay({ waveformHeight: Number(v) })}
+          />
+        </FieldRow>
+
+        {/* Classic UI toggle */}
+        <FieldRow label="Use classic UI" hint="Revert to the flat, borderless panel style from earlier versions.">
+          <Toggle
+            checked={settings.display.classicUi}
+            onChange={(v) => updateDisplay({ classicUi: v })}
           />
         </FieldRow>
       </SettingsSection>

@@ -5,6 +5,7 @@
 
 import { ImageResponse } from 'next/og';
 
+export const dynamic = 'force-static';
 export const size = { width: 192, height: 192 };
 export const contentType = 'image/png';
 

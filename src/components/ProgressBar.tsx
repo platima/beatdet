@@ -44,7 +44,7 @@ export function ProgressBar({
       </div>
 
       <div
-        className="relative h-2 w-full overflow-hidden rounded-full"
+        className="ui-progress-bar relative h-2 w-full overflow-hidden rounded-full"
         style={{ backgroundColor: 'var(--bg-alt)' }}
         role="progressbar"
         aria-valuenow={isIndeterminate ? undefined : pct}

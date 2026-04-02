@@ -127,11 +127,11 @@ export function BeatList({ beats, onBeatClick, baseName = 'beats' }: BeatListPro
 
   return (
     <div
-      className="rounded-xl overflow-hidden"
+      className="ui-panel rounded-xl overflow-hidden"
       style={{ border: '1px solid var(--border)' }}
     >
       <div className="px-4 py-3 flex items-center justify-between" style={{ backgroundColor: 'var(--bg-panel)', borderBottom: '1px solid var(--border)' }}>
-        <p className="text-xs font-medium uppercase tracking-widest"
+        <p className="ui-section-heading text-xs font-medium uppercase tracking-widest"
           style={{ color: 'var(--text-muted)' }}>
           Beat Timeline - {beats.length} beats
         </p>

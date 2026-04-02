@@ -29,6 +29,7 @@ function applyTheme(effective: EffectiveTheme): void {
 
 export function useTheme() {
   const preference = useSettingsStore((s) => s.settings.display.theme);
+  const classicUi = useSettingsStore((s) => s.settings.display.classicUi);
   const updateDisplay = useSettingsStore((s) => s.updateDisplay);
 
   // Apply theme whenever preference changes
@@ -46,6 +47,15 @@ export function useTheme() {
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
   }, [preference]);
+
+  // Keep data-ui attribute in sync with classicUi toggle
+  useEffect(() => {
+    if (classicUi) {
+      document.documentElement.setAttribute('data-ui', 'classic');
+    } else {
+      document.documentElement.removeAttribute('data-ui');
+    }
+  }, [classicUi]);
 
   const toggleTheme = useCallback(() => {
     const effective = resolveTheme(preference);

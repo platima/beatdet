@@ -45,7 +45,7 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
   return (
     <>
     <div
-      className="rounded-xl p-6 space-y-5"
+      className="ui-panel ui-bpm-card rounded-xl p-6 space-y-5"
       style={{
         backgroundColor: 'var(--bg-panel)',
         border: '1px solid var(--border)',
@@ -54,7 +54,7 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
       {/* Primary BPM */}
       <div className="flex items-end gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-widest mb-1"
+          <p className="ui-section-heading text-xs font-medium uppercase tracking-widest mb-1"
             style={{ color: 'var(--text-muted)' }}>
             Detected BPM
           </p>
@@ -173,7 +173,7 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
       {/* Candidate tempos */}
       {bpmEstimate.candidates.length > 1 && (
         <div>
-          <p className="text-xs font-medium uppercase tracking-widest mb-2"
+          <p className="ui-section-heading text-xs font-medium uppercase tracking-widest mb-2"
             style={{ color: 'var(--text-muted)' }}>
             Tempo candidates
           </p>

@@ -6,6 +6,29 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.6.0] - 2026-03-31
+
+### Added
+
+- **Modern UI**: elevated panels with subtle box shadows, accent-dot section headings, BPM hero card gradient background, upload zone glow on hover/drag, button hover lift, navbar shadow, progress bar glow, and fade-in animation on results. All purely CSS-driven via `ui-*` hook classes in `globals.css`.
+- **Classic UI toggle**: new `classicUi` boolean in `DisplaySettings` (default `false`); when enabled, `data-ui="classic"` is set on `<html>` and all modern enhancements are suppressed. Toggle available in Settings > Appearance > "Use classic UI".
+- **Settings store schema v4**: migrates v3 -> v4 automatically, adding `classicUi: false` to existing display settings.
+- **FOUC prevention for UI mode**: inline head script now also reads `classicUi` from localStorage and applies `data-ui="classic"` before first paint.
+
+### Fixed
+
+- **Static export**: icon route files (`apple-icon.tsx`, `icon1.tsx`, `icon2.tsx`) and `manifest.ts` now export `dynamic = 'force-static'` to fix build failure with Next.js 16 `output: "export"`.
+
+---
+
+## [0.5.1] - 2026-03-31
+
+### Fixed
+
+- **Jest Node.js 25 warning**: added `testEnvironmentOptions: { globalsCleanup: 'off' }` to `jest.config.js` to prevent the `--localstorage-file` warning from Node.js 25's built-in `localStorage` during Jest environment teardown.
+
+---
+
 ## [0.5.0] - 2026-03-30
 
 ### Added

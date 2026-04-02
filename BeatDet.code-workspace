@@ -63,7 +63,24 @@
 				"approve": true,
 				"matchCommandLine": true
 			},
-			"audioExport": true
+			"audioExport": true,
+			"ForEach-Object": true,
+			"/^node --trace-warnings -e \"const \\{ AudioContext \\} = require\\('node-web-audio-api'\\); const ctx = new AudioContext\\(\\); ctx\\.close\\(\\)\\.then\\(\\(\\) => process\\.exit\\(0\\)\\);\" 2>&1 \\| Select-Object -First 30$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node --trace-warnings -e \"const \\{ AudioContext \\} = require\\('node-web-audio-api'\\); const ctx = new AudioContext\\(\\); setTimeout\\(\\(\\) => ctx\\.close\\(\\)\\.then\\(\\(\\) => \\{\\}\\), 100\\);\"$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node -e \"const \\{ AudioContext \\} = require\\('node-web-audio-api'\\); const ctx = new AudioContext\\(\\); ctx\\.close\\(\\)\\.then\\(\\(\\) => \\{\\}\\);\" 2>&1$/": {
+				"approve": true,
+				"matchCommandLine": true
+			},
+			"/^node node_modules/jest/bin/jest\\.js 2>&1 \\| Select-Object -Last 30$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
 		}
 	}
 }

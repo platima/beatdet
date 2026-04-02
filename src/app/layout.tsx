@@ -50,7 +50,7 @@ export const viewport: Viewport = {
 // Logic: read localStorage, check prefers-color-scheme if no explicit
 // preference, then set data-theme on <html> so CSS variables resolve to the
 // correct theme without a flash.
-const THEME_SCRIPT = `(function(){try{var r=localStorage.getItem('beatdet-settings');var t='light';if(r){var s=JSON.parse(r);var p=s&&s.state&&s.state.settings&&s.state.settings.display&&s.state.settings.display.theme;if(p==='dark'){t='dark';}else if(p==='light'){t='light';}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
+const THEME_SCRIPT = `(function(){try{var r=localStorage.getItem('beatdet-settings');var t='light';var c=false;if(r){var s=JSON.parse(r);var d=s&&s.state&&s.state.settings&&s.state.settings.display;if(d){var p=d.theme;if(p==='dark'){t='dark';}else if(p==='light'){t='light';}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}c=!!d.classicUi;}}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t);if(c){document.documentElement.setAttribute('data-ui','classic');}}catch(e){}})();`;
 
 export default function RootLayout({
   children,

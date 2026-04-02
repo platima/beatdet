@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.5.0** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.6.0** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -53,6 +53,7 @@ BeatDet was more accurate more often than both [Tunebat](https://tunebat.com/Ana
 - **Error boundaries**: failed panels show a recovery UI without crashing the page.
 - **Settings page**: all parameters configurable without restarting.
 - **Light / Dark / System theme** with Solarised colour palette throughout; waveform colours update live on theme change.
+- **Modern UI**: elevated panels, accent dots, subtle shadows, and animated transitions; revert to the classic flat look via "Use classic UI" in Settings.
 - **Accessible**: ARIA labels, live regions, and screen-reader chart summaries throughout.
 - **Semantic Versioning** tracked in `VERSION`; version injected at build time from `VERSION` file.
 

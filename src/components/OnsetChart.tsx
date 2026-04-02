@@ -169,13 +169,13 @@ export function OnsetChart({ result }: OnsetChartProps) {
 
   return (
     <div
-      className="rounded-xl p-4"
+      className="ui-panel rounded-xl p-4"
       style={{
         backgroundColor: 'var(--bg-panel)',
         border: '1px solid var(--border)',
       }}
     >
-      <p className="text-xs font-medium uppercase tracking-widest mb-3"
+      <p className="ui-section-heading text-xs font-medium uppercase tracking-widest mb-3"
         style={{ color: 'var(--text-muted)' }}>
         Onset Strength &amp; Beat Markers
       </p>
