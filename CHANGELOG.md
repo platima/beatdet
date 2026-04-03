@@ -6,6 +6,36 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.6.3] - 2026-04-02
+
+### Added
+
+- **Tap tempo**: a "Tap" button on the BPM card that measures inter-tap intervals and displays a tapped BPM estimate. Resets automatically after 3 s of inactivity. A "Use" button applies the tap BPM as the display multiplier.
+- **Playback speed control**: four compact speed buttons (0.5×, 0.75×, 1×, 1.5×) in the waveform player let users slow down audio for beat verification.
+- **Loop region**: a loop toggle button (also accessible via **L**) enables a draggable, resizable blue region on the waveform. Playback loops continuously within the region. Toggling off clears the region.
+- **Waveform region → export**: when a loop region is active and the ExportPanel is in Custom range mode, a "Use waveform region" button pre-fills the start/end inputs from the region bounds.
+- **Keyboard shortcuts help**: a keyboard icon in the NavBar (and **?** global shortcut) opens a shortcuts reference panel listing Space, R, L, and ?.
+- **R shortcut**: restarts playback from the beginning (mirrors the restart button).
+
+### Changed
+
+- **WaveformPlayer controls**: restructured into a primary transport row (time, restart, play, loop, mute, volume) and a secondary row (speed buttons, zoom, beats badge) to prevent overflow on 360 px screens.
+- **Mobile layout**: primary controls now use `flex-wrap`, the time display no longer has a fixed width, and the volume slider is slightly narrower to prevent horizontal overflow at 360 px.
+
+### Fixed
+
+- **Accessibility**: `select` elements now receive the same `focus-visible` outline as other interactive elements; `button:active` has a consistent `opacity` reduction for non-colour-based feedback.
+
+---
+
+## [0.6.2] - 2026-04-01
+
+### Changed
+
+- **Docs**: trimmed `CLAUDE.md` to remove outdated implementation notes and reduce noise for AI assistants.
+
+---
+
 ## [0.6.1] - 2026-04-01
 
 ### Added

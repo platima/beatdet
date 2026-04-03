@@ -11,7 +11,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import type { AnalysisResult } from '@/types';
 import { buildHints } from '@/lib/hintUtils';
@@ -41,6 +41,45 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
   const [hintsVisible, setHintsVisible] = useState(true);
   useEffect(() => { setHintsVisible(true); }, [result]);
   const hints = buildHints(bpmEstimate, beats.length);
+
+  // Tap tempo: timestamps of recent taps (ms), cleared after 3 s of inactivity
+  const tapTimesRef = useRef<number[]>([]);
+  const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [tapBpm, setTapBpm] = useState<number | null>(null);
+
+  // Reset tap state when a new analysis result comes in
+  useEffect(() => {
+    tapTimesRef.current = [];
+    setTapBpm(null);
+  }, [result]);
+
+  const handleTap = useCallback(() => {
+    const now = Date.now();
+    const times = tapTimesRef.current;
+
+    // Reset the tap chain if more than 3 s have elapsed since the last tap
+    if (times.length > 0 && now - times[times.length - 1] > 3000) {
+      tapTimesRef.current = [];
+    }
+    tapTimesRef.current = [...tapTimesRef.current, now];
+
+    // Need at least 2 taps to measure an interval
+    if (tapTimesRef.current.length >= 2) {
+      const intervals: number[] = [];
+      for (let i = 1; i < tapTimesRef.current.length; i++) {
+        intervals.push(tapTimesRef.current[i] - tapTimesRef.current[i - 1]);
+      }
+      const avgMs = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      setTapBpm(Math.round(60000 / avgMs));
+    }
+
+    // Auto-clear tap chain after 3 s of inactivity
+    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    tapTimeoutRef.current = setTimeout(() => {
+      tapTimesRef.current = [];
+      setTapBpm(null);
+    }, 3000);
+  }, []);
 
   return (
     <>
@@ -105,6 +144,51 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
               )}
             </div>
           )}
+
+          {/* Tap tempo: tap to measure inter-tap BPM; apply to override display */}
+          <div className="flex items-center gap-2 mt-3">
+            <button
+              onClick={handleTap}
+              className="rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:opacity-80 active:scale-95"
+              style={{
+                backgroundColor: 'var(--bg-alt)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-heading)',
+              }}
+              title="Tap this button to the beat to measure tempo"
+              aria-label="Tap tempo"
+            >
+              Tap
+            </button>
+            {tapBpm !== null && (
+              <>
+                <span
+                  className="text-sm font-semibold tabular-nums font-mono"
+                  style={{ color: 'var(--accent-alt)' }}
+                  aria-live="polite"
+                  aria-label={`Tap tempo: ${tapBpm} BPM`}
+                >
+                  {tapBpm} BPM
+                </span>
+                {onMultiplierChange && bpmEstimate.bpm > 0 && (
+                  <button
+                    onClick={() => onMultiplierChange(tapBpm / bpmEstimate.bpm)}
+                    className="rounded px-2 py-0.5 text-xs transition-colors hover:bg-[var(--bg-alt)]"
+                    style={{ border: '1px solid var(--accent-alt)', color: 'var(--accent-alt)' }}
+                    title="Override displayed BPM with tap tempo"
+                    aria-label={`Use tap BPM of ${tapBpm}`}
+                  >
+                    Use
+                  </button>
+                )}
+              </>
+            )}
+            {tapBpm === null && (
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                Tap to the beat to measure tempo
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Confidence ring */}

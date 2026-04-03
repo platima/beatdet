@@ -9,7 +9,8 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import WaveSurfer from 'wavesurfer.js';
-import { Play, Pause, SkipBack, Volume2, VolumeX, ZoomIn } from 'lucide-react';
+import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions';
+import { Play, Pause, SkipBack, Volume2, VolumeX, ZoomIn, Repeat, Gauge } from 'lucide-react';
 import type { AnalysisResult } from '@/types';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useTheme } from '@/hooks/useTheme';
@@ -22,6 +23,11 @@ interface WaveformPlayerProps {
    * time in seconds. Used by BeatList click-to-seek.
    */
   seekTo?: number | null;
+  /**
+   * Called whenever the loop region is created, updated, or cleared.
+   * Used by ExportPanel to pre-fill custom-range inputs from the region.
+   */
+  onRegionChange?: (region: { start: number; end: number } | null) => void;
 }
 
 const SOLARISED_ACCENT: Record<string, string> = {
@@ -41,16 +47,27 @@ function formatTime(secs: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps) {
+export function WaveformPlayer({ audioUrl, result, seekTo, onRegionChange }: WaveformPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
+  // RegionsPlugin instance — recreated alongside WaveSurfer
+  const regionsPluginRef = useRef<RegionsPlugin | null>(null);
+  // Current loop region bounds in seconds
+  const regionRef = useRef<{ start: number; end: number } | null>(null);
+  // Ref so the audioprocess closure always reads the current loop state
+  const loopEnabledRef = useRef(false);
+  // Stable ref for onRegionChange so event handlers do not capture stale props
+  const onRegionChangeRef = useRef(onRegionChange);
+  useEffect(() => { onRegionChangeRef.current = onRegionChange; }, [onRegionChange]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(result.duration);
   const [volume, setVolume] = useState(0.8);
   const [muted, setMuted] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1.0);
+  const [loopEnabled, setLoopEnabled] = useState(false);
 
   const displaySettings = useSettingsStore((s) => s.settings.display);
   const { updateDisplay } = useSettingsStore();
@@ -76,6 +93,10 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
     const waveColour = style.getPropertyValue('--sol-blue').trim() || '#268bd2';
     const progressColour = style.getPropertyValue('--sol-cyan').trim() || '#2aa198';
 
+    // RegionsPlugin enables draggable/resizable loop regions on the waveform
+    const regionsPlugin = RegionsPlugin.create();
+    regionsPluginRef.current = regionsPlugin;
+
     const ws = WaveSurfer.create({
       container: containerRef.current,
       waveColor: waveColour,
@@ -90,6 +111,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
       // hover listeners below reveal it only while the pointer is over the
       // waveform section.
       hideScrollbar: true,
+      plugins: [regionsPlugin],
     });
 
     wsRef.current = ws;
@@ -118,17 +140,44 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
       }
     });
 
-    ws.on('audioprocess', (t) => setCurrentTime(t));
+    ws.on('audioprocess', (t) => {
+      setCurrentTime(t);
+      // Loop region: when loop is active, seek back to region start when
+      // playback reaches or passes the region end.
+      if (loopEnabledRef.current) {
+        const r = regionRef.current;
+        if (r && t >= r.end) {
+          ws.seekTo(r.start / ws.getDuration());
+        }
+      }
+    });
     ws.on('seeking', (t) => setCurrentTime(t));
     ws.on('play', () => setIsPlaying(true));
     ws.on('pause', () => setIsPlaying(false));
     ws.on('finish', () => setIsPlaying(false));
 
+    // Region events: keep regionRef current and notify parent via stable ref
+    regionsPlugin.on('region-created', (region) => {
+      regionRef.current = { start: region.start, end: region.end };
+      onRegionChangeRef.current?.({ start: region.start, end: region.end });
+    });
+    regionsPlugin.on('region-updated', (region) => {
+      regionRef.current = { start: region.start, end: region.end };
+      onRegionChangeRef.current?.({ start: region.start, end: region.end });
+    });
+    regionsPlugin.on('region-removed', () => {
+      regionRef.current = null;
+      onRegionChangeRef.current?.(null);
+    });
+
     return () => {
       hoverCleanup?.();
       ws.destroy();
       wsRef.current = null;
+      regionsPluginRef.current = null;
+      regionRef.current = null;
       setIsReady(false);
+      setLoopEnabled(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioUrl, theme]);
@@ -155,19 +204,59 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
     }
   }, [seekTo, isReady, duration]);
 
-  // Space bar global shortcut to play/pause
+  // Keep loopEnabledRef in sync with state for use in the audioprocess closure
+  useEffect(() => { loopEnabledRef.current = loopEnabled; }, [loopEnabled]);
+
+  // Apply playback rate when it changes
+  useEffect(() => {
+    if (isReady) wsRef.current?.setPlaybackRate(playbackRate);
+  }, [playbackRate, isReady]);
+
+  // Create or clear the waveform loop region when loopEnabled / isReady changes
+  useEffect(() => {
+    const regionsPlugin = regionsPluginRef.current;
+    if (!regionsPlugin || !isReady) return;
+
+    if (!loopEnabled) {
+      regionsPlugin.clearRegions();
+      regionRef.current = null;
+      onRegionChangeRef.current?.(null);
+      return;
+    }
+
+    // Create a default region (25%–75% of track) if none exists yet
+    if (!regionRef.current && duration > 0) {
+      regionsPlugin.addRegion({
+        start: duration * 0.25,
+        end:   duration * 0.75,
+        color: 'rgba(38, 139, 210, 0.15)',
+        drag:   true,
+        resize: true,
+      });
+    }
+  }, [loopEnabled, isReady, duration]);
+
+  // Keyboard shortcuts: Space = play/pause, R = restart, L = toggle loop
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (!isReady) return;
+      // Do not intercept when focus is on an editable or button element
       if (
-        e.key === ' ' &&
-        // Do not intercept when focus is on an interactive element
-        !(e.target instanceof HTMLInputElement) &&
-        !(e.target instanceof HTMLTextAreaElement) &&
-        !(e.target instanceof HTMLButtonElement)
-      ) {
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLButtonElement
+      ) return;
+
+      if (e.key === ' ') {
         e.preventDefault();
         wsRef.current?.playPause();
+      } else if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        wsRef.current?.seekTo(0);
+        setCurrentTime(0);
+      } else if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        setLoopEnabled((v) => !v);
       }
     };
     document.addEventListener('keydown', handleKey);
@@ -226,123 +315,169 @@ export function WaveformPlayer({ audioUrl, result, seekTo }: WaveformPlayerProps
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-3 px-4 py-3"
-        style={{ borderTop: '1px solid var(--border)' }}>
-        {/* Time */}
-        <span
-          className="w-24 text-xs font-mono tabular-nums shrink-0"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          {formatTime(currentTime)} / {formatTime(duration)}
-        </span>
+      {/* Controls — split into two rows for comfortable mobile layout */}
+      <div style={{ borderTop: '1px solid var(--border)' }}>
+        {/* Primary transport row: time, restart, play, loop, mute, volume */}
+        <div className="flex flex-wrap items-center gap-2 px-4 py-2.5">
+          {/* Time display */}
+          <span
+            className="shrink-0 whitespace-nowrap text-xs font-mono tabular-nums"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </span>
 
-        {/* Restart */}
-        <button
-          onClick={restart}
-          disabled={!isReady}
-          className="flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-40"
-          style={{ color: 'var(--text-muted)' }}
-          title="Return to start"
-          aria-label="Restart"
-        >
-          <SkipBack size={16} />
-        </button>
+          {/* Restart */}
+          <button
+            onClick={restart}
+            disabled={!isReady}
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-40 hover:bg-[var(--bg-alt)]"
+            style={{ color: 'var(--text-muted)' }}
+            title="Return to start (R)"
+            aria-label="Restart"
+          >
+            <SkipBack size={16} />
+          </button>
 
-        {/* Play / Pause */}
-        <button
-          onClick={togglePlay}
-          disabled={!isReady}
-          className="flex h-10 w-10 items-center justify-center rounded-full text-white transition-all disabled:opacity-40 hover:brightness-110"
-          style={{ backgroundColor: 'var(--accent)' }}
-          title={isPlaying ? 'Pause' : 'Play'}
-          aria-label={isPlaying ? 'Pause' : 'Play'}
-        >
-          {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-        </button>
+          {/* Play / Pause */}
+          <button
+            onClick={togglePlay}
+            disabled={!isReady}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-white transition-all disabled:opacity-40 hover:brightness-110 shrink-0"
+            style={{ backgroundColor: 'var(--accent)' }}
+            title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+          </button>
 
-        {/* Volume */}
-        <button
-          onClick={() => setMuted((m) => !m)}
-          className="flex h-8 w-8 items-center justify-center rounded-full transition-colors"
-          style={{ color: 'var(--text-muted)' }}
-          title={muted ? 'Unmute' : 'Mute'}
-          aria-label={muted ? 'Unmute' : 'Mute'}
-        >
-          {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-        </button>
+          {/* Loop region toggle */}
+          <button
+            onClick={() => setLoopEnabled((v) => !v)}
+            disabled={!isReady}
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-40"
+            style={{
+              color: loopEnabled ? 'var(--accent)' : 'var(--text-muted)',
+              backgroundColor: loopEnabled ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent',
+            }}
+            title={loopEnabled ? 'Disable loop (L)' : 'Enable loop region (L)'}
+            aria-label={loopEnabled ? 'Disable loop region' : 'Enable loop region'}
+            aria-pressed={loopEnabled}
+          >
+            <Repeat size={16} />
+          </button>
 
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.01}
-          value={muted ? 0 : volume}
-          onChange={(e) => {
-            const v = parseFloat(e.target.value);
-            setVolume(v);
-            setMuted(v === 0);
-          }}
-          className="h-1.5 w-20 accent-[var(--accent)] cursor-pointer"
-          title="Volume"
-          aria-label="Volume"
-        />
+          {/* Mute */}
+          <button
+            onClick={() => setMuted((m) => !m)}
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-[var(--bg-alt)]"
+            style={{ color: 'var(--text-muted)' }}
+            title={muted ? 'Unmute' : 'Mute'}
+            aria-label={muted ? 'Unmute' : 'Mute'}
+          >
+            {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+          </button>
 
-        {/* Zoom slider + numeric readout */}
-        <div className="ml-2 flex items-center gap-1.5 shrink-0">
-          <ZoomIn size={14} style={{ color: 'var(--text-muted)' }} aria-hidden />
           <input
             type="range"
-            min={1}
-            max={8}
-            step={0.5}
-            value={zoom}
+            min={0}
+            max={1}
+            step={0.01}
+            value={muted ? 0 : volume}
             onChange={(e) => {
               const v = parseFloat(e.target.value);
-              setZoom(v);
-              updateDisplay({ waveformZoom: v });
+              setVolume(v);
+              setMuted(v === 0);
             }}
-            className="h-1.5 w-36 accent-[var(--accent)] cursor-pointer"
-            title={`Zoom: ${zoom}×`}
-            aria-label="Waveform zoom"
-          />
-          <input
-            type="number"
-            min={1}
-            max={8}
-            step={0.5}
-            value={zoom}
-            onChange={(e) => {
-              const raw = parseFloat(e.target.value);
-              if (!isNaN(raw)) {
-                // Snap to nearest 0.5, clamp to [1, 8]
-                const v = Math.max(1, Math.min(8, Math.round(raw * 2) / 2));
-                setZoom(v);
-                updateDisplay({ waveformZoom: v });
-              }
-            }}
-            className="w-12 rounded px-1 py-0.5 text-xs font-mono text-center tabular-nums"
-            style={{
-              backgroundColor: 'var(--bg)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-body)',
-            }}
-            title="Zoom level"
-            aria-label="Waveform zoom level"
+            className="h-1.5 w-16 accent-[var(--accent)] cursor-pointer"
+            title="Volume"
+            aria-label="Volume"
           />
         </div>
 
-        {/* Beat count badge */}
-        <span
-          className="ml-auto rounded px-2 py-0.5 text-xs font-medium"
-          style={{
-            backgroundColor: 'var(--bg)',
-            color: 'var(--highlight)',
-            border: '1px solid var(--border)',
-          }}
+        {/* Secondary row: playback speed, zoom, beats badge */}
+        <div
+          className="flex flex-wrap items-center gap-2 px-4 pb-2.5"
+          style={{ borderTop: '1px solid var(--border)' }}
         >
-          {result.beats.length} beats
-        </span>
+          {/* Speed label */}
+          <Gauge size={13} style={{ color: 'var(--text-muted)' }} aria-hidden />
+          {/* Speed buttons */}
+          {([0.5, 0.75, 1, 1.5] as const).map((rate) => (
+            <button
+              key={rate}
+              onClick={() => setPlaybackRate(rate)}
+              disabled={!isReady}
+              title={`${rate}× speed`}
+              aria-label={`Set playback speed to ${rate}×`}
+              aria-pressed={playbackRate === rate}
+              className="rounded px-1.5 py-0.5 text-xs font-mono transition-colors disabled:opacity-40"
+              style={{
+                backgroundColor: playbackRate === rate ? 'var(--accent)' : 'var(--bg)',
+                color: playbackRate === rate ? 'white' : 'var(--text-muted)',
+                border: `1px solid ${playbackRate === rate ? 'var(--accent)' : 'var(--border)'}`,
+              }}
+            >
+              {rate}×
+            </button>
+          ))}
+
+          {/* Zoom slider + numeric readout */}
+          <div className="ml-auto flex items-center gap-1.5 shrink-0">
+            <ZoomIn size={14} style={{ color: 'var(--text-muted)' }} aria-hidden />
+            <input
+              type="range"
+              min={1}
+              max={8}
+              step={0.5}
+              value={zoom}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
+                setZoom(v);
+                updateDisplay({ waveformZoom: v });
+              }}
+              className="h-1.5 w-28 accent-[var(--accent)] cursor-pointer"
+              title={`Zoom: ${zoom}×`}
+              aria-label="Waveform zoom"
+            />
+            <input
+              type="number"
+              min={1}
+              max={8}
+              step={0.5}
+              value={zoom}
+              onChange={(e) => {
+                const raw = parseFloat(e.target.value);
+                if (!isNaN(raw)) {
+                  // Snap to nearest 0.5, clamp to [1, 8]
+                  const v = Math.max(1, Math.min(8, Math.round(raw * 2) / 2));
+                  setZoom(v);
+                  updateDisplay({ waveformZoom: v });
+                }
+              }}
+              className="w-12 rounded px-1 py-0.5 text-xs font-mono text-center tabular-nums"
+              style={{
+                backgroundColor: 'var(--bg)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-body)',
+              }}
+              title="Zoom level"
+              aria-label="Waveform zoom level"
+            />
+          </div>
+
+          {/* Beat count badge */}
+          <span
+            className="rounded px-2 py-0.5 text-xs font-medium"
+            style={{
+              backgroundColor: 'var(--bg)',
+              color: 'var(--highlight)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            {result.beats.length} beats
+          </span>
+        </div>
       </div>
     </div>
   );

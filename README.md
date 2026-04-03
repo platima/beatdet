@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.6.0** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.6.3** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -31,7 +31,11 @@ BeatDet was more accurate more often than both [Tunebat](https://tunebat.com/Ana
 - **BPM estimation**: multi-lag IOI accumulation with Gaussian histogram smoothing
   and harmonic octave correction.
 - **BPM correction**: clickable tempo candidates and ÷2 / ×2 display-only quick-correct buttons for common octave errors. Clicking a candidate sets that tempo as the displayed BPM.
-- **Waveform player**: interactive playback with beat markers overlaid; Space bar toggles play/pause.
+- **Waveform player**: interactive playback with beat markers overlaid; Space bar toggles play/pause; **R** restarts; **L** toggles the loop region.
+- **Playback speed control**: 0.5×, 0.75×, 1×, and 1.5× speed buttons for slowed-down beat verification.
+- **Loop region**: toggle a draggable, resizable region on the waveform; playback loops within the region boundary.
+- **Tap tempo**: tap a button to the beat on the BPM card to measure and optionally apply a tempo override.
+- **Keyboard shortcuts**: press **?** or click the keyboard icon in the nav to see all shortcuts (Space, R, L, ?).
 - **Waveform zoom**: adjustable zoom slider; setting is persisted automatically.
 - **Click-to-seek**: click any row in the beat timeline to jump the waveform to that beat.
 - **Onset strength chart**: onset curve with beat positions highlighted.

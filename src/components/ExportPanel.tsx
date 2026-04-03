@@ -24,6 +24,8 @@ interface ExportPanelProps {
   audioBuffer: ArrayBuffer;
   result: AnalysisResult;
   fileName: string;
+  /** When set, a button appears in custom-range mode to sync the range from the waveform loop region. */
+  loopRegion?: { start: number; end: number } | null;
 }
 
 const MODES: Array<{ value: ExportMode; label: string; description: string; icon: React.ReactNode }> = [
@@ -53,7 +55,7 @@ const MODES: Array<{ value: ExportMode; label: string; description: string; icon
   },
 ];
 
-export function ExportPanel({ audioBuffer, result, fileName }: ExportPanelProps) {
+export function ExportPanel({ audioBuffer, result, fileName, loopRegion }: ExportPanelProps) {
   const { settings, updateExport } = useSettingsStore();
   const exportOptions = settings.export;
 
@@ -239,6 +241,27 @@ export function ExportPanel({ audioBuffer, result, fileName }: ExportPanelProps)
         {/* Custom range */}
         {exportOptions.mode === 'custom-range' && (
           <>
+            {/* Sync from waveform loop region if one is active */}
+            {loopRegion && (
+              <div className="col-span-2 sm:col-span-3">
+                <button
+                  onClick={() => updateExport({
+                    rangeStart: loopRegion.start,
+                    rangeEnd:   loopRegion.end,
+                  })}
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:opacity-80"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--accent) 12%, var(--bg))',
+                    border: '1px solid var(--accent)',
+                    color: 'var(--accent)',
+                  }}
+                  title="Set range from the waveform loop region"
+                  aria-label="Use waveform loop region as export range"
+                >
+                  Use waveform region ({loopRegion.start.toFixed(1)} s – {loopRegion.end.toFixed(1)} s)
+                </button>
+              </div>
+            )}
             <label className="space-y-1.5">
               <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
                 Start (s)

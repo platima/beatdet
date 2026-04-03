@@ -271,3 +271,34 @@ html:not([data-ui="classic"]) .ui-btn:active {
 html:not([data-ui="classic"]) .ui-animate-in {
   animation: fade-in-up 0.3s ease-out both;
 }
+
+/* ============================================================
+   Mobile layout helpers
+   Ensure no horizontal overflow at 360px viewport width.
+   ============================================================ */
+
+/* Prevent fixed-width elements from causing horizontal scroll on very
+   narrow viewports; components use flex-wrap and min-width: 0 instead. */
+@media (max-width: 400px) {
+  /* ExportPanel options grid: single column below 400px */
+  .export-options-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ============================================================
+   Accessibility — visible keyboard focus ring for native
+   elements that may override the default outline.
+   ============================================================ */
+
+/* Ensure select elements also get a visible focus ring */
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* High-contrast active:scale for tap-tempo button so the press is
+   visible even without colour distinction */
+button:active {
+  opacity: 0.85;
+}

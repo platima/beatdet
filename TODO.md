@@ -111,13 +111,13 @@
 - [x] **Settings nav toggle**: clicking the Settings icon when already on the Settings page returns to the home page (same toggle behaviour as the Changelog icon).
 - [x] **Settings Saved indicator**: brief "Saved" toast appears after any setting is changed.
 
-- [ ] **Tap tempo tool**: a tap button on the BPM card that measures inter-tap interval to let the user manually verify or override the detected BPM.
-- [ ] **Playback speed control**: expose WaveSurfer's `playbackRate` (0.5x, 0.75x, 1x) for slowed-down beat verification.
-- [ ] **Loop region**: allow marking a time range on the waveform and looping playback within it.
-- [ ] **Waveform region selection for export**: wire the waveform region to the custom time-range export mode, replacing manual input.
-- [ ] **Keyboard shortcuts reference**: small help popover listing all keyboard shortcuts (Space, etc.).
-- [ ] **Improved mobile layout**: review ExportPanel and BeatList on narrow viewports; ensure no horizontal scroll on 360px screen width.
-- [ ] **Accessibility audit**: verify WCAG 2.1 AA colour contrast for all Solarised semantic tokens; fix any failures; add missing `aria-live` regions.
+- [x] **Tap tempo tool**: a tap button on the BPM card that measures inter-tap interval to let the user manually verify or override the detected BPM.
+- [x] **Playback speed control**: expose WaveSurfer's `playbackRate` (0.5x, 0.75x, 1x, 1.5x) for slowed-down beat verification.
+- [x] **Loop region**: allow marking a time range on the waveform and looping playback within it.
+- [x] **Waveform region selection for export**: wire the waveform region to the custom time-range export mode, replacing manual input.
+- [x] **Keyboard shortcuts reference**: small help popover listing all keyboard shortcuts (Space, R, L, ?).
+- [x] **Improved mobile layout**: review ExportPanel and BeatList on narrow viewports; ensure no horizontal scroll on 360px screen width.
+- [x] **Accessibility audit**: verify WCAG 2.1 AA colour contrast for all Solarised semantic tokens; fix any failures; add missing `aria-live` regions.
 
 ---
 

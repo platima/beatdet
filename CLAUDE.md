@@ -155,7 +155,7 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 ## Current State
 
 - **Milestone:** v0.5.x = PWA; v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Library Release
-- **Current version:** v0.6.2
+- **Current version:** v0.6.3
 - **Settings store:** schema v4 (`settingsVersion: '4.0.0'`); migrates v1 -> v2 -> v3 -> v4 automatically.
 - **Tests:** run `npm test` for current counts.
 - **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.
@@ -164,10 +164,14 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 - **Analysis cancellation** via `AbortController` passed to `analyseAudio`.
 - **FOUC prevention**: plain render-blocking `<script>` in `<head>` in `layout.tsx` (not `next/script`); reads both `theme` and `classicUi` from localStorage and sets `data-theme` and `data-ui` on `<html>` before first paint; `globals.css` also has `@media (prefers-color-scheme: dark) :root:not([data-theme=light])` as a CSS-only fallback for system-dark users.
 - **Tempo candidates** in `BpmDisplay` are clickable buttons; selecting one sets `bpmMultiplier` to `candidate.bpm / baseBpm`.
+- **Tap tempo** in `BpmDisplay`: timestamps stored in a `useRef` array; inter-tap mean triggers `setTapBpm`; a 3 s timeout (also `useRef`) resets the chain. "Use" button sets multiplier to `tapBpm / bpmEstimate.bpm`.
 - **Cancel race guard**: `analyseFile` checks `controller.signal.aborted` after `analyseAudio` returns before calling `setStatus('complete')`.
 - **Version string** injected at build time via `NEXT_PUBLIC_APP_VERSION` (source: `VERSION` file).
 - **Waveform height** default 120 px, configurable 80/120/160/200 px, applied live via `setOptions`.
 - **Detection hints** shown in a toast; `src/lib/hintUtils.ts` is extracted for independent testing.
 - **PWA**: manifest via `app/manifest.ts`; icons via `app/apple-icon.tsx` (180x180), `icon1.tsx` (192x192), `icon2.tsx` (512x512) using Next.js `ImageResponse` file convention; all icon/manifest route files export `dynamic = 'force-static'` for `output: "export"` compatibility; service worker at `public/sw.js` uses network-first for navigation and cache-first/stale-while-revalidate for static assets; `CACHE_VERSION` constant in `sw.js` must be bumped manually on significant releases (static file has no access to Next.js build-time env).
 - **Modern UI**: CSS-driven visual layer using `ui-*` hook classes in `globals.css`; active by default, disabled when `data-ui="classic"` is set on `<html>`. The `classicUi` boolean in `DisplaySettings` controls the toggle; `useTheme` hook syncs `data-ui` attribute to DOM. Inline head script also reads the setting for FOUC-free first paint.
+- **Keyboard shortcuts**: Space = play/pause, R = restart, L = toggle loop region, ? = keyboard shortcuts help (in `NavBar`). The R and L shortcuts are handled in `WaveformPlayer`; ? is handled in `NavBar`.
+- **Loop region**: `RegionsPlugin` from `wavesurfer.js/dist/plugins/regions` registered via `WaveSurfer.create({ plugins: [...] })`; loop check runs in the `audioprocess` closure via `loopEnabledRef` (avoids stale-closure race). `onRegionChange` prop threads the region bounds to `page.tsx` → `ExportPanel` for custom-range pre-fill.
+- **Playback speed**: `setPlaybackRate()` called on the WaveSurfer instance; speed buttons in the secondary controls row; default 1×.
 - `testfiles/` excluded from Git (local only); required for real-audio integration tests.

@@ -79,6 +79,8 @@ export default function HomePage() {
   const [bpmMultiplier, setBpmMultiplier] = useState(1);
   // Seek target propagated from BeatList row clicks to WaveformPlayer
   const [seekTime, setSeekTime] = useState<number | null>(null);
+  // Loop region from WaveformPlayer, forwarded to ExportPanel for custom-range pre-fill
+  const [loopRegion, setLoopRegion] = useState<{ start: number; end: number } | null>(null);
 
   // Attempt to restore the last session on mount
   useEffect(() => {
@@ -86,11 +88,12 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reset BPM multiplier and seek target when a new analysis completes.
+  // Reset BPM multiplier, seek target, and loop region when a new analysis completes.
   useEffect(() => {
     if (status === 'complete') {
       setBpmMultiplier(1);
       setSeekTime(null);
+      setLoopRegion(null);
     }
   }, [status]);
 
@@ -216,6 +219,7 @@ export default function HomePage() {
               audioUrl={fileInfo.objectUrl}
               result={result}
               seekTo={seekTime}
+              onRegionChange={setLoopRegion}
             />
           )}
 
@@ -258,6 +262,7 @@ export default function HomePage() {
                 audioBuffer={audioBuffer}
                 result={result}
                 fileName={fileInfo.name}
+                loopRegion={loopRegion}
               />
             </ErrorBoundary>
           )}
