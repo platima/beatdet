@@ -80,7 +80,8 @@
 			"/^node node_modules/jest/bin/jest\\.js 2>&1 \\| Select-Object -Last 30$/": {
 				"approve": true,
 				"matchCommandLine": true
-			}
+			},
+			"git cherry-pick": true
 		}
 	}
 }

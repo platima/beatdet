@@ -1,9 +1,5 @@
 ﻿# CLAUDE.md: AI Assistant Context
 
-This file provides project context for AI coding assistants (GitHub Copilot,
-Claude, etc.). It is read at the start of each session so the assistant
-understands the project without re-discovering everything.
-
 ## Project Overview
 
 **BeatDet** is a browser-based audio beat detection app with interactive
@@ -100,13 +96,10 @@ Semantic Versioning tracked in the `VERSION` file at the repo root.
 
 ### Git Workflow
 
-1. Create a **feature or fix branch** off `main` (`feature/<name>`, `fix/<name>`).
-2. Make changes, commit with a **Conventional Commits** message
-   (`feat:`, `fix:`, `chore:`, `docs:`).
+1. Make changes directly on `main` (this is a solo project with no PR workflow).
+2. Commit with a **Conventional Commits** message (`feat:`, `fix:`, `chore:`, `docs:`).
 3. **Bump the PATCH** version in `VERSION` with each commit.
-4. When the phase/milestone is complete: bump **MINOR**, update `README.md`,
-   commit, and push.
-5. Merge back to `main`.
+4. When a milestone is complete: bump **MINOR**, update `README.md`, commit, and push.
 
 ### Documentation & Testing
 
@@ -156,37 +149,15 @@ npx jest --watch
 npm run test:coverage
 ```
 
-### Test Suites
-
-- **Unit tests** (`beatDetection.test.ts`): 34 tests covering FFT correctness,
-  onset strength functions, peak picking (including absolute height floor), and
-  BPM estimation.
-- **Unit tests** (`audioExport.test.ts`): 23 tests covering `encodeWav`,
-  `normalisePeak`, `sliceBuffer`, `concatenateBuffers`, `bundleZip`, and the
-  `MAX_FILE_BYTES` constant. Uses `node-web-audio-api` for `AudioContext` in Node.
-- **Real-audio integration tests** (`realAudio.test.ts`): 16 Kevin MacLeod
-  tracks spanning 60-204 BPM, decoded via `node-web-audio-api` and run through
-  the full spectral-flux -> peak-pick -> BPM-estimate pipeline. Tests live in
-  `src/lib/__tests__/`. Real-audio tests require the `testfiles/` directory
-  containing the benchmark MP3 tracks.
-
-## Deployment (Cloudflare Pages)
-
-The app is a fully static Next.js export (no server runtime required).
-
-| Setting          | Value             |
-|------------------|-------------------|
-| Build command    | `npx next build`  |
-| Output directory | `out`             |
-| Node.js version  | 20+               |
-
+Test suites live in `src/lib/__tests__/`. Real-audio tests require the `testfiles/`
+directory (local only, excluded from Git) containing the Kevin MacLeod benchmark MP3s.
 
 ## Current State
 
 - **Milestone:** v0.5.x = PWA; v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Library Release
-- **Current version:** v0.6.1
+- **Current version:** v0.6.2
 - **Settings store:** schema v4 (`settingsVersion: '4.0.0'`); migrates v1 -> v2 -> v3 -> v4 automatically.
-- **Tests:** 88 unit + 26 real-audio integration; run `npm test` for current counts.
+- **Tests:** run `npm test` for current counts.
 - **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.
 - **BeatList** virtualised via `@tanstack/react-virtual` for long beat lists.
 - **Session persistence** restores last analysis on reload; waveform requires re-upload.
