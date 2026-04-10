@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.6.3** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.6.4** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -120,29 +120,40 @@ src/
 │   ├── icon2.tsx           # 512x512 PWA icon (ImageResponse)
 │   ├── page.tsx            # Main beat detection page
 │   ├── globals.css         # Solarised CSS variables + Tailwind
+│   ├── changelog/
+│   │   └── page.tsx        # Changelog page (server component, reads CHANGELOG.md)
 │   └── settings/
 │       └── page.tsx        # Settings page
 ├── components/
 │   ├── AudioUploader.tsx   # Drag-and-drop file input
 │   ├── BeatList.tsx        # Virtualised beat timeline table (@tanstack/react-virtual)
-│   ├── BpmDisplay.tsx      # BPM card with confidence meter and clickable candidates
+│   ├── BpmDisplay.tsx      # BPM card with confidence, candidates, and tap tempo
 │   ├── BpmHistogram.tsx    # Bar chart of BPM distribution
 │   ├── Button.tsx          # Reusable button component
+│   ├── ErrorBoundary.tsx   # React class error boundary for result panels
 │   ├── ExportPanel.tsx     # Export mode and download controls
-│   ├── NavBar.tsx          # Top navigation with theme toggle
+│   ├── NavBar.tsx          # Top navigation, theme toggle, keyboard shortcuts help
 │   ├── OnsetChart.tsx      # Onset strength line chart
 │   ├── ProgressBar.tsx             # Animated analysis progress bar
 │   ├── ServiceWorkerRegistrar.tsx  # Service worker registration (PWA)
-│   └── WaveformPlayer.tsx          # wavesurfer.js waveform + controls
+│   ├── ThemeInitialiser.tsx        # (legacy) Theme DOM sync
+│   ├── WhatsNewBanner.tsx          # Dismissible upgrade banner (localStorage-based)
+│   └── WaveformPlayer.tsx          # wavesurfer.js waveform, loop regions, speed controls
 ├── hooks/
 │   ├── useAudioAnalysis.ts # File upload + analysis lifecycle hook
 │   └── useTheme.ts         # Theme preference hook
 ├── lib/
-│   ├── audioExport.ts      # WAV encoding and audio slicing
+│   ├── audioExport.ts      # WAV/MP3 encoding, ZIP bundling, and audio slicing
 │   ├── beatDetection.ts    # Beat detection engine (Web Audio API)
-│   └── sessionStorage.ts   # Session persistence helpers
+│   ├── hintUtils.ts        # Detection hint logic (buildHints, isCloseRatio)
+│   ├── sessionStorage.ts   # Session persistence helpers
+│   └── __tests__/          # Unit + integration tests
+│       ├── audioExport.test.ts   # WAV encoding, slicing, normalisation, ZIP tests
+│       ├── beatDetection.test.ts # FFT, onset, peak picking, BPM estimation tests
+│       ├── hintUtils.test.ts     # Hint logic unit tests
+│       └── realAudio.test.ts     # Kevin MacLeod benchmark integration tests
 ├── store/
-│   └── settingsStore.ts    # Zustand settings store
+│   └── settingsStore.ts    # Zustand settings store (schema v4, auto-migration)
 └── types/
     └── index.ts            # Shared TypeScript types
 ```
@@ -195,7 +206,9 @@ All settings persist across sessions in `localStorage`.
 | Setting            | Default | Description                              |
 |--------------------|---------|------------------------------------------|
 | Theme              | system  | light / dark / system preference.        |
+| Classic UI         | off     | Revert to flat pre-v0.6 visual style.    |
 | Beat marker colour | orange  | Solarised accent colour for beat markers.|
+| Waveform height    | 120 px  | Waveform display height (80/120/160/200).|
 | Show confidence    | on      | Show confidence bars in beat timeline.   |
 | Show onset curve   | on      | Show onset strength chart on main page.  |
 | Histogram bins     | 40      | Number of bins in BPM histogram.         |
@@ -204,15 +217,22 @@ All settings persist across sessions in `localStorage`.
 
 ## Testing
 
-Two test suites cover the beat detection engine:
+Four test suites cover the core libraries:
 
-- **Unit tests** (`beatDetection.test.ts`): 34 tests covering FFT correctness,
-  onset strength functions, peak picking (including absolute height floor), and
-  BPM estimation.
+- **Beat detection unit tests** (`beatDetection.test.ts`): 34 tests covering
+  FFT correctness, onset strength functions, peak picking (including absolute
+  height floor), and BPM estimation.
+- **Hint logic unit tests** (`hintUtils.test.ts`): 31 tests for `buildHints`
+  and `isCloseRatio`, covering octave errors, 3:2/4:3 ratio hints, low
+  confidence warnings, short-clip detection, and suppression when the algorithm
+  already corrected a ratio.
+- **Audio export unit tests** (`audioExport.test.ts`): 17 tests for WAV
+  encoding, peak normalisation, buffer slicing, concatenation, and ZIP
+  bundling.
 - **Real-audio integration tests** (`realAudio.test.ts`): 26 Kevin MacLeod
   tracks spanning 54-204 BPM, decoded via `node-web-audio-api` and run through
-  the full spectral-flux -> peak-pick -> BPM-estimate pipeline. 21 pass
-  outright (including 7 octave-tolerant), 5 are skipped as known limitations
+  the full spectral-flux -> peak-pick -> BPM-estimate pipeline. 20 pass
+  outright (including 7 octave-tolerant), 6 are skipped as known limitations
   (3:2 harmonic ambiguity, missing-candidate failures, too-short clips).
 
 ```bash

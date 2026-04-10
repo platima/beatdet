@@ -6,6 +6,22 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.6.4] - 2026-04-02
+
+### Fixed
+
+- **Lint**: resolved all ESLint errors (5 errors → 0). Fixed `set-state-in-effect` warnings in `BpmDisplay` (derived state for hints, suppress for tap reset) and `WhatsNewBanner` (suppress for localStorage read). Removed unused `Hint` type import, stale `eslint-disable` directive in `layout.tsx`, and suppressed `no-require-imports` in `jest.config.js`.
+- **Dead CSS**: removed unused `.export-options-grid` class from `globals.css`.
+- **Misleading comment**: corrected "active:scale" comment to match the actual `opacity` rule.
+- **Unescaped entity**: fixed `'` in `WhatsNewBanner` JSX text for `react/no-unescaped-entities`.
+
+### Changed
+
+- **README**: updated project structure tree (added `changelog/page.tsx`, `ErrorBoundary.tsx`, `ThemeInitialiser.tsx`, `WhatsNewBanner.tsx`, `hintUtils.ts`, all four test files), expanded the Testing section from two to four suites, updated component descriptions (tap tempo, keyboard shortcuts help, MP3/ZIP export), and added missing Display settings (Classic UI, Waveform height).
+- **package.json**: synced `version` field to `0.6.4` (was stale at `0.3.4`).
+
+---
+
 ## [0.6.3] - 2026-04-02
 
 ### Added

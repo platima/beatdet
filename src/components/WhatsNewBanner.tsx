@@ -39,6 +39,9 @@ const WHATS_NEW: Record<string, string[]> = {
 export function WhatsNewBanner() {
   const [visible, setVisible] = useState(false);
 
+  // Reading from localStorage (external system) and conditionally setting
+  // visibility is the textbook use case for useEffect + setState.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const last = localStorage.getItem(STORAGE_KEY);
@@ -52,6 +55,7 @@ export function WhatsNewBanner() {
       // localStorage unavailable; skip silently
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!visible) return null;
 
@@ -69,7 +73,7 @@ export function WhatsNewBanner() {
       <div className="flex items-center gap-2">
         <Sparkles size={15} style={{ color: 'var(--accent)', flexShrink: 0 }} />
         <p className="text-sm font-semibold" style={{ color: 'var(--text-heading)' }}>
-          What's new in v{CURRENT}
+          What&apos;s new in v{CURRENT}
         </p>
         <button
           onClick={() => setVisible(false)}

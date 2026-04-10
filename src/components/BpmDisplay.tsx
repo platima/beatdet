@@ -15,7 +15,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import type { AnalysisResult } from '@/types';
 import { buildHints } from '@/lib/hintUtils';
-import type { Hint } from '@/lib/hintUtils';
 
 interface BpmDisplayProps {
   result: AnalysisResult;
@@ -38,8 +37,9 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
   const confidencePct = Math.round(bpmEstimate.confidence * 100);
 
   // Hint visibility: re-shown on every new result, dismissible per-analysis.
-  const [hintsVisible, setHintsVisible] = useState(true);
-  useEffect(() => { setHintsVisible(true); }, [result]);
+  // Track which result the dismissal applies to so we auto-show on new results.
+  const [dismissedResult, setDismissedResult] = useState<AnalysisResult | null>(null);
+  const hintsVisible = dismissedResult !== result;
   const hints = buildHints(bpmEstimate, beats.length);
 
   // Tap tempo: timestamps of recent taps (ms), cleared after 3 s of inactivity
@@ -47,11 +47,13 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
   const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [tapBpm, setTapBpm] = useState<number | null>(null);
 
-  // Reset tap state when a new analysis result comes in
+  // Reset tap state when a new analysis result comes in.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     tapTimesRef.current = [];
     setTapBpm(null);
   }, [result]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleTap = useCallback(() => {
     const now = Date.now();
@@ -337,7 +339,7 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
             ))}
           </div>
           <button
-            onClick={() => setHintsVisible(false)}
+            onClick={() => setDismissedResult(result)}
             className="shrink-0 rounded p-0.5 hover:bg-[var(--bg-alt)] transition-colors"
             aria-label="Dismiss detection hint"
           >

@@ -277,14 +277,6 @@ html:not([data-ui="classic"]) .ui-animate-in {
    Ensure no horizontal overflow at 360px viewport width.
    ============================================================ */
 
-/* Prevent fixed-width elements from causing horizontal scroll on very
-   narrow viewports; components use flex-wrap and min-width: 0 instead. */
-@media (max-width: 400px) {
-  /* ExportPanel options grid: single column below 400px */
-  .export-options-grid {
-    grid-template-columns: 1fr !important;
-  }
-}
 
 /* ============================================================
    Accessibility — visible keyboard focus ring for native
@@ -297,7 +289,7 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
-/* High-contrast active:scale for tap-tempo button so the press is
+/* High-contrast active state for buttons so the press is
    visible even without colour distinction */
 button:active {
   opacity: 0.85;

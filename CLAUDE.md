@@ -155,7 +155,7 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 ## Current State
 
 - **Milestone:** v0.5.x = PWA; v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Library Release
-- **Current version:** v0.6.3
+- **Current version:** v0.6.4
 - **Settings store:** schema v4 (`settingsVersion: '4.0.0'`); migrates v1 -> v2 -> v3 -> v4 automatically.
 - **Tests:** run `npm test` for current counts.
 - **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.
