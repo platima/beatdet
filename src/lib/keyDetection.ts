@@ -263,20 +263,18 @@ export function detectKey(mono: Float32Array, sampleRate: number): KeyEstimate {
   // Sort by correlation descending; best match is first.
   results.sort((a, b) => b.correlation - a.correlation);
 
-  // Normalise confidences to [0, 1] using the range of the top results.
-  // This makes confidence comparable across tracks with varying spectral clarity.
+  // Use the raw Pearson correlation coefficient as the confidence value,
+  // clamped to [0, 1].  This gives an absolute measure of tonal clarity:
+  // anti-correlated profiles are floored to 0 and a perfect match is 1.
   const best = results[0];
-  const worst = results[results.length - 1];
-  const corrRange = best.correlation - worst.correlation;
 
-  const normaliseConf = (r: number): number =>
-    corrRange > 0 ? (r - worst.correlation) / corrRange : 1;
+  const clampConf = (r: number): number => Math.max(0, Math.min(1, r));
 
   // Build the top-5 candidate list.
   const candidates = results.slice(0, 5).map((r) => ({
     key: NOTE_NAMES[r.pitchClass],
     mode: r.mode,
-    confidence: normaliseConf(r.correlation),
+    confidence: clampConf(r.correlation),
     camelot: r.mode === 'major'
       ? CAMELOT_MAJOR[r.pitchClass]
       : CAMELOT_MINOR[r.pitchClass],
@@ -286,7 +284,7 @@ export function detectKey(mono: Float32Array, sampleRate: number): KeyEstimate {
   const { pitchClass, mode } = best;
   const key = NOTE_NAMES[pitchClass];
   const camelot = mode === 'major' ? CAMELOT_MAJOR[pitchClass] : CAMELOT_MINOR[pitchClass];
-  const confidence = normaliseConf(best.correlation);
+  const confidence = clampConf(best.correlation);
 
   // Compute relative key (major ÔåÆ relative minor is 9 semitones up; vice versa).
   const relativePc = mode === 'major'
@@ -303,9 +301,9 @@ export function detectKey(mono: Float32Array, sampleRate: number): KeyEstimate {
     camelot,
     relativeKey,
     candidates,
-    // Ambiguous when the raw Pearson correlation is too weak ÔÇö the normalised
-    // confidence is relative across candidates and is always 1 for the winner,
-    // so the raw value is a better indicator of absolute tonal clarity.
+    // Ambiguous when the raw Pearson correlation is too weak.  Values below
+    // ~0.4 indicate the chroma has no clear tonal centre (modal, chromatic,
+    // or atonal material).
     ambiguous: best.correlation < RAW_AMBIGUITY_THRESHOLD,
   };
 }

@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.1] - 2026-04-11
+
+### Fixed
+
+- **Key confidence metric**: confidence now shows the raw Pearson correlation coefficient (0–1) instead of a misleading normalised value that was always 100% for the winner. This gives users a meaningful absolute measure of tonal clarity (e.g. 0.86 for a clear key, 0.57 for an ambiguous one).
+
+### Added
+
+- **Real-audio key detection test**: Canon In D verified as D Major (10B) with r=0.86, ensuring the algorithm works correctly on known-key material.
+
+---
+
 ## [0.7.0] - 2026-04-11
 
 ### Added

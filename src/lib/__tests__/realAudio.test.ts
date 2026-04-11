@@ -27,6 +27,8 @@ import {
   estimateBpm,
 } from '../beatDetection';
 
+import { detectKey } from '../keyDetection';
+
 /* ============================================================
    Helpers
    ============================================================ */
@@ -202,6 +204,60 @@ describe('Real-audio BPM detection (Kevin MacLeod test tracks)', () => {
         errors.push(Math.abs(bpm - expectedBpm / 2));
       }
       expect(Math.min(...errors)).toBeLessThanOrEqual(tolerance);
+    });
+  }
+});
+
+/* ============================================================
+   Key detection (known-key tracks)
+   ============================================================ */
+
+interface KeyTrackDef {
+  file: string;
+  expectedKey: string;
+  expectedMode: 'major' | 'minor';
+  expectedCamelot: string;
+  /** Minimum raw Pearson correlation to expect (sanity floor). */
+  minCorrelation: number;
+}
+
+/**
+ * Tracks with known keys.  Only tracks whose musical key is unambiguously
+ * documented (e.g. "Canon In D" = D Major) are included.
+ */
+const KEY_TRACKS: KeyTrackDef[] = [
+  // Pachelbel's Canon in D Major — key is in the title.
+  {
+    file: 'Canon In D For 8 Bit Synths 132bpm.mp3',
+    expectedKey: 'D',
+    expectedMode: 'major',
+    expectedCamelot: '10B',
+    minCorrelation: 0.70,
+  },
+];
+
+describe('Real-audio key detection (known-key tracks)', () => {
+  for (const { file, expectedKey, expectedMode, expectedCamelot, minCorrelation } of KEY_TRACKS) {
+    it(`detects ${expectedKey} ${expectedMode} (${expectedCamelot}) — "${file}"`, async () => {
+      const filePath = path.join(TESTFILES_DIR, file);
+
+      if (!fs.existsSync(filePath)) {
+        console.warn(`[SKIP] testfile not found: ${filePath}`);
+        return;
+      }
+
+      const audioBuffer = await decodeMp3(filePath);
+      const mono = mixDownToMono(audioBuffer);
+      const result = detectKey(mono, audioBuffer.sampleRate);
+
+      console.log(
+        `  ${file}: detected ${result.display} (${result.camelot}), confidence ${result.confidence.toFixed(3)}`,
+      );
+
+      expect(result.key).toBe(expectedKey);
+      expect(result.mode).toBe(expectedMode);
+      expect(result.camelot).toBe(expectedCamelot);
+      expect(result.confidence).toBeGreaterThanOrEqual(minCorrelation);
     });
   }
 });

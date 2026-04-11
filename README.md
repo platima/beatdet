@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.7.0** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.7.1** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -246,10 +246,11 @@ Four test suites cover the core libraries:
   encoding, peak normalisation, buffer slicing, concatenation, and ZIP
   bundling.
 - **Real-audio integration tests** (`realAudio.test.ts`): 26 Kevin MacLeod
-  tracks spanning 54-204 BPM, decoded via `node-web-audio-api` and run through
-  the full spectral-flux -> peak-pick -> BPM-estimate pipeline. 20 pass
+  tracks spanning 54–204 BPM, decoded via `node-web-audio-api` and run through
+  the full spectral-flux → peak-pick → BPM-estimate pipeline. 20 pass
   outright (including 7 octave-tolerant), 6 are skipped as known limitations
   (3:2 harmonic ambiguity, missing-candidate failures, too-short clips).
+  Also includes 1 known-key verification test (Canon In D = D Major, 10B).
 
 ```bash
 # Run all tests
