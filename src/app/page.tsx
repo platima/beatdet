@@ -23,6 +23,7 @@ import { ExportPanel } from '@/components/ExportPanel';
 import { Button } from '@/components/Button';
 import { WhatsNewBanner } from '@/components/WhatsNewBanner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { KeyDisplay } from '@/components/KeyDisplay';
 import { useAudioAnalysis } from '@/hooks/useAudioAnalysis';
 import { useSettingsStore } from '@/store/settingsStore';
 import { RefreshCw, AlertCircle, History, RotateCcw } from 'lucide-react';
@@ -73,6 +74,9 @@ export default function HomePage() {
 
   const showOnsetCurve = useSettingsStore(
     (s) => s.settings.display.showOnsetCurve
+  );
+  const showKey = useSettingsStore(
+    (s) => s.settings.display.showKey
   );
 
   // Display-only BPM multiplier (×2 / ÷2 correction without re-analysis)
@@ -231,6 +235,13 @@ export default function HomePage() {
               onMultiplierChange={setBpmMultiplier}
             />
           </ErrorBoundary>
+
+          {/* Key detection card */}
+          {showKey && result.keyEstimate && (
+            <ErrorBoundary label="Key display">
+              <KeyDisplay keyEstimate={result.keyEstimate} />
+            </ErrorBoundary>
+          )}
 
           {/* Charts: two-column only when both charts are visible */}
           <div className={`grid grid-cols-1 gap-6${

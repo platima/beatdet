@@ -33,12 +33,44 @@ export interface BpmEstimate {
   correctionRatio?: number;
 }
 
+/** A single key candidate with its Camelot code and correlation confidence. */
+export interface KeyCandidate {
+  /** Note name, e.g. "C", "F#", "Bb". */
+  key: string;
+  mode: 'major' | 'minor';
+  /** Normalised confidence (0–1; 1 = best match among all 24 candidates). */
+  confidence: number;
+  /** Camelot Wheel code, e.g. "8B" or "10A". */
+  camelot: string;
+}
+
+/** Musical key estimate produced by the Krumhansl-Kessler algorithm. */
+export interface KeyEstimate {
+  /** Note name, e.g. "C", "F#", "Bb". */
+  key: string;
+  mode: 'major' | 'minor';
+  /** Human-readable label, e.g. "C Major", "F# Minor". */
+  display: string;
+  /** Normalised confidence (0–1). */
+  confidence: number;
+  /** Camelot Wheel code, e.g. "8B". */
+  camelot: string;
+  /** Relative key as a human-readable string, e.g. "A Minor". */
+  relativeKey: string;
+  /** Top-5 key candidates ranked by confidence descending. */
+  candidates: KeyCandidate[];
+  /** True when confidence is too low to be reliable. */
+  ambiguous: boolean;
+}
+
 /** Full result produced by the beat detection engine. */
 export interface AnalysisResult {
   /** Detected beats, sorted by time ascending. */
   beats: Beat[];
   /** BPM estimate. */
   bpmEstimate: BpmEstimate;
+  /** Key estimate (undefined if detection was skipped). */
+  keyEstimate?: KeyEstimate;
   /** Onset strength over time (parallel arrays). */
   onsetTimes: number[];
   onsetStrengths: number[];
@@ -147,6 +179,8 @@ export interface DisplaySettings {
   beatMarkerColour: SolarisedAccent;
   /** Use the pre-v0.5.2 flat UI instead of the modern elevated style. */
   classicUi: boolean;
+  /** Show the detected musical key in the results panel. */
+  showKey: boolean;
 }
 
 /** All application settings, persisted to localStorage. */

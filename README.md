@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.6.4** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.7.0** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -15,7 +15,7 @@ No login required. No data leaves your browser; all processing uses the
 
 **[beatdet.plati.ma](https://beatdet.plati.ma/)** - live on Cloudflare Pages, no install needed.
 
-Drop in any WAV, MP3, M4A, or AAC file and get BPM, beat markers, and export options in seconds.
+Drop in any WAV, MP3, M4A, or AAC file and get BPM, key, beat markers, and export options in seconds.
 
 Everything runs **locally in your browser** — no upload, no server, no account needed. Works great on mobile too.
 
@@ -30,6 +30,9 @@ BeatDet was more accurate more often than both [Tunebat](https://tunebat.com/Ana
 - **Beat detection**: spectral-flux onset detection with adaptive peak picking.
 - **BPM estimation**: multi-lag IOI accumulation with Gaussian histogram smoothing
   and harmonic octave correction.
+- **Key detection**: Krumhansl-Kessler algorithm identifies the musical key (e.g. "C Major"),
+  Camelot Wheel code for DJ-friendly harmonic mixing, relative key, and top-5 candidates
+  with confidence bars. Toggleable in Settings.
 - **BPM correction**: clickable tempo candidates and ÷2 / ×2 display-only quick-correct buttons for common octave errors. Clicking a candidate sets that tempo as the displayed BPM.
 - **Waveform player**: interactive playback with beat markers overlaid; Space bar toggles play/pause; **R** restarts; **L** toggles the loop region.
 - **Playback speed control**: 0.5×, 0.75×, 1×, and 1.5× speed buttons for slowed-down beat verification.
@@ -132,6 +135,7 @@ src/
 │   ├── Button.tsx          # Reusable button component
 │   ├── ErrorBoundary.tsx   # React class error boundary for result panels
 │   ├── ExportPanel.tsx     # Export mode and download controls
+│   ├── KeyDisplay.tsx      # Key detection card (Camelot, candidates)
 │   ├── NavBar.tsx          # Top navigation, theme toggle, keyboard shortcuts help
 │   ├── OnsetChart.tsx      # Onset strength line chart
 │   ├── ProgressBar.tsx             # Animated analysis progress bar
@@ -146,11 +150,13 @@ src/
 │   ├── audioExport.ts      # WAV/MP3 encoding, ZIP bundling, and audio slicing
 │   ├── beatDetection.ts    # Beat detection engine (Web Audio API)
 │   ├── hintUtils.ts        # Detection hint logic (buildHints, isCloseRatio)
+│   ├── keyDetection.ts     # Key detection engine (Krumhansl-Kessler algorithm)
 │   ├── sessionStorage.ts   # Session persistence helpers
 │   └── __tests__/          # Unit + integration tests
 │       ├── audioExport.test.ts   # WAV encoding, slicing, normalisation, ZIP tests
 │       ├── beatDetection.test.ts # FFT, onset, peak picking, BPM estimation tests
 │       ├── hintUtils.test.ts     # Hint logic unit tests
+│       ├── keyDetection.test.ts  # Key detection unit tests
 │       └── realAudio.test.ts     # Kevin MacLeod benchmark integration tests
 ├── store/
 │   └── settingsStore.ts    # Zustand settings store (schema v4, auto-migration)
@@ -183,6 +189,12 @@ src/
    against slight peak offsets. The minimum beat gap is automatically clamped
    to one beat period at the configured maximum BPM so fast tempos are never
    blocked.
+7. **Key detection**: a 12-bin chroma (pitch class energy) vector is computed
+   from the mono PCM using a separate FFT pass (4096-point, Hann-windowed,
+   65-2100 Hz). The chroma vector is Pearson-correlated against all 24
+   Krumhansl-Kessler major/minor key profiles. The best-fit key, Camelot Wheel
+   code, relative key, and top-5 candidates are returned. An ambiguity flag is
+   set when the raw correlation is below 0.40 (flat or chromatic material).
 
 ---
 
@@ -207,6 +219,7 @@ All settings persist across sessions in `localStorage`.
 |--------------------|---------|------------------------------------------|
 | Theme              | system  | light / dark / system preference.        |
 | Classic UI         | off     | Revert to flat pre-v0.6 visual style.    |
+| Show key detection | on      | Display key and Camelot code in results.  |
 | Beat marker colour | orange  | Solarised accent colour for beat markers.|
 | Waveform height    | 120 px  | Waveform display height (80/120/160/200).|
 | Show confidence    | on      | Show confidence bars in beat timeline.   |
@@ -222,6 +235,9 @@ Four test suites cover the core libraries:
 - **Beat detection unit tests** (`beatDetection.test.ts`): 34 tests covering
   FFT correctness, onset strength functions, peak picking (including absolute
   height floor), and BPM estimation.
+- **Key detection unit tests** (`keyDetection.test.ts`): 18 tests covering
+  chroma vector computation, Krumhansl-Kessler correlation, Camelot codes,
+  relative key calculation, candidate ranking, and ambiguity detection.
 - **Hint logic unit tests** (`hintUtils.test.ts`): 31 tests for `buildHints`
   and `isCloseRatio`, covering octave errors, 3:2/4:3 ratio hints, low
   confidence warnings, short-clip detection, and suppression when the algorithm

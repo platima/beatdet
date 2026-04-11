@@ -84,7 +84,7 @@
 
 ## v0.7.0 — Key Detection
 
-- [ ] **Key detection and relative key hints**: detect the musical key of the uploaded track and display it alongside the BPM.
+- [x] **Key detection and relative key hints**: detect the musical key of the uploaded track and display it alongside the BPM.
 
   | Sub-feature | Notes |
   |---|---|

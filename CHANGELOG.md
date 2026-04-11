@@ -6,6 +6,17 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.0] - 2026-04-11
+
+### Added
+
+- **Key detection**: Krumhansl-Kessler algorithm identifies the musical key of uploaded audio. Displays the detected key (e.g. "C Major"), Camelot Wheel code for DJ-friendly harmonic mixing, relative key, normalised confidence bar, and top-5 alternative candidates ranked by correlation. Ambiguity flag shown when confidence is too low.
+- **KeyDisplay component**: prominent key card with large key name, mode badge, Camelot code, confidence bar, relative key, and candidate list with confidence bars.
+- **Key detection tests**: 18 unit tests covering chroma vector computation, Pearson correlation, Camelot codes, relative key calculation, candidate ranking, and ambiguity detection on flat input.
+- **Show key detection setting**: toggleable via `showKey` in Display settings (default on). Settings store migrated to schema v5.
+
+---
+
 ## [0.6.4] - 2026-04-02
 
 ### Fixed

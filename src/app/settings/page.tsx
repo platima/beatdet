@@ -343,6 +343,14 @@ export default function SettingsPage() {
           />
         </FieldRow>
 
+        {/* Show key detection */}
+        <FieldRow label="Show key detection" hint="Display the detected musical key and Camelot Wheel code in the results panel.">
+          <Toggle
+            checked={settings.display.showKey}
+            onChange={(v) => updateDisplay({ showKey: v })}
+          />
+        </FieldRow>
+
         {/* Histogram bins */}
         <FieldRow label="Histogram bins" hint="Number of buckets in the BPM distribution histogram (10–100).">
           <NumberInput

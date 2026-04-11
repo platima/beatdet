@@ -13,6 +13,7 @@
  */
 
 import type { AnalysisResult, Beat, BpmEstimate, DetectionSettings } from '@/types';
+import { detectKey } from '@/lib/keyDetection';
 
 /* ============================================================
    Internal helpers
@@ -570,6 +571,11 @@ export async function analyseAudio(
   const bpmEstimate = estimateBpm(beatTimes, settings.bpmMin, settings.bpmMax);
   onProgress?.(0.95);
 
+  // Detect musical key from the full mono signal.
+  // This runs after beat detection to keep the progress bar feeling linear;
+  // chroma analysis is fast (~50 ms even on long tracks).
+  const keyEstimate = detectKey(mono, sampleRate);
+
   const onsetStrengths = Array.from(onsets);
 
   onProgress?.(1.0);
@@ -577,6 +583,7 @@ export async function analyseAudio(
   return {
     beats,
     bpmEstimate,
+    keyEstimate,
     onsetTimes,
     onsetStrengths,
     duration,

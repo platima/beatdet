@@ -34,6 +34,7 @@ const DEFAULT_DISPLAY: DisplaySettings = {
   waveformHeight: 120,
   beatMarkerColour: 'orange',
   classicUi: false,
+  showKey: true,
 };
 
 const DEFAULT_EXPORT: ExportOptions = {
@@ -49,7 +50,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   detection: DEFAULT_DETECTION,
   display: DEFAULT_DISPLAY,
   export: DEFAULT_EXPORT,
-  settingsVersion: '4.0.0',
+  settingsVersion: '5.0.0',
 };
 
 /* ============================================================
@@ -104,7 +105,7 @@ export const useSettingsStore = create<SettingsStore>()(
       name: 'beatdet-settings',
       // Migrate persisted settings from older schema versions so returning
       // users don't lose their preferences when new keys are added.
-      version: 4,
+      version: 5,
       migrate: (persisted: unknown, fromVersion: number) => {
         const prev = persisted as Partial<{ settings: Partial<AppSettings> }>;
         const settings = prev?.settings ?? {};
@@ -163,6 +164,23 @@ export const useSettingsStore = create<SettingsStore>()(
                   (settings.display as Partial<typeof DEFAULT_DISPLAY>)?.classicUi ?? false,
               },
               settingsVersion: '4.0.0',
+            },
+          };
+        }
+
+        if (fromVersion < 5) {
+          // v4 → v5: showKey enables the key detection panel for returning users.
+          return {
+            ...prev,
+            settings: {
+              ...settings,
+              display: {
+                ...DEFAULT_DISPLAY,
+                ...(settings.display ?? {}),
+                showKey:
+                  (settings.display as Partial<typeof DEFAULT_DISPLAY>)?.showKey ?? true,
+              },
+              settingsVersion: '5.0.0',
             },
           };
         }

@@ -55,10 +55,12 @@ Browser (static site)
 | `src/components/`               | All React components (UI, charts, waveform, etc.) |
 | `src/components/WhatsNewBanner.tsx` | Dismissible upgrade banner (localStorage-based) |
 | `src/components/ErrorBoundary.tsx` | React class error boundary for result panels   |
+| `src/components/KeyDisplay.tsx` | Key detection card (Camelot, candidates, relative key) |
 | `src/hooks/useAudioAnalysis.ts` | File upload + analysis lifecycle hook             |
 | `src/hooks/useTheme.ts`         | Theme preference hook                             |
 | `src/lib/beatDetection.ts`      | Beat detection engine (spectral flux, peak pick)  |
 | `src/lib/hintUtils.ts`          | `buildHints` / `isCloseRatio`: hint logic extracted for testability |
+| `src/lib/keyDetection.ts`       | Key detection engine (Krumhansl-Kessler chroma correlation) |
 | `src/lib/audioExport.ts`        | WAV/MP3 encoding, ZIP bundling, and audio slicing |
 | `src/lib/sessionStorage.ts`     | Session persistence helpers                       |
 | `src/store/settingsStore.ts`    | Zustand settings store (localStorage backed)      |
@@ -155,8 +157,8 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 ## Current State
 
 - **Milestone:** v0.5.x = PWA; v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Library Release
-- **Current version:** v0.6.4
-- **Settings store:** schema v4 (`settingsVersion: '4.0.0'`); migrates v1 -> v2 -> v3 -> v4 automatically.
+- **Current version:** v0.7.0
+- **Settings store:** schema v5 (`settingsVersion: '5.0.0'`); migrates v1 -> v2 -> v3 -> v4 -> v5 automatically.
 - **Tests:** run `npm test` for current counts.
 - **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.
 - **BeatList** virtualised via `@tanstack/react-virtual` for long beat lists.
@@ -174,4 +176,5 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 - **Keyboard shortcuts**: Space = play/pause, R = restart, L = toggle loop region, ? = keyboard shortcuts help (in `NavBar`). The R and L shortcuts are handled in `WaveformPlayer`; ? is handled in `NavBar`.
 - **Loop region**: `RegionsPlugin` from `wavesurfer.js/dist/plugins/regions` registered via `WaveSurfer.create({ plugins: [...] })`; loop check runs in the `audioprocess` closure via `loopEnabledRef` (avoids stale-closure race). `onRegionChange` prop threads the region bounds to `page.tsx` → `ExportPanel` for custom-range pre-fill.
 - **Playback speed**: `setPlaybackRate()` called on the WaveSurfer instance; speed buttons in the secondary controls row; default 1×.
+- **Key detection**: Krumhansl-Kessler algorithm in `src/lib/keyDetection.ts`; computes 12-bin chroma vector via FFT (4096-point, 65-2100 Hz), correlates against 24 KK major/minor profiles, returns key, Camelot code, relative key, top-5 candidates, and ambiguity flag. Called from `analyseAudio` after beat detection. `KeyDisplay` component renders the results. Toggleable via `showKey` in `DisplaySettings`.
 - `testfiles/` excluded from Git (local only); required for real-audio integration tests.
