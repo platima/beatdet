@@ -141,7 +141,7 @@ export function NavBar() {
             role="dialog"
             aria-modal="true"
             aria-label="Keyboard shortcuts"
-            className="absolute right-4 top-full z-50 mt-2 min-w-56 rounded-xl p-4 shadow-xl"
+            className="absolute right-4 top-full z-50 mt-4 min-w-56 rounded-xl p-4 shadow-xl"
             style={{
               backgroundColor: 'var(--bg-panel)',
               border: '1px solid var(--border)',
