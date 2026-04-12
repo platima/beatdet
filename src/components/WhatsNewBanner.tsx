@@ -11,7 +11,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+import { CloseButton } from './Button';
 
 const STORAGE_KEY = 'beatdet-last-seen-version';
 const CURRENT = process.env.NEXT_PUBLIC_APP_VERSION ?? '';
@@ -81,14 +82,11 @@ export function WhatsNewBanner() {
         <p className="text-sm font-semibold" style={{ color: 'var(--text-heading)' }}>
           What&apos;s new in v{CURRENT}
         </p>
-        <button
+        <CloseButton
           onClick={() => setVisible(false)}
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-[var(--bg-alt)]"
-          style={{ color: 'var(--text-muted)' }}
-          aria-label="Dismiss what's new"
-        >
-          <X size={14} />
-        </button>
+          label="Dismiss what's new"
+          className="ml-auto"
+        />
       </div>
 
       {items && items.length > 0 ? (

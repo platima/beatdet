@@ -213,6 +213,56 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
     [settings]
   );
 
+  /**
+   * Re-run analysis on the stored audio buffer (used after session restore
+   * when the original File object is no longer available).
+   */
+  const reanalyseFromBuffer = useCallback(async (): Promise<void> => {
+    const buf = audioBuffer;
+    const info = fileInfo;
+    if (!buf || !info) return;
+
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setStatus('analysing');
+    setProgress(0);
+    setResult(null);
+    setError(null);
+
+    try {
+      const analysisResult = await analyseAudio(
+        buf,
+        settings,
+        (p) => setProgress(p),
+        controller.signal
+      );
+
+      if (controller.signal.aborted) return;
+
+      setResult(analysisResult);
+      setStatus('complete');
+
+      // Persist updated result; use fileInfo as a stand-in for the File metadata.
+      saveSession(
+        { name: info.name, size: info.size, type: info.type } as unknown as File,
+        analysisResult,
+        buf
+      );
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
+      setError(`Analysis failed: ${message}`);
+      setStatus('error');
+      console.error('[BeatDet] Analysis error:', err);
+    } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
+    }
+  }, [audioBuffer, fileInfo, settings]);
+
   return {
     status,
     progress,
@@ -224,6 +274,10 @@ export function useAudioAnalysis(): UseAudioAnalysisReturn {
     clearAll,
     restoreSession,
     cancel,
-    reanalyse: lastFileRef.current ? () => analyseFile(lastFileRef.current!) : null,
+    // Prefer re-analysing from the original File; fall back to the stored
+    // ArrayBuffer when restoring a session (where no File object is available).
+    reanalyse: lastFileRef.current
+      ? () => analyseFile(lastFileRef.current!)
+      : (audioBuffer ? reanalyseFromBuffer : null),
   };
 }

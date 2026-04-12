@@ -13,7 +13,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
+import { CloseButton } from './Button';
 import type { AnalysisResult } from '@/types';
 import { buildHints } from '@/lib/hintUtils';
 
@@ -341,13 +342,10 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
               </p>
             ))}
           </div>
-          <button
+          <CloseButton
             onClick={() => setDismissedResult(result)}
-            className="shrink-0 cursor-pointer rounded p-1 hover:bg-[var(--bg-alt)] hover:shadow-md transition-all"
-            aria-label="Dismiss detection hint"
-          >
-            <X size={15} style={{ color: 'var(--text-muted)' }} />
-          </button>
+            label="Dismiss detection hint"
+          />
         </div>
       </div>,
       document.body

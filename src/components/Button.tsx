@@ -6,7 +6,7 @@
 'use client';
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';
@@ -76,6 +76,38 @@ export function Button({
         <span className="shrink-0">{icon}</span>
       ) : null}
       {children && <span>{children}</span>}
+    </button>
+  );
+}
+
+interface CloseButtonProps {
+  onClick: () => void;
+  /** Accessible label describing what is being dismissed. */
+  label: string;
+  /** Icon size in pixels. Default: 15. */
+  size?: number;
+  className?: string;
+}
+
+/**
+ * Consistent dismiss / close button used across notification banners and toasts.
+ * Uses the ui-btn class so it inherits the modern-UI hover lift in globals.css.
+ */
+export function CloseButton({ onClick, label, size = 15, className = '' }: CloseButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        'ui-btn inline-flex items-center justify-center',
+        'rounded-full p-1 transition-all duration-150',
+        'text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-[var(--bg-alt)]',
+        'focus-visible:outline-2 focus-visible:outline-[var(--accent)] focus-visible:outline-offset-2',
+        className,
+      ].join(' ')}
+      aria-label={label}
+    >
+      <X size={size} />
     </button>
   );
 }
