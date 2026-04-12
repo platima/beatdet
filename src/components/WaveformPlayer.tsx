@@ -250,7 +250,8 @@ export function WaveformPlayer({ audioUrl, result, seekTo, onRegionChange }: Wav
       if (e.key === ' ') {
         e.preventDefault();
         wsRef.current?.playPause();
-      } else if (e.key === 'r' || e.key === 'R') {
+      } else if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey && !e.metaKey) {
+        // Guard against intercepting Ctrl+R / Cmd+R (browser refresh)
         e.preventDefault();
         wsRef.current?.seekTo(0);
         setCurrentTime(0);

@@ -44,6 +44,11 @@ export function AudioUploader({
     [onFileSelect, disabled]
   );
 
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!disabled) setIsDragging(true);
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     if (!disabled) setIsDragging(true);
@@ -51,7 +56,11 @@ export function AudioUploader({
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(false);
+    // Only clear the drag state when the pointer actually leaves this element,
+    // not when it moves over a child element (which fires a spurious dragleave).
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+      setIsDragging(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -73,7 +82,8 @@ export function AudioUploader({
   if (fileInfo) {
     return (
       <div
-        className="ui-panel flex items-center gap-4 rounded-xl p-4"
+        className="ui-panel relative flex items-center gap-4 rounded-xl p-4"
+        onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -82,6 +92,15 @@ export function AudioUploader({
           border: `1px solid ${isDragging ? 'var(--accent)' : 'var(--border)'}`,
         }}
       >
+        {/* Overlay hint shown while dragging a replacement file */}
+        {isDragging && (
+          <div
+            className="absolute inset-0 flex items-center justify-center rounded-xl pointer-events-none"
+            style={{ backgroundColor: 'color-mix(in srgb, var(--bg-alt) 80%, transparent)' }}
+          >
+            <p className="text-sm font-medium" style={{ color: 'var(--accent)' }}>Drop to replace</p>
+          </div>
+        )}
         <div
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg"
           style={{ backgroundColor: 'var(--bg)', color: 'var(--accent)' }}
@@ -128,6 +147,7 @@ export function AudioUploader({
           inputRef.current?.click();
         }
       }}
+      onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

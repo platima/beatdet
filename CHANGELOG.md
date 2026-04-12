@@ -6,6 +6,65 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.7] - 2026-04-13
+
+### Fixed
+
+- **Re-analyse after session restore**: "Re-analyse" button was missing when a session
+  was restored on page reload (the original `File` object is unavailable after restore).
+  Added a `reanalyseFromBuffer` path in `useAudioAnalysis` that re-runs analysis on the
+  stored `ArrayBuffer`, so the button is now always available when audio is loaded.
+
+### Added
+
+- **CloseButton component**: reusable dismiss/close button exported from `Button.tsx` with
+  consistent cursor, colour change (`text-muted` to `text-body`), and UI lift animation.
+  Used by the What's New banner and the Detection Notes toast for uniform dismiss UX.
+
+---
+
+## [0.7.6] - 2026-04-13
+
+### Added
+
+- **Page tagline**: subtitle "Beat & key detection for DJs and producers" added below the
+  "BeatDet" heading; instructional description promoted to secondary text.
+- **Consistent pointer cursor**: global `cursor: pointer` CSS rule added for all enabled
+  `button` and `[role="button"]` elements (Tailwind Preflight does not set this by default).
+
+### Changed
+
+- **Footer action buttons**: "New file" and "Re-analyse" changed from `ghost` to `secondary`
+  variant so they visually read as bordered buttons rather than plain text links.
+- **Detection Notes toast dismiss**: improved padding and `hover:shadow-md` for a clearer
+  interactive affordance.
+
+---
+
+## [0.7.5] - 2026-04-12
+
+### Changed
+
+- **What's New banner**: moved from inside the results block to the top of the page, above
+  the file uploader, so it appears as soon as the page loads rather than only after analysis.
+- **Page title**: heading changed from "Beat Detection" to "BeatDet"; subtitle updated to
+  cover beats, musical key, waveform visualisation, and audio export.
+- **Playback controls spacing**: secondary controls row (speed buttons, zoom) now uses
+  `py-2.5` for symmetric top and bottom padding; previously only had `pb-2.5`.
+
+### Fixed
+
+- **Detection Notes toast position**: wrapped in `ReactDOM.createPortal` to escape the
+  `ui-animate-in` ancestor, whose CSS `transform` animation created a containing block
+  that trapped `position: fixed` children, causing the toast to scroll with the page.
+
+### Added
+
+- **Drop-to-replace on loaded file**: the file info panel now accepts drag-and-drop events;
+  dropping a new audio file replaces the currently loaded one and starts a new analysis.
+
+---
+
 ## [0.7.4] - 2026-04-12
 
 ### Added
