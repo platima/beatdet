@@ -18,6 +18,12 @@ const CURRENT = process.env.NEXT_PUBLIC_APP_VERSION ?? '';
 
 // Short summary of what's new; update alongside each release.
 const WHATS_NEW: Record<string, string[]> = {
+  '0.7.5': [
+    'What\'s New banner now appears at the top of the page',
+    'Drop a new file onto the loaded-file area to replace it',
+    'Playback speed and zoom controls spacing fix',
+    'Detection notes toast now anchored to the viewport',
+  ],
   '0.3.0': [
     'MP3 export with selectable bitrate',
     'Cut-at-beats now downloads a single ZIP',

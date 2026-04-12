@@ -397,7 +397,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo, onRegionChange }: Wav
 
         {/* Secondary row: playback speed, zoom, beats badge */}
         <div
-          className="flex flex-wrap items-center gap-2 px-4 pb-2.5"
+          className="flex flex-wrap items-center gap-2 px-4 py-2.5"
           style={{ borderTop: '1px solid var(--border)' }}
         >
           {/* Speed label */}

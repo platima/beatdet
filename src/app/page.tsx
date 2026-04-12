@@ -111,13 +111,16 @@ export default function HomePage() {
           className="text-2xl font-bold tracking-tight"
           style={{ color: 'var(--text-heading)' }}
         >
-          Beat Detection
+          BeatDet
         </h1>
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          Upload a WAV, MP3, M4A, or AAC file to detect beats, visualise the
-          waveform, and export sliced audio.
+          Upload a WAV, MP3, M4A, or AAC file to detect beats and musical key,
+          visualise the waveform, and export sliced audio.
         </p>
       </div>
+
+      {/* What's New banner - shown once to returning users after an upgrade */}
+      <WhatsNewBanner />
 
       {/* Upload area */}
       <AudioUploader
@@ -189,9 +192,6 @@ export default function HomePage() {
         <div className="ui-animate-in space-y-6">
           {/* Anchor used by auto-scroll after analysis */}
           <div id="results" />
-
-          {/* What's New banner - shown to returning users after an upgrade */}
-          <WhatsNewBanner />
 
           {/* Restored session banner - shown when audio was not saved */}
           {!fileInfo.objectUrl && (

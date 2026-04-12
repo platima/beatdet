@@ -74,9 +74,12 @@ export function AudioUploader({
     return (
       <div
         className="ui-panel flex items-center gap-4 rounded-xl p-4"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         style={{
-          backgroundColor: 'var(--bg-panel)',
-          border: '1px solid var(--border)',
+          backgroundColor: isDragging ? 'var(--bg-alt)' : 'var(--bg-panel)',
+          border: `1px solid ${isDragging ? 'var(--accent)' : 'var(--border)'}`,
         }}
       >
         <div

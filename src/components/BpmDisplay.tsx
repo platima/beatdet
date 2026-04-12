@@ -12,6 +12,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, X } from 'lucide-react';
 import type { AnalysisResult } from '@/types';
 import { buildHints } from '@/lib/hintUtils';
@@ -296,8 +297,10 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
       )}
     </div>
 
-    {/* Detection hints: fixed bottom-right toast, dismissible per analysis */}
-    {hints.length > 0 && hintsVisible && (
+    {/* Detection hints: fixed bottom-right toast, rendered via portal to escape
+        the ui-animate-in ancestor (which uses a CSS transform and would otherwise
+        create a containing block that traps position:fixed elements). */}
+    {hints.length > 0 && hintsVisible && typeof document !== 'undefined' && createPortal(
       <div
         className="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl p-4 shadow-xl"
         style={{
@@ -346,7 +349,8 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
             <X size={15} style={{ color: 'var(--text-muted)' }} />
           </button>
         </div>
-      </div>
+      </div>,
+      document.body
     )}
     </>
   );
