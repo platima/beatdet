@@ -171,7 +171,9 @@ function fft(re: Float64Array, im: Float64Array): void {
  * @param sampleRate  Sample rate in Hz.
  * @param fftSize     FFT window size in samples (must be power of two, default 4096).
  * @param hopSize     Hop between frames in samples (default fftSize / 2).
- * @param fMin        Minimum frequency to include in Hz (default 65 Hz, ~C2).
+ * @param fMin        Minimum frequency to include in Hz (default 150 Hz, ~D3).
+ *                   Set above the kick drum fundamental range (~50–130 Hz) to
+ *                   avoid percussion-induced chroma pollution in EDM.
  * @param fMax        Maximum frequency to include in Hz (default 2100 Hz, ~C7).
  * @returns           Normalised 12-element chroma vector (values 0ÔÇô1).
  */
@@ -180,7 +182,7 @@ export function computeChromaVector(
   sampleRate: number,
   fftSize = 4096,
   hopSize = 2048,
-  fMin = 65,
+  fMin = 150,
   fMax = 2100
 ): Float64Array {
   const chroma = new Float64Array(12);

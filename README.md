@@ -191,7 +191,7 @@ src/
    blocked.
 7. **Key detection**: a 12-bin chroma (pitch class energy) vector is computed
    from the mono PCM using a separate FFT pass (4096-point, Hann-windowed,
-   65-2100 Hz). The chroma vector is Pearson-correlated against all 24
+   150-2100 Hz, above the kick drum fundamental range). The chroma vector is Pearson-correlated against all 24
    Bellman-Budge major/minor key profiles (corpus-derived, stronger
    diatonic/non-diatonic separation than the original Krumhansl-Kessler
    profiles). The best-fit key, Camelot Wheel code, relative key, and top-5

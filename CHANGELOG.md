@@ -6,6 +6,26 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.3] - 2026-04-12
+
+### Fixed
+
+- **Key detection frequency range**: raised `fMin` from 65 Hz to 150 Hz (~D3) in the
+  chroma extraction pass. EDM kick drums are commonly tuned to C#/Db (~78 Hz), causing
+  their energy to pollute the chroma vector and force nearly all detections to C# minor
+  or F# major. The new lower cutoff sits above the kick drum fundamental range
+  (~50-130 Hz) while retaining all musical bass content above D3.
+  Accuracy on the GiantSteps Key Dataset (460 electronic music tracks) improved from
+  10.0% to 35.7% (3.5x improvement) with no regressions on existing tests.
+
+### Added
+
+- **GiantSteps benchmark**: `giantsteps-benchmark.mjs` script for measuring key detection
+  accuracy against the 460-track GiantSteps Key Dataset (expert-annotated electronic music).
+  Reports overall percentage, per-key accuracy table, and top confusions.
+
+---
+
 ## [0.7.2] - 2026-04-11
 
 ### Changed
