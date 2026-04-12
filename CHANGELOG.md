@@ -6,6 +6,27 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.4] - 2026-04-12
+
+### Added
+
+- **HPSS key detection**: Harmonic-Percussive Source Separation (HPSS) is now applied to
+  the spectrogram before chroma accumulation (Driedger, Müller and Disch, ISMIR 2014).
+  Horizontal (time-axis, L=17 frames) and vertical (frequency-axis, L=17 bins) median
+  filters separate sustained harmonic sources (synths, pads, bass lines) from transient
+  percussive sources (kick drums, snares, hi-hats). A squared Wiener soft mask then
+  extracts the harmonic component. Only harmonic energy contributes to chroma.
+  This removes kick drum harmonics above 150 Hz (at ~156, 234 and 312 Hz) that escape
+  the fMin cutoff.
+  - Exact accuracy on GiantSteps Key Dataset (460 tracks): **35.7% → 39.8%**
+  - Combined accuracy (correct + adjacent Camelot key): **61.3% → 67.4%**
+  - No regressions on existing test tracks; Für Elise confidence improved 0.833 → 0.844
+  - Note: fMin stays at 150 Hz; HPSS cannot cleanly remove the kick drum fundamental
+    (65-150 Hz) because in EDM the kick repeats so rapidly (~2-4 Hz) that the 17-frame
+    horizontal kernel classifies it as harmonic
+
+---
+
 ## [0.7.3] - 2026-04-12
 
 ### Fixed

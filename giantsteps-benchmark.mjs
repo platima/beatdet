@@ -106,34 +106,101 @@ function fft(re, im) {
 }
 
 /* ============================================================
+   HPSS helpers
+   ============================================================ */
+
+function insertionSort(arr, len) {
+  for (let i = 1; i < len; i++) {
+    const key = arr[i];
+    let j = i - 1;
+    while (j >= 0 && arr[j] > key) { arr[j + 1] = arr[j]; j--; }
+    arr[j + 1] = key;
+  }
+}
+
+function separateHarmonicComponent(spec, numBins, numFrames, hKernel, pKernel) {
+  const hHalf = Math.floor(hKernel / 2);
+  const pHalf = Math.floor(pKernel / 2);
+  const harmSpec = new Float32Array(spec.length);
+  const percSpec = new Float32Array(spec.length);
+  const tmpH = new Float32Array(hKernel);
+  const tmpP = new Float32Array(pKernel);
+
+  for (let b = 0; b < numBins; b++) {
+    for (let t = 0; t < numFrames; t++) {
+      for (let k = 0; k < hKernel; k++) {
+        const tt = t - hHalf + k;
+        tmpH[k] = (tt >= 0 && tt < numFrames) ? spec[tt * numBins + b] : 0;
+      }
+      insertionSort(tmpH, hKernel);
+      harmSpec[t * numBins + b] = tmpH[hHalf];
+    }
+  }
+  for (let t = 0; t < numFrames; t++) {
+    const row = t * numBins;
+    for (let b = 0; b < numBins; b++) {
+      for (let k = 0; k < pKernel; k++) {
+        const bb = b - pHalf + k;
+        tmpP[k] = (bb >= 0 && bb < numBins) ? spec[row + bb] : 0;
+      }
+      insertionSort(tmpP, pKernel);
+      percSpec[row + b] = tmpP[pHalf];
+    }
+  }
+  const result = new Float32Array(spec.length);
+  for (let i = 0; i < spec.length; i++) {
+    const h = harmSpec[i], p = percSpec[i];
+    const denom = h * h + p * p;
+    if (denom > 0) result[i] = spec[i] * (h * h / denom);
+  }
+  return result;
+}
+
+/* ============================================================
    Chroma extraction (mirror of keyDetection.ts)
    ============================================================ */
 
-function computeChromaVector(mono, sampleRate, fftSize = 4096, hopSize = 2048, fMin = 150, fMax = 2100) {
+function computeChromaVector(mono, sampleRate, fftSize = 4096, hopSize = 2048, fMin = 150, fMax = 2100, useHpss = true) {
   const chroma = new Float64Array(12);
   const re = new Float64Array(fftSize);
   const im = new Float64Array(fftSize);
   const numFrames = Math.floor((mono.length - fftSize) / hopSize) + 1;
-  const numBins = fftSize / 2 + 1;
-  const binToPitchClass = new Int8Array(numBins).fill(-1);
   const freqPerBin = sampleRate / fftSize;
-  for (let b = 1; b < numBins; b++) {
-    const freq = b * freqPerBin;
-    if (freq < fMin || freq > fMax) continue;
+  const bMin = Math.max(1, Math.ceil(fMin / freqPerBin));
+  const bMax = Math.min(fftSize / 2, Math.floor(fMax / freqPerBin));
+  const activeBins = bMax - bMin + 1;
+
+  const binToPitchClass = new Uint8Array(activeBins);
+  for (let b = 0; b < activeBins; b++) {
+    const freq = (b + bMin) * freqPerBin;
     const midiNote = 69 + 12 * Math.log2(freq / 440);
     binToPitchClass[b] = ((Math.round(midiNote) % 12) + 12) % 12;
   }
+
+  const spectrogram = new Float32Array(numFrames * activeBins);
   for (let frame = 0; frame < numFrames; frame++) {
-    const offset = frame * hopSize;
-    for (let i = 0; i < fftSize; i++) { re[i] = mono[offset + i] ?? 0; im[i] = 0; }
+    const sampleOffset = frame * hopSize;
+    for (let i = 0; i < fftSize; i++) { re[i] = mono[sampleOffset + i] ?? 0; im[i] = 0; }
     applyHann(re, fftSize);
     fft(re, im);
-    for (let b = 0; b < numBins; b++) {
-      const pc = binToPitchClass[b];
-      if (pc === -1) continue;
-      chroma[pc] += Math.sqrt(re[b] * re[b] + im[b] * im[b]);
+    const frameOffset = frame * activeBins;
+    for (let b = 0; b < activeBins; b++) {
+      const absB = b + bMin;
+      spectrogram[frameOffset + b] = Math.sqrt(re[absB] * re[absB] + im[absB] * im[absB]);
     }
   }
+
+  const activeSpec = useHpss
+    ? separateHarmonicComponent(spectrogram, activeBins, numFrames, 17, 17)
+    : spectrogram;
+
+  for (let frame = 0; frame < numFrames; frame++) {
+    const frameOffset = frame * activeBins;
+    for (let b = 0; b < activeBins; b++) {
+      chroma[binToPitchClass[b]] += activeSpec[frameOffset + b];
+    }
+  }
+
   let maxVal = 0;
   for (let i = 0; i < 12; i++) if (chroma[i] > maxVal) maxVal = chroma[i];
   if (maxVal > 0) for (let i = 0; i < 12; i++) chroma[i] /= maxVal;
@@ -144,8 +211,8 @@ function computeChromaVector(mono, sampleRate, fftSize = 4096, hopSize = 2048, f
    Key detection (mirror of keyDetection.ts)
    ============================================================ */
 
-function detectKey(mono, sampleRate) {
-  const chroma = computeChromaVector(mono, sampleRate);
+function detectKey(mono, sampleRate, fMin = 150, fMax = 2100, useHpss = true) {
+  const chroma = computeChromaVector(mono, sampleRate, 4096, 2048, fMin, fMax, useHpss);
   const results = [];
   for (let pc = 0; pc < 12; pc++) {
     results.push({ pc, mode: 'major', r: pearsonCorrelation(chroma, rotateRight(KEY_MAJOR, pc)) });
@@ -219,16 +286,20 @@ const mp3Files = readdirSync(AUDIO_DIR)
 
 console.log(`Running BeatDet key detection on ${mp3Files.length} GiantSteps tracks...\n`);
 
-let correct = 0;
-let closeWrong = 0; // adjacent Camelot key (off by one step)
-let wrong = 0;
-const confusionMap = {}; // "expected → detected" tallies
-const perKeyStats = {};  // expected key → { correct, total }
-const results = [];
+// Configurations to bench: [label, fMin, fMax, useHpss]
+const CONFIGS = [
+  ['No HPSS  / 150Hz (v0.7.3)', 150, 2100, false],
+  ['HPSS     /  65Hz (branch)',   65, 2100, true],
+  ['HPSS     / 150Hz',           150, 2100, true],
+  ['HPSS     / 200Hz',           200, 2100, true],
+];
+const scores = CONFIGS.map(() => 0);
+const closeCounts = CONFIGS.map(() => 0);
 
 let processed = 0;
 const startTime = Date.now();
 
+// We run all configs on each track so that the expensive decode happens once.
 for (const file of mp3Files) {
   const audioPath = join(AUDIO_DIR, file);
   const keyPath = join(ANNOT_DIR, basename(file, '.mp3') + '.key');
@@ -236,83 +307,47 @@ for (const file of mp3Files) {
   const normalised = normaliseKey(rawAnnotation);
   const [expectedNote, expectedMode] = normalised.split(' ');
 
-  let detected;
+  let mono, sampleRate;
   try {
     const buf = await decodeMp3(audioPath);
-    const mono = mixDownToMono(buf);
-    detected = detectKey(mono, buf.sampleRate);
+    mono = mixDownToMono(buf);
+    sampleRate = buf.sampleRate;
   } catch (err) {
     console.error(`  ERROR decoding ${file}: ${err.message}`);
-    wrong++;
     processed++;
     continue;
   }
 
-  const detectedStr = `${detected.key} ${detected.mode}`;
-  const isCorrect = detected.key === expectedNote && detected.mode === expectedMode;
-  const dist = camelotDistance(
-    expectedMode === 'major' ? CAMELOT_MAJOR[NOTE_NAMES.indexOf(expectedNote)] : CAMELOT_MINOR[NOTE_NAMES.indexOf(expectedNote)],
-    detected.camelot,
-  );
-
-  if (isCorrect) {
-    correct++;
-  } else if (dist === 1) {
-    closeWrong++;
-  } else {
-    wrong++;
-  }
-
-  // Confusion tracking
-  const confKey = `${normalised} → ${detectedStr}`;
-  confusionMap[confKey] = (confusionMap[confKey] || 0) + 1;
-
-  // Per-key tracking
-  if (!perKeyStats[normalised]) perKeyStats[normalised] = { correct: 0, total: 0 };
-  perKeyStats[normalised].total++;
-  if (isCorrect) perKeyStats[normalised].correct++;
-
-  results.push({ file, expected: normalised, detected: detectedStr, camelot: detected.camelot, confidence: detected.confidence, isCorrect, dist });
+  CONFIGS.forEach(([, fMin, fMax, useHpss], idx) => {
+    const detected = detectKey(mono, sampleRate, fMin, fMax, useHpss);
+    const isCorrect = detected.key === expectedNote && detected.mode === expectedMode;
+    const expCamelot = expectedMode === 'major'
+      ? CAMELOT_MAJOR[NOTE_NAMES.indexOf(expectedNote)]
+      : CAMELOT_MINOR[NOTE_NAMES.indexOf(expectedNote)];
+    const dist = camelotDistance(expCamelot, detected.camelot);
+    if (isCorrect) scores[idx]++;
+    else if (dist === 1) closeCounts[idx]++;
+  });
 
   processed++;
   if (processed % 50 === 0) {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
-    const pct = ((correct / processed) * 100).toFixed(1);
-    process.stdout.write(`  ${processed}/${mp3Files.length} processed... ${pct}% correct so far (${elapsed}s)\n`);
+    process.stdout.write(`  ${processed}/${mp3Files.length} processed... (${elapsed}s)\n`);
   }
 }
 
-const total = results.length;
+const total = processed;
 const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
-console.log('\n' + '='.repeat(60));
-console.log('RESULTS');
-console.log('='.repeat(60));
-console.log(`Total tracks:        ${total}`);
-console.log(`Correct:             ${correct} (${((correct / total) * 100).toFixed(1)}%)`);
-console.log(`Close (±1 Camelot):  ${closeWrong} (${((closeWrong / total) * 100).toFixed(1)}%)`);
-console.log(`Wrong:               ${wrong} (${((wrong / total) * 100).toFixed(1)}%)`);
-console.log(`Correct + close:     ${correct + closeWrong} (${(((correct + closeWrong) / total) * 100).toFixed(1)}%)`);
-console.log(`Time:                ${elapsed}s`);
-
-console.log('\n' + '-'.repeat(60));
-console.log('PER-KEY ACCURACY (sorted by worst first)');
-console.log('-'.repeat(60));
-Object.entries(perKeyStats)
-  .sort((a, b) => (a[1].correct / a[1].total) - (b[1].correct / b[1].total))
-  .forEach(([key, { correct: c, total: t }]) => {
-    const pct = ((c / t) * 100).toFixed(0).padStart(3);
-    const bar = '█'.repeat(Math.round(c / t * 20)).padEnd(20, '░');
-    console.log(`  ${key.padEnd(12)} ${bar} ${pct}%  (${c}/${t})`);
-  });
-
-console.log('\n' + '-'.repeat(60));
-console.log('TOP CONFUSIONS (wrong detections, most common first)');
-console.log('-'.repeat(60));
-Object.entries(confusionMap)
-  .filter(([k]) => !k.startsWith(k.split(' → ')[1]))  // exclude correct ones
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 20)
-  .forEach(([pair, count]) => {
-    console.log(`  ${count.toString().padStart(3)}×  ${pair}`);
-  });
+console.log('\n' + '='.repeat(65));
+console.log('RESULTS on ' + total + ' tracks (' + elapsed + 's)');
+console.log('='.repeat(65));
+console.log('Config'.padEnd(35) + 'Correct    Close     Combined');
+console.log('-'.repeat(65));
+CONFIGS.forEach(([label], idx) => {
+  const c = scores[idx], cl = closeCounts[idx], t = total;
+  const pctC  = ((c / t) * 100).toFixed(1).padStart(5);
+  const pctCl = ((cl / t) * 100).toFixed(1).padStart(5);
+  const pctCo = (((c + cl) / t) * 100).toFixed(1).padStart(5);
+  console.log(`${label.padEnd(35)}${pctC}%   ${pctCl}%   ${pctCo}%`);
+});

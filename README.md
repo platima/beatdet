@@ -191,7 +191,15 @@ src/
    blocked.
 7. **Key detection**: a 12-bin chroma (pitch class energy) vector is computed
    from the mono PCM using a separate FFT pass (4096-point, Hann-windowed,
-   150-2100 Hz, above the kick drum fundamental range). The chroma vector is Pearson-correlated against all 24
+   150-2100 Hz). Before chroma accumulation, Harmonic-Percussive Source
+   Separation (HPSS) is applied: horizontal and vertical median filters on the
+   spectrogram separate sustained harmonic content (synths, pads, bass lines)
+   from transient percussive bursts (kick drums, snares). Only the harmonic
+   component contributes to chroma. This suppresses kick drum harmonics above
+   150 Hz that would otherwise bias the chroma vector. The 150 Hz lower cutoff
+   is retained to block the kick fundamental (~50-130 Hz), which HPSS cannot
+   cleanly separate because the kick repeats so frequently in EDM.
+   The chroma vector is Pearson-correlated against all 24
    Bellman-Budge major/minor key profiles (corpus-derived, stronger
    diatonic/non-diatonic separation than the original Krumhansl-Kessler
    profiles). The best-fit key, Camelot Wheel code, relative key, and top-5

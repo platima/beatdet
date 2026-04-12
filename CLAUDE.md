@@ -157,7 +157,7 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 ## Current State
 
 - **Milestone:** v0.5.x = PWA; v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Library Release
-- **Current version:** v0.7.3
+- **Current version:** v0.7.4
 - **Settings store:** schema v5 (`settingsVersion: '5.0.0'`); migrates v1 -> v2 -> v3 -> v4 -> v5 automatically.
 - **Tests:** run `npm test` for current counts.
 - **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.
@@ -176,5 +176,5 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 - **Keyboard shortcuts**: Space = play/pause, R = restart, L = toggle loop region, ? = keyboard shortcuts help (in `NavBar`). The R and L shortcuts are handled in `WaveformPlayer`; ? is handled in `NavBar`.
 - **Loop region**: `RegionsPlugin` from `wavesurfer.js/dist/plugins/regions` registered via `WaveSurfer.create({ plugins: [...] })`; loop check runs in the `audioprocess` closure via `loopEnabledRef` (avoids stale-closure race). `onRegionChange` prop threads the region bounds to `page.tsx` → `ExportPanel` for custom-range pre-fill.
 - **Playback speed**: `setPlaybackRate()` called on the WaveSurfer instance; speed buttons in the secondary controls row; default 1×.
-- **Key detection**: Bellman-Budge corpus-derived profiles in `src/lib/keyDetection.ts`; computes 12-bin chroma vector via FFT (4096-point, 150-2100 Hz; lower cutoff excludes kick drum fundamental range for better EDM accuracy), correlates against 24 Bellman-Budge major/minor profiles (stronger diatonic/non-diatonic separation than the original Krumhansl-Kessler profiles), returns key, Camelot code, relative key, top-5 candidates, and ambiguity flag. Confidence is the raw Pearson correlation coefficient (0–1). Called from `analyseAudio` after beat detection. `KeyDisplay` component renders the results. Toggleable via `showKey` in `DisplaySettings`.
+- **Key detection**: Bellman-Budge corpus-derived profiles in `src/lib/keyDetection.ts`; computes 12-bin chroma vector via FFT (4096-point, 150-2100 Hz; lower cutoff excludes kick drum fundamental range); before chroma accumulation, Harmonic-Percussive Source Separation (HPSS) isolates the harmonic spectrogram using horizontal (time-axis, L=17 frames) and vertical (frequency-axis, L=17 bins) median filters with squared Wiener soft masks — removes kick harmonics above 150 Hz, which the cutoff alone cannot block; correlates against 24 Bellman-Budge major/minor profiles (stronger diatonic/non-diatonic separation than the original Krumhansl-Kessler profiles), returns key, Camelot code, relative key, top-5 candidates, and ambiguity flag. Confidence is the raw Pearson correlation coefficient (0–1). Called from `analyseAudio` after beat detection. `KeyDisplay` component renders the results. Toggleable via `showKey` in `DisplaySettings`.
 - `testfiles/` excluded from Git (local only); required for real-audio integration tests.

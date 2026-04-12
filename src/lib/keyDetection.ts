@@ -62,6 +62,21 @@ const CAMELOT_MINOR = ['5A', '12A', '7A', '2A', '9A', '4A', '11A', '6A', '1A', '
  */
 const RAW_AMBIGUITY_THRESHOLD = 0.40;
 
+/**
+ * HPSS horizontal (time-axis) median filter kernel width in frames.
+ * At hopSize=2048 and 44100 Hz (~46 ms/frame), 17 frames ≈ 790 ms.
+ * Sustained harmonic sources (synths, pads, bass lines) persist over
+ * many frames and are retained by this filter.
+ */
+const HPSS_H_KERNEL = 17;
+
+/**
+ * HPSS vertical (frequency-axis) median filter kernel width in bins.
+ * 17 bins at ~11-12 Hz/bin covers ~190 Hz bandwidth, enough to capture
+ * the broadband frequency spread of transient percussive events.
+ */
+const HPSS_P_KERNEL = 17;
+
 /* ============================================================
    Internal helpers
    ============================================================ */
@@ -156,26 +171,133 @@ function fft(re: Float64Array, im: Float64Array): void {
 }
 
 /* ============================================================
+   Harmonic-Percussive Source Separation (HPSS)
+   ============================================================ */
+
+/**
+ * Sort the first `len` elements of a Float32Array in-place using
+ * insertion sort.  Efficient for small arrays (typically len ≤ 31).
+ */
+function insertionSort(arr: Float32Array, len: number): void {
+  for (let i = 1; i < len; i++) {
+    const key = arr[i];
+    let j = i - 1;
+    while (j >= 0 && arr[j] > key) {
+      arr[j + 1] = arr[j];
+      j--;
+    }
+    arr[j + 1] = key;
+  }
+}
+
+/**
+ * Apply Harmonic-Percussive Source Separation (HPSS) to a magnitude
+ * spectrogram and return the harmonic component.
+ *
+ * The algorithm exploits two properties of audio spectrograms:
+ *   - Harmonic sources (synths, pads, bass lines) create horizontal ridges
+ *     — they persist at a stable frequency across many frames.
+ *   - Percussive sources (kick drums, snares, hi-hats) create vertical
+ *     stripes — they spread across many frequencies at a given moment.
+ *
+ * A horizontal (time-axis) median filter extracts the harmonic estimate;
+ * a vertical (frequency-axis) median filter extracts the percussive
+ * estimate.  A squared Wiener soft mask then blends the two estimates
+ * so that energy at each time-frequency point is attributed to whichever
+ * source is dominant.
+ *
+ * Reference: Driedger, Müller and Disch, "Extending Harmonic-Percussive
+ * Separation of Audio Signals", ISMIR 2014.
+ *
+ * @param spec      Row-major magnitude spectrogram [frame * numBins + bin].
+ * @param numBins   Number of frequency bins (columns).
+ * @param numFrames Number of time frames (rows).
+ * @param hKernel   Time-axis median filter width (should be odd).
+ * @param pKernel   Frequency-axis median filter width (should be odd).
+ * @returns         Harmonic component, same shape and layout as `spec`.
+ */
+function separateHarmonicComponent(
+  spec: Float32Array,
+  numBins: number,
+  numFrames: number,
+  hKernel: number,
+  pKernel: number,
+): Float32Array {
+  const hHalf = Math.floor(hKernel / 2);
+  const pHalf = Math.floor(pKernel / 2);
+  const harmSpec = new Float32Array(spec.length);
+  const percSpec = new Float32Array(spec.length);
+  const tmpH = new Float32Array(hKernel);
+  const tmpP = new Float32Array(pKernel);
+
+  // Horizontal median filter: per frequency bin, across time frames.
+  // Sources that persist at a stable frequency are retained (harmonic).
+  for (let b = 0; b < numBins; b++) {
+    for (let t = 0; t < numFrames; t++) {
+      for (let k = 0; k < hKernel; k++) {
+        const tt = t - hHalf + k;
+        tmpH[k] = (tt >= 0 && tt < numFrames) ? spec[tt * numBins + b] : 0;
+      }
+      insertionSort(tmpH, hKernel);
+      harmSpec[t * numBins + b] = tmpH[hHalf];
+    }
+  }
+
+  // Vertical median filter: per time frame, across frequency bins.
+  // Sources that spread broadly in frequency are retained (percussive).
+  for (let t = 0; t < numFrames; t++) {
+    const row = t * numBins;
+    for (let b = 0; b < numBins; b++) {
+      for (let k = 0; k < pKernel; k++) {
+        const bb = b - pHalf + k;
+        tmpP[k] = (bb >= 0 && bb < numBins) ? spec[row + bb] : 0;
+      }
+      insertionSort(tmpP, pKernel);
+      percSpec[row + b] = tmpP[pHalf];
+    }
+  }
+
+  // Squared Wiener soft mask: H_mask = H² / (H² + P²).
+  // Where both are zero the result stays zero (no signal present).
+  const result = new Float32Array(spec.length);
+  for (let i = 0; i < spec.length; i++) {
+    const h = harmSpec[i];
+    const p = percSpec[i];
+    const denom = h * h + p * p;
+    if (denom > 0) result[i] = spec[i] * (h * h / denom);
+  }
+
+  return result;
+}
+
+/* ============================================================
    Chroma extraction
    ============================================================ */
 
 /**
  * Compute a 12-bin chroma (pitch class energy) vector from mono PCM data.
  *
- * The algorithm processes the signal in overlapping frames. Each frame is
- * Hann-windowed before FFT. Spectral magnitude is accumulated into the
- * chroma bin corresponding to the nearest 12-TET pitch class. Only
- * frequencies in the musically meaningful range [fMin, fMax] are considered.
+ * The algorithm processes the signal in overlapping Hann-windowed frames.
+ * Before accumulating chroma, Harmonic-Percussive Source Separation (HPSS)
+ * is applied to the magnitude spectrogram.  HPSS uses median filtering to
+ * separate harmonic sources (synths, pads, bass lines — horizontal ridges in
+ * the spectrogram) from percussive sources (kick drums, snares — vertical
+ * stripes).  Only the harmonic component contributes to chroma.
+ *
+ * Because HPSS removes kick harmonics above 150 Hz (the 2nd, 3rd and 4th
+ * harmonics of a typical ~78 Hz EDM kick fall at ~156, 234 and 312 Hz), the
+ * lower frequency cutoff can be kept at 150 Hz rather than being raised
+ * further.  Lowering fMin below 150 Hz does not help: in EDM the kick repeats
+ * so frequently (2+ times/s) that HPSS's short horizontal kernel classifies
+ * the kick fundamental as "harmonic", undoing the separation benefit.
  *
  * @param mono        Mono PCM samples (Float32Array).
  * @param sampleRate  Sample rate in Hz.
  * @param fftSize     FFT window size in samples (must be power of two, default 4096).
  * @param hopSize     Hop between frames in samples (default fftSize / 2).
- * @param fMin        Minimum frequency to include in Hz (default 150 Hz, ~D3).
- *                   Set above the kick drum fundamental range (~50–130 Hz) to
- *                   avoid percussion-induced chroma pollution in EDM.
- * @param fMax        Maximum frequency to include in Hz (default 2100 Hz, ~C7).
- * @returns           Normalised 12-element chroma vector (values 0ÔÇô1).
+ * @param fMin        Minimum frequency in Hz (default 150 Hz, ~D3).
+ * @param fMax        Maximum frequency in Hz (default 2100 Hz, ~C7).
+ * @returns           Normalised 12-element chroma vector (values 0–1).
  */
 export function computeChromaVector(
   mono: Float32Array,
@@ -190,39 +312,51 @@ export function computeChromaVector(
   const im = new Float64Array(fftSize);
   const numFrames = Math.floor((mono.length - fftSize) / hopSize) + 1;
 
-  // Pre-compute which FFT bin each pitch class maps to so we can do an O(n)
-  // lookup rather than computing log2 for every bin in every frame.
-  // Build a binÔåÆpitchClass lookup table (value ÔêÆ1 means "out of range").
-  const numBins = fftSize / 2 + 1;
-  const binToPitchClass = new Int8Array(numBins).fill(-1);
+  // Restrict spectrogram computation to the active frequency window.
+  // bMin..bMax are bin indices whose centre frequencies fall in [fMin, fMax].
   const freqPerBin = sampleRate / fftSize;
-  for (let b = 1; b < numBins; b++) {
-    const freq = b * freqPerBin;
-    if (freq < fMin || freq > fMax) continue;
+  const bMin = Math.max(1, Math.ceil(fMin / freqPerBin));
+  const bMax = Math.min(fftSize / 2, Math.floor(fMax / freqPerBin));
+  const activeBins = bMax - bMin + 1;
+
+  // Pre-compute pitch class for each active bin (all fall within [fMin, fMax]
+  // by construction, so no out-of-range guard is needed in the inner loop).
+  const binToPitchClass = new Uint8Array(activeBins);
+  for (let b = 0; b < activeBins; b++) {
+    const freq = (b + bMin) * freqPerBin;
     // MIDI note relative to A4 = 440 Hz; pitch class 9 = A.
     const midiNote = 69 + 12 * Math.log2(freq / 440);
-    const pitchClass = ((Math.round(midiNote) % 12) + 12) % 12;
-    binToPitchClass[b] = pitchClass;
+    binToPitchClass[b] = ((Math.round(midiNote) % 12) + 12) % 12;
   }
 
+  // Build magnitude spectrogram restricted to active bins.
+  // Layout: row-major [frame * activeBins + bin_offset_from_bMin].
+  const spectrogram = new Float32Array(numFrames * activeBins);
   for (let frame = 0; frame < numFrames; frame++) {
-    const offset = frame * hopSize;
-
-    // Fill re with samples, im with zeros
+    const sampleOffset = frame * hopSize;
     for (let i = 0; i < fftSize; i++) {
-      re[i] = mono[offset + i] ?? 0;
+      re[i] = mono[sampleOffset + i] ?? 0;
       im[i] = 0;
     }
-
     applyHann(re, fftSize);
     fft(re, im);
+    const frameOffset = frame * activeBins;
+    for (let b = 0; b < activeBins; b++) {
+      const absB = b + bMin;
+      spectrogram[frameOffset + b] = Math.sqrt(re[absB] * re[absB] + im[absB] * im[absB]);
+    }
+  }
 
-    // Accumulate magnitude into chroma bins
-    for (let b = 0; b < numBins; b++) {
-      const pc = binToPitchClass[b];
-      if (pc === -1) continue;
-      const mag = Math.sqrt(re[b] * re[b] + im[b] * im[b]);
-      chroma[pc] += mag;
+  // Apply HPSS: retain only the harmonic component for chroma computation.
+  const harmonicSpec = separateHarmonicComponent(
+    spectrogram, activeBins, numFrames, HPSS_H_KERNEL, HPSS_P_KERNEL,
+  );
+
+  // Accumulate harmonic magnitudes into chroma bins.
+  for (let frame = 0; frame < numFrames; frame++) {
+    const frameOffset = frame * activeBins;
+    for (let b = 0; b < activeBins; b++) {
+      chroma[binToPitchClass[b]] += harmonicSpec[frameOffset + b];
     }
   }
 
