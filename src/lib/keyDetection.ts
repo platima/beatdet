@@ -195,10 +195,10 @@ function insertionSort(arr: Float32Array, len: number): void {
  * spectrogram and return the harmonic component.
  *
  * The algorithm exploits two properties of audio spectrograms:
- *   - Harmonic sources (synths, pads, bass lines) create horizontal ridges
- *     — they persist at a stable frequency across many frames.
+ *   - Harmonic sources (synths, pads, bass lines) create horizontal ridges:
+ *     they persist at a stable frequency across many frames.
  *   - Percussive sources (kick drums, snares, hi-hats) create vertical
- *     stripes — they spread across many frequencies at a given moment.
+ *     stripes: they spread across many frequencies at a given moment.
  *
  * A horizontal (time-axis) median filter extracts the harmonic estimate;
  * a vertical (frequency-axis) median filter extracts the percussive
@@ -280,9 +280,9 @@ function separateHarmonicComponent(
  * The algorithm processes the signal in overlapping Hann-windowed frames.
  * Before accumulating chroma, Harmonic-Percussive Source Separation (HPSS)
  * is applied to the magnitude spectrogram.  HPSS uses median filtering to
- * separate harmonic sources (synths, pads, bass lines — horizontal ridges in
- * the spectrogram) from percussive sources (kick drums, snares — vertical
- * stripes).  Only the harmonic component contributes to chroma.
+ * separate harmonic sources (synths, pads, bass lines, horizontal ridges in
+ * the spectrogram) from percussive sources (kick drums, snares, vertical
+ * stripes in the spectrogram).  Only the harmonic component contributes to chroma.
  *
  * Because HPSS removes kick harmonics above 150 Hz (the 2nd, 3rd and 4th
  * harmonics of a typical ~78 Hz EDM kick fall at ~156, 234 and 312 Hz), the
