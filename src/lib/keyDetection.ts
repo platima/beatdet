@@ -1,16 +1,16 @@
 /**
- * Musical key detection using the Krumhansl-Kessler algorithm.
+ * Musical key detection via chroma-profile correlation.
  *
  * The algorithm works by:
  * 1. Computing a 12-bin chroma (pitch class) energy vector from the audio.
  * 2. Pearson-correlating that vector against 24 key profiles (12 major,
- *    12 minor) derived from the Krumhansl-Kessler tonal hierarchy study.
+ *    12 minor) derived from the Bellman-Budge corpus analysis.
  * 3. Ranking the correlations to find the best-fit key and mode.
  *
- * References:
- *   Krumhansl & Kessler (1982) "Tracing the dynamic changes in perceived
- *   tonal organization in a spatial representation of musical keys."
- *   Psychological Review, 89(4), 334ÔÇô368.
+ * The Bellman-Budge profiles (2005, building on Budge 1943) assign much
+ * larger weights to diatonic scale tones than to non-diatonic ones,
+ * which provides stronger tonic/dominant separation than the original
+ * Krumhansl-Kessler (1982) perceptual profiles.
  */
 
 import type { KeyEstimate } from '@/types';
@@ -26,21 +26,25 @@ import type { KeyEstimate } from '@/types';
 const NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'] as const;
 
 /**
- * Krumhansl-Kessler major profile (C-rooted, 12 elements).
- * Represents the perceived tonal hierarchy for major keys.
+ * Bellman-Budge major profile (C-rooted, 12 elements).
+ * Derived from a large corpus analysis of Western tonal music.
+ * Provides stronger distinction between diatonic and non-diatonic
+ * pitch classes than the original Krumhansl-Kessler profiles,
+ * reducing tonic/dominant confusion on real audio.
+ *
+ * Source: Bellman (2005), building on Budge (1943).
  */
-const KK_MAJOR: readonly number[] = [
-  6.35, 2.23, 3.48, 2.33, 4.38, 4.09,
-  2.52, 5.19, 2.39, 3.66, 2.29, 2.88,
+const KEY_MAJOR: readonly number[] = [
+  16.80, 0.86, 12.95, 1.41, 13.49, 11.93,
+   1.25, 20.28,  1.80,  8.04,  0.62, 10.57,
 ];
 
 /**
- * Krumhansl-Kessler minor profile (C-rooted, 12 elements).
- * Represents the perceived tonal hierarchy for natural minor keys.
+ * Bellman-Budge minor profile (C-rooted, 12 elements).
  */
-const KK_MINOR: readonly number[] = [
-  6.33, 2.68, 3.52, 5.38, 2.60, 3.97,
-  2.69, 4.94, 3.04, 3.41, 4.00, 2.62,
+const KEY_MINOR: readonly number[] = [
+  18.16, 0.69, 12.99, 13.34, 1.07, 11.15,
+   1.38, 21.07,  7.49,  1.53,  0.92, 10.21,
 ];
 
 /**
@@ -251,12 +255,12 @@ export function detectKey(mono: Float32Array, sampleRate: number): KeyEstimate {
     results.push({
       pitchClass: pc,
       mode: 'major',
-      correlation: pearsonCorrelation(chromaArr, rotateRight(KK_MAJOR, pc)),
+      correlation: pearsonCorrelation(chromaArr, rotateRight(KEY_MAJOR, pc)),
     });
     results.push({
       pitchClass: pc,
       mode: 'minor',
-      correlation: pearsonCorrelation(chromaArr, rotateRight(KK_MINOR, pc)),
+      correlation: pearsonCorrelation(chromaArr, rotateRight(KEY_MINOR, pc)),
     });
   }
 

@@ -30,9 +30,9 @@ BeatDet was more accurate more often than both [Tunebat](https://tunebat.com/Ana
 - **Beat detection**: spectral-flux onset detection with adaptive peak picking.
 - **BPM estimation**: multi-lag IOI accumulation with Gaussian histogram smoothing
   and harmonic octave correction.
-- **Key detection**: Krumhansl-Kessler algorithm identifies the musical key (e.g. "C Major"),
-  Camelot Wheel code for DJ-friendly harmonic mixing, relative key, and top-5 candidates
-  with confidence bars. Toggleable in Settings.
+- **Key detection**: chroma-profile correlation (Bellman-Budge profiles) identifies the
+  musical key (e.g. "C Major"), Camelot Wheel code for DJ-friendly harmonic mixing,
+  relative key, and top-5 candidates with confidence bars. Toggleable in Settings.
 - **BPM correction**: clickable tempo candidates and ÷2 / ×2 display-only quick-correct buttons for common octave errors. Clicking a candidate sets that tempo as the displayed BPM.
 - **Waveform player**: interactive playback with beat markers overlaid; Space bar toggles play/pause; **R** restarts; **L** toggles the loop region.
 - **Playback speed control**: 0.5×, 0.75×, 1×, and 1.5× speed buttons for slowed-down beat verification.
@@ -150,7 +150,7 @@ src/
 │   ├── audioExport.ts      # WAV/MP3 encoding, ZIP bundling, and audio slicing
 │   ├── beatDetection.ts    # Beat detection engine (Web Audio API)
 │   ├── hintUtils.ts        # Detection hint logic (buildHints, isCloseRatio)
-│   ├── keyDetection.ts     # Key detection engine (Krumhansl-Kessler algorithm)
+│   ├── keyDetection.ts     # Key detection engine (Bellman-Budge chroma correlation)
 │   ├── sessionStorage.ts   # Session persistence helpers
 │   └── __tests__/          # Unit + integration tests
 │       ├── audioExport.test.ts   # WAV encoding, slicing, normalisation, ZIP tests
@@ -192,9 +192,11 @@ src/
 7. **Key detection**: a 12-bin chroma (pitch class energy) vector is computed
    from the mono PCM using a separate FFT pass (4096-point, Hann-windowed,
    65-2100 Hz). The chroma vector is Pearson-correlated against all 24
-   Krumhansl-Kessler major/minor key profiles. The best-fit key, Camelot Wheel
-   code, relative key, and top-5 candidates are returned. An ambiguity flag is
-   set when the raw correlation is below 0.40 (flat or chromatic material).
+   Bellman-Budge major/minor key profiles (corpus-derived, stronger
+   diatonic/non-diatonic separation than the original Krumhansl-Kessler
+   profiles). The best-fit key, Camelot Wheel code, relative key, and top-5
+   candidates are returned. An ambiguity flag is set when the raw correlation
+   is below 0.40 (flat or chromatic material).
 
 ---
 
@@ -236,7 +238,7 @@ Four test suites cover the core libraries:
   FFT correctness, onset strength functions, peak picking (including absolute
   height floor), and BPM estimation.
 - **Key detection unit tests** (`keyDetection.test.ts`): 18 tests covering
-  chroma vector computation, Krumhansl-Kessler correlation, Camelot codes,
+  chroma vector computation, Bellman-Budge profile correlation, Camelot codes,
   relative key calculation, candidate ranking, and ambiguity detection.
 - **Hint logic unit tests** (`hintUtils.test.ts`): 31 tests for `buildHints`
   and `isCloseRatio`, covering octave errors, 3:2/4:3 ratio hints, low
@@ -250,7 +252,9 @@ Four test suites cover the core libraries:
   the full spectral-flux → peak-pick → BPM-estimate pipeline. 20 pass
   outright (including 7 octave-tolerant), 6 are skipped as known limitations
   (3:2 harmonic ambiguity, missing-candidate failures, too-short clips).
-  Also includes 1 known-key verification test (Canon In D = D Major, 10B).
+  Also includes 3 known-key verification tests (1 passing: Für Elise = A Minor;
+  2 skipped as known limitations: Canon In D 8-bit synth timbre, Eine Kleine
+  Nachtmusik sonata-form modulation).
 
 ```bash
 # Run all tests
