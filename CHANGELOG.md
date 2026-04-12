@@ -6,6 +6,49 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.10] - 2026-04-14
+
+### Added
+
+- **Global drag overlay**: dragging any file over the browser window now darkens the entire
+  page and shows a centred "Drop to replace" / "Drop audio file to analyse" hint, regardless
+  of which element the pointer is hovering. Uses a window-level `dragenter`/`dragleave`/`drop`
+  listener with a ref counter to avoid false clears when moving between child elements.
+- **Settings keyboard shortcut**: pressing `S` from any page navigates to the Settings page;
+  pressing `S` again navigates back. Listed in the keyboard shortcuts flyout.
+
+### Fixed
+
+- **Waveform drag-to-seek cursor**: the playhead cursor bar now tracks the pointer in real
+  time while dragging, not only on release. Fixed by enabling WaveSurfer's `dragToSeek`
+  option (defaults to `false` in wavesurfer.js 7.x).
+
+---
+
+## [0.7.9] - 2026-04-13
+
+### Fixed
+
+- **Keyboard shortcuts flyout margin**: gap between the `?` button and the flyout panel
+  increased from `mt-2` to `mt-4` for better visual separation.
+
+---
+
+## [0.7.8] - 2026-04-13
+
+### Fixed
+
+- **Ctrl+R passthrough**: the global `keydown` handler now ignores events where `ctrlKey`,
+  `metaKey`, or `altKey` is held, so browser shortcuts such as Ctrl+R (hard reload) and
+  Ctrl+S (save) pass through unaffected.
+- **Drag-enter/leave flicker**: file drag highlight on the uploader no longer flickers when
+  the pointer moves over child elements, resolved by switching from `dragenter`/`dragleave`
+  pair to `dragover`/`dragleave` with a CSS pointer-events guard.
+- **Drop-to-replace hint**: "Drop audio to replace" text is now shown on the loaded-file
+  state of the uploader (in addition to the empty state) for a consistent drag affordance.
+
+---
+
 ## [0.7.7] - 2026-04-13
 
 ### Fixed

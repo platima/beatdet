@@ -12,7 +12,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AudioUploader } from '@/components/AudioUploader';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -103,8 +103,59 @@ export default function HomePage() {
 
   const isProcessing = status === 'loading' || status === 'analysing';
 
+  // Global drag overlay: show whenever any file is dragged over the window,
+  // regardless of which element it hovers. Uses a ref-counter so that entering
+  // child elements doesn't prematurely clear the dragging state.
+  const [isGlobalDragging, setIsGlobalDragging] = useState(false);
+  const dragCounterRef = useRef(0);
+
+  useEffect(() => {
+    const onEnter = (e: DragEvent) => {
+      if (!e.dataTransfer?.types.includes('Files')) return;
+      dragCounterRef.current++;
+      setIsGlobalDragging(true);
+    };
+    const onLeave = () => {
+      dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
+      if (dragCounterRef.current === 0) setIsGlobalDragging(false);
+    };
+    const onDrop = () => {
+      dragCounterRef.current = 0;
+      setIsGlobalDragging(false);
+    };
+    window.addEventListener('dragenter', onEnter);
+    window.addEventListener('dragleave', onLeave);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('dragenter', onEnter);
+      window.removeEventListener('dragleave', onLeave);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, []);
+
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-6">
+      {/* Global drag overlay: darkens the entire page whenever a file is
+          dragged over the window, providing a consistent drop affordance. */}
+      {isGlobalDragging && !isProcessing && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--bg) 70%, transparent)' }}
+        >
+          <div
+            className="rounded-2xl px-8 py-6 text-center"
+            style={{
+              backgroundColor: 'var(--bg-panel)',
+              border: '2px dashed var(--accent)',
+            }}
+          >
+            <p className="text-base font-semibold" style={{ color: 'var(--accent)' }}>
+              {fileInfo ? 'Drop to replace' : 'Drop audio file to analyse'}
+            </p>
+            <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>WAV · MP3 · M4A · AAC</p>
+          </div>
+        </div>
+      )}
       {/* Page header */}
       <div className="space-y-1.5">
         <h1

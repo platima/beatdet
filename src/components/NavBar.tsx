@@ -7,7 +7,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Activity, Settings, Sun, Moon, Monitor, ScrollText, Keyboard } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -16,25 +16,30 @@ const VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0';
 
 export function NavBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { preference, toggleTheme } = useTheme();
   const [showHelp, setShowHelp] = React.useState(false);
 
   const ThemeIcon =
     preference === 'dark' ? Moon : preference === 'light' ? Sun : Monitor;
 
-  // Global '?' key toggles the shortcuts panel
+  // Global '?' key toggles the shortcuts panel; 'S' navigates to/from settings
   React.useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key !== '?') return;
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
       ) return;
-      setShowHelp((v) => !v);
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === '?') {
+        setShowHelp((v) => !v);
+      } else if (e.key === 's' || e.key === 'S') {
+        router.push(pathname === '/settings' ? '/' : '/settings');
+      }
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
-  }, []);
+  }, [pathname, router]);
 
   return (
     <header
@@ -159,6 +164,7 @@ export function NavBar() {
                   { key: 'Space', action: 'Play / pause' },
                   { key: 'R',     action: 'Restart playback' },
                   { key: 'L',     action: 'Toggle loop region' },
+                  { key: 'S',     action: 'Open / close settings' },
                   { key: '?',     action: 'Show / hide shortcuts' },
                 ].map(({ key, action }) => (
                   <tr key={key}>

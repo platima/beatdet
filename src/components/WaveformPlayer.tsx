@@ -106,6 +106,7 @@ export function WaveformPlayer({ audioUrl, result, seekTo, onRegionChange }: Wav
       height: waveformHeight,
       normalize: true,
       interact: true,
+      dragToSeek: true,
       url: audioUrl,
       // Hide the scrollbar via WaveSurfer's own shadow-DOM mechanism; the
       // hover listeners below reveal it only while the pointer is over the
