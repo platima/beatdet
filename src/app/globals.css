@@ -289,6 +289,13 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
+/* Ensure pointer cursor on interactive elements.
+   Tailwind Preflight does not set this for buttons. */
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
 /* High-contrast active state for buttons so the press is
    visible even without colour distinction */
 button:active {

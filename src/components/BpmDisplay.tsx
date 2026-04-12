@@ -343,7 +343,7 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
           </div>
           <button
             onClick={() => setDismissedResult(result)}
-            className="shrink-0 rounded p-0.5 hover:bg-[var(--bg-alt)] transition-colors"
+            className="shrink-0 cursor-pointer rounded p-1 hover:bg-[var(--bg-alt)] hover:shadow-md transition-all"
             aria-label="Dismiss detection hint"
           >
             <X size={15} style={{ color: 'var(--text-muted)' }} />

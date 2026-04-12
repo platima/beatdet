@@ -106,14 +106,17 @@ export default function HomePage() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <h1
           className="text-2xl font-bold tracking-tight"
           style={{ color: 'var(--text-heading)' }}
         >
           BeatDet
         </h1>
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-sm font-medium" style={{ color: 'var(--text-body)' }}>
+          Beat &amp; key detection for DJs and producers
+        </p>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
           Upload a WAV, MP3, M4A, or AAC file to detect beats and musical key,
           visualise the waveform, and export sliced audio.
         </p>
@@ -282,7 +285,7 @@ export default function HomePage() {
           <div className="flex justify-end gap-2 pt-2">
             {reanalyse && (
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 icon={<RotateCcw size={14} />}
                 onClick={() => { setBpmMultiplier(1); reanalyse(); }}
@@ -291,7 +294,7 @@ export default function HomePage() {
               </Button>
             )}
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               icon={<RefreshCw size={14} />}
               onClick={clearAll}

@@ -26,6 +26,12 @@ Browser (static site)
 ## Dev Environment
 
 - **Dev machine:** Windows 11 with VS Code as the primary IDE
+- **Shell:** PowerShell only. Do NOT use bash commands or POSIX utilities.
+  Use PowerShell equivalents instead:
+  - `... | Select-Object -Last N` (not `tail -N`)
+  - `... | Select-Object -First N` (not `head -N`)
+  - `Select-String 'pattern'` (not `grep`)
+  - `$content -replace 'old','new'` (not `sed`)
 - **Node.js:** 20+ (required for Next.js 16)
 - **Package manager:** npm
 
