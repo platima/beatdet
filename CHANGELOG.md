@@ -6,6 +6,28 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.12] - 2026-04-14
+
+### Fixed
+
+- **Drop not working / overlay stuck**: the global drag overlay used a window-level `drop`
+  listener to reset its state, but `drop` only fires when `dragover` has been prevented on
+  the target element. Elements outside `AudioUploader` (headings, result panels, etc.) had
+  no `dragover` handler, so drops on those areas were rejected by the browser and the window
+  `drop` event never fired, leaving the overlay visible indefinitely.
+  Fixed by:
+  - Adding a window-level `dragover` handler that calls `preventDefault()` for file drags,
+    making the entire page a valid drop target.
+  - Having the window `drop` handler process the file (calls `analyseFile`) for drops that
+    land outside `AudioUploader`.
+  - Adding `e.stopPropagation()` in `AudioUploader.handleDrop` to prevent double-processing
+    when the user drops directly on the uploader element.
+  - Adding a window `dragend` listener to clear the overlay on Escape / drag cancel.
+  - Adding a `status`-based `useEffect` backstop that clears the overlay whenever analysis
+    starts (covers the `stopPropagation` path where the window `drop` is bypassed).
+
+---
+
 ## [0.7.11] - 2026-04-14
 
 ### Fixed

@@ -65,6 +65,9 @@ export function AudioUploader({
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    // Stop propagation so the window-level drop handler in page.tsx does not
+    // also process the same file (would cause double analysis).
+    e.stopPropagation();
     setIsDragging(false);
     if (disabled) return;
     const file = e.dataTransfer.files[0];

@@ -108,6 +108,19 @@ export default function HomePage() {
   // child elements doesn't prematurely clear the dragging state.
   const [isGlobalDragging, setIsGlobalDragging] = useState(false);
   const dragCounterRef = useRef(0);
+  // Stable ref so the window drop handler always calls the latest analyseFile
+  // without needing to be in the effect dependency array.
+  const analyseFileRef = useRef(analyseFile);
+  useEffect(() => { analyseFileRef.current = analyseFile; }, [analyseFile]);
+
+  // Clear overlay whenever analysis starts (backstop for drops handled by
+  // AudioUploader via stopPropagation, which bypasses the window drop handler).
+  useEffect(() => {
+    if (status !== 'idle') {
+      setIsGlobalDragging(false);
+      dragCounterRef.current = 0;
+    }
+  }, [status]);
 
   useEffect(() => {
     const onEnter = (e: DragEvent) => {
@@ -115,20 +128,40 @@ export default function HomePage() {
       dragCounterRef.current++;
       setIsGlobalDragging(true);
     };
+    // Prevent the default action so the whole page accepts drops, not just
+    // AudioUploader. Without this, drops outside the uploader are rejected and
+    // the window 'drop' event never fires, leaving the overlay stuck.
+    const onDragOver = (e: DragEvent) => {
+      if (e.dataTransfer?.types.includes('Files')) e.preventDefault();
+    };
     const onLeave = () => {
       dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
       if (dragCounterRef.current === 0) setIsGlobalDragging(false);
     };
-    const onDrop = () => {
+    // dragend fires on Escape / drag cancel - clears overlay regardless of drop
+    const onDragEnd = () => {
       dragCounterRef.current = 0;
       setIsGlobalDragging(false);
     };
+    const onDrop = (e: DragEvent) => {
+      e.preventDefault();
+      dragCounterRef.current = 0;
+      setIsGlobalDragging(false);
+      // Process files dropped outside AudioUploader (which stops propagation on
+      // its own drop handler to avoid double-processing).
+      const file = e.dataTransfer?.files[0];
+      if (file) analyseFileRef.current(file);
+    };
     window.addEventListener('dragenter', onEnter);
+    window.addEventListener('dragover', onDragOver);
     window.addEventListener('dragleave', onLeave);
+    window.addEventListener('dragend', onDragEnd);
     window.addEventListener('drop', onDrop);
     return () => {
       window.removeEventListener('dragenter', onEnter);
+      window.removeEventListener('dragover', onDragOver);
       window.removeEventListener('dragleave', onLeave);
+      window.removeEventListener('dragend', onDragEnd);
       window.removeEventListener('drop', onDrop);
     };
   }, []);
