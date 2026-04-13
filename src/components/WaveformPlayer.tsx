@@ -259,11 +259,35 @@ export function WaveformPlayer({ audioUrl, result, seekTo, onRegionChange }: Wav
       } else if (e.key === 'l' || e.key === 'L') {
         e.preventDefault();
         setLoopEnabled((v) => !v);
+      } else if (e.key === 'x' || e.key === 'X') {
+        // Zoom in (step 0.5, max 8)
+        e.preventDefault();
+        setZoom((prev) => {
+          const next = Math.min(8, parseFloat((prev + 0.5).toFixed(1)));
+          updateDisplay({ waveformZoom: next });
+          return next;
+        });
+      } else if (e.key === 'z' || e.key === 'Z') {
+        // Zoom out (step 0.5, min 1)
+        e.preventDefault();
+        setZoom((prev) => {
+          const next = Math.max(1, parseFloat((prev - 0.5).toFixed(1)));
+          updateDisplay({ waveformZoom: next });
+          return next;
+        });
+      } else if (e.key === ']') {
+        // Volume up (step 0.1, max 1)
+        e.preventDefault();
+        setVolume((prev) => Math.min(1, parseFloat((prev + 0.1).toFixed(2))));
+      } else if (e.key === '[') {
+        // Volume down (step 0.1, min 0)
+        e.preventDefault();
+        setVolume((prev) => Math.max(0, parseFloat((prev - 0.1).toFixed(2))));
       }
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
-  }, [isReady]);
+  }, [isReady, updateDisplay]);
 
   const togglePlay = useCallback(() => wsRef.current?.playPause(), []);
   const restart = useCallback(() => {

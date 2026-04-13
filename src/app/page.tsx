@@ -143,7 +143,7 @@ export default function HomePage() {
           style={{ backgroundColor: 'color-mix(in srgb, var(--bg) 70%, transparent)' }}
         >
           <div
-            className="rounded-2xl px-8 py-6 text-center"
+            className="rounded-2xl px-8 py-6 text-center pointer-events-none"
             style={{
               backgroundColor: 'var(--bg-panel)',
               border: '2px dashed var(--accent)',

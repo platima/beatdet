@@ -89,7 +89,7 @@ export function KeyDisplay({ keyEstimate }: KeyDisplayProps) {
           </div>
           {ambiguous && (
             <p className="mt-1 text-xs" style={{ color: 'var(--warning)' }}>
-              Low confidence ÔÇö key may be ambiguous
+              Low confidence - key may be ambiguous
             </p>
           )}
         </div>

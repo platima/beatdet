@@ -164,6 +164,10 @@ export function NavBar() {
                   { key: 'Space', action: 'Play / pause' },
                   { key: 'R',     action: 'Restart playback' },
                   { key: 'L',     action: 'Toggle loop region' },
+                  { key: 'X',     action: 'Zoom in' },
+                  { key: 'Z',     action: 'Zoom out' },
+                  { key: ']',     action: 'Volume up' },
+                  { key: '[',     action: 'Volume down' },
                   { key: 'S',     action: 'Open / close settings' },
                   { key: '?',     action: 'Show / hide shortcuts' },
                 ].map(({ key, action }) => (

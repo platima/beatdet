@@ -6,6 +6,26 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.11] - 2026-04-14
+
+### Fixed
+
+- **Drop-to-replace overlay stuck on screen**: the global drag overlay's inner hint box was
+  missing `pointer-events-none`, so it intercepted drag-enter/leave events and the `drop`
+  event never reached `AudioUploader`. All overlay children now carry `pointer-events-none`.
+- **Key ambiguity label garbled**: the warning "Low confidence — key may be ambiguous" was
+  rendering as `ÔÇö` due to a mis-encoded em-dash in the source file. Replaced with a
+  plain hyphen (`-`) in line with project conventions (no em-dashes).
+
+### Added
+
+- **Zoom keyboard shortcuts**: `X` zooms the waveform in (step +0.5×), `Z` zooms out
+  (step -0.5×), clamped to the slider range 1-8×. Changes are persisted to settings.
+- **Volume keyboard shortcuts**: `]` raises volume by 0.1, `[` lowers it, clamped to 0-1.
+  Both listed in the keyboard shortcuts flyout.
+
+---
+
 ## [0.7.10] - 2026-04-14
 
 ### Added
