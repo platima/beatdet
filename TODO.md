@@ -72,7 +72,6 @@
 
 - [x] **Tempo confidence hints** (v0.4.0): dismissible toast showing contextual tips when the BPM result may be unreliable. Detects octave (2:1), sesquialtera (3:2), 4:3, and triple-tempo (3:1) inter-candidate ratios, low confidence (<35%), and short clips (<30 beats). Suppressed when the algorithm already auto-corrected the same ratio (`correctionRatio` field on `BpmEstimate`).
 - [x] Waveform zoom slider wired to `waveformZoom` store setting (v0.4.1).
-- [ ] Further bug fixes and UI polish as needed.
 
 ---
 
@@ -121,7 +120,13 @@
 
 ---
 
-## v0.8.0 — Library Release
+## v0.8.0 — TBD
+
+- [ ] **To be defined.**
+
+---
+
+## v0.9.0 — Library Release
 
 - [ ] **Expose beat detection engine as a standalone npm package** (`beatdet-core` or similar), so developers can `import { analyseAudio, estimateBpm } from 'beatdet-core'` in their own projects.
 
