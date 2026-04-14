@@ -162,7 +162,7 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 
 ## Current State
 
-- **Milestone:** v0.5.x = PWA; v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Library Release
+- **Milestone:** v0.5.x = PWA; v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Projects; v0.9.x = Multi-file Projects; v0.10.x = Active Tempo; v0.11.x = UI Rework; v0.12.x = Waveform Selection; v0.13.x = DJ Tools; v0.14.x = Library Release. Full details in `TODO.md`.
 - **Current version:** v0.7.12
 - **Settings store:** schema v5 (`settingsVersion: '5.0.0'`); migrates v1 -> v2 -> v3 -> v4 -> v5 automatically.
 - **Tests:** run `npm test` for current counts.

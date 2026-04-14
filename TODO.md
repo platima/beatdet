@@ -120,20 +120,122 @@
 
 ---
 
-## v0.8.0 — TBD
+## v0.8.0 — Projects (Single File)
 
-- [ ] **To be defined.**
+Introduce "projects" as a way to stash and return to analysed files. Currently
+the app only remembers the last session via `sessionStorage`/`localStorage`;
+projects persist multiple named snapshots to IndexedDB.
+
+- [ ] **Storage layer** (`src/lib/projectStorage.ts`): IndexedDB-backed CRUD for
+  project records. Each project stores file metadata, analysis result, and
+  (optionally) the raw audio `ArrayBuffer`. Use the `idb-keyval` library or bare
+  `indexedDB` wrapper to keep it lightweight.
+- [ ] **Project type** (`src/types/index.ts`): `Project` interface with `id`
+  (UUID), `name` (defaults to file name sans extension), `fileName`, `fileSize`,
+  `fileType`, `result: AnalysisResult`, `audioBuffer?: ArrayBuffer`,
+  `createdAt`, `updatedAt`.
+- [ ] **Save button**: after analysis completes, a "Save to Projects" button
+  appears in the results footer (next to "Re-analyse" / "New file"). Saves the
+  current analysis result + audio buffer as a new project (or overwrites if the
+  same project is already open).
+- [ ] **Projects drawer / panel**: a slide-out drawer (or dropdown) accessible
+  from a button in the top-right of the NavBar (e.g. folder icon). Lists saved
+  projects with name, date, BPM, and key. Each row has "Open" and "Delete"
+  actions. Opening restores the analysis result and (if audio was stashed) the
+  waveform.
+- [ ] **Active project indicator**: when a project is open, show its name in
+  a subtle badge or breadcrumb so the user knows which project they are viewing.
+- [ ] **Docs/tests/CHANGELOG** update per standard checklist.
 
 ---
 
-## v0.9.0 — Library Release
+## v0.9.0 — Projects (Multi-File)
 
-- [ ] **Expose beat detection engine as a standalone npm package** (`beatdet-core` or similar), so developers can `import { analyseAudio, estimateBpm } from 'beatdet-core'` in their own projects.
+Extend projects to hold multiple audio files in a single project. This is the
+foundation for mix preparation, set lists, or album-level analysis.
+
+- [ ] **Multi-file project model**: a `Project` contains an array of
+  `ProjectTrack` entries (each with its own `AnalysisResult`, audio buffer, and
+  ordering index).
+- [ ] **Track management UI**: within an open project, list tracks with
+  drag-to-reorder, add (drop or browse), and remove. Clicking a track loads its
+  result + waveform into the main view.
+- [ ] **Project-level summary**: aggregate view showing BPM range, most common
+  key, and total duration across all tracks.
+- [ ] **Full docs/tests/README/CHANGELOG review**: audit all documentation for
+  completeness, accuracy, and missing entries from earlier milestones.
+
+---
+
+## v0.10.0 — Active Tempo Override
+
+Make tempo candidates, tap tempo, and x2/÷2 buttons functionally meaningful
+beyond display-only multiplier adjustment.
+
+- [ ] **Recalculate beat markers**: when a different tempo candidate is selected
+  (or tap tempo is "used", or x2/÷2 is pressed), recalculate beat positions to
+  match the new BPM and update the waveform markers in real time.
+- [ ] **Export uses active tempo**: export slicing and metadata use the
+  user-selected tempo (and its corresponding beat grid), not just the raw
+  detected BPM.
+- [ ] **Visual feedback**: active/selected state on the chosen candidate button;
+  beat marker count updates in the waveform badge.
+
+---
+
+## v0.11.0 — UI Layout Rework
+
+Redesign the results layout for better information density and usability.
+User will provide a reference diagram at implementation time.
+
+- [ ] **Confidence graph repositioned**: move the onset/confidence chart next to
+  or below the BPM display card for immediate visual association.
+- [ ] **Tap tempo repositioned**: relocate tap tempo out of the BPM card into a
+  more accessible location (TBD per user diagram).
+- [ ] **General layout polish**: spacing, card grouping, and responsive
+  breakpoints refined based on the reference diagram.
+
+---
+
+## v0.12.0 — Waveform Selection
+
+Click-and-drag on the waveform to select a region for targeted re-analysis or
+export.
+
+- [ ] **Selection region**: click-and-drag creates a highlighted region
+  distinct from the existing loop region. Visual affordance (handles, shading).
+- [ ] **Re-analyse selection**: "Analyse selection" button appears; runs beat
+  and key detection on only the selected time range. Results replace (or
+  supplement) the full-track results.
+- [ ] **Export selection**: the selection auto-fills the Custom Range start/end
+  fields in ExportPanel, enabling direct export of the highlighted section.
+
+---
+
+## v0.13.0 — Practical DJ / Audio Engineering Tools
+
+Expand BeatDet's utility beyond analysis-only with actionable features for home
+DJs and audio engineers.
+
+- [ ] **Scope TBD**: candidates include harmonic mixing suggestions (Camelot
+  wheel neighbours), cue point export (Rekordbox / Serato / VirtualDJ XML),
+  ID3 tag writing (embed BPM + key into the file for download), mix transition
+  helper, or automated beat-matched crossfade preview. Final scope to be decided
+  when the milestone is reached.
+
+---
+
+## v0.14.0 — Library Release
+
+- [ ] **Expose beat detection engine as a standalone npm package** (`beatdet-core`
+  or similar), so developers can
+  `import { analyseAudio, estimateBpm } from 'beatdet-core'` in their own
+  projects.
 
   | Sub-feature | Notes |
   |---|---|
   | **Package scaffold** | Separate `packages/beatdet-core/` workspace; build to ESM + CJS dual-package. |
   | **Public API** | Export `analyseAudio`, `estimateBpm`, `buildHints`, `isCloseRatio`, and all associated TypeScript types. |
-  | **Tree-shaking** | Pure functions only — no React, no browser-only APIs in the core package. |
+  | **Tree-shaking** | Pure functions only; no React, no browser-only APIs in the core package. |
   | **Docs** | Dedicated `README` for the package with minimal usage example and type reference. |
   | **CI publish** | GitHub Actions workflow to publish to npm on tag push. |
