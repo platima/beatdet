@@ -76,10 +76,13 @@ export const KEY_MAJOR = [
 
 /**
  * Bellman-Budge 2005 minor key profile (C-rooted, 12 pitch classes).
+ * Indices 10 (flat-7th = Bb) and 11 (leading tone = B) are swapped relative to
+ * the original to better match natural minor / aeolian mode which is dominant in
+ * electronic music.
  */
 export const KEY_MINOR = [
   18.16, 0.69, 12.99, 13.34, 1.07, 11.15,
-   1.38, 21.07,  7.49,  1.53,  0.92, 10.21,
+   1.38, 21.07,  7.49,  1.53, 10.21,  0.92,
 ];
 
 /* ============================================================
