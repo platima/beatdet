@@ -42,7 +42,7 @@ export const SETTINGS = {
  */
 export const BPM_PARAMS = {
   bpmRes:              0.5,   // histogram bin resolution in BPM
-  sigma:               2.0,   // Gaussian smoothing width in BPM (broader = more robust to IOI jitter)
+  sigma:               2.5,   // Gaussian smoothing width in BPM (broader = more robust to IOI jitter)
   absMinHeight:        0.15,  // absolute normalised floor for peak picking (lower = more onsets)
   medianWindow:        16,    // half-window size for adaptive peak picking
   slowTempoFloor:      80,    // BPM below which strictHalfThreshold applies
