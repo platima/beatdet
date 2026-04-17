@@ -47,8 +47,8 @@ export const BPM_PARAMS = {
   medianWindow:        16,    // half-window size for adaptive peak picking
   slowTempoFloor:      80,    // BPM below which strictHalfThreshold applies
   strictHalfThreshold: 0.95,  // energy ratio to allow ×0.5 below slowTempoFloor
-  defaultDownThreshold:0.40,  // energy ratio for all other downward corrections
-  sesqThreshold:       0.60,  // energy ratio for ×1.5 upward correction
+  defaultDownThreshold:0.30,  // energy ratio for all other downward corrections (was 0.40)
+  sesqThreshold:       0.45,  // energy ratio for ×1.5 upward correction (was 0.60)
   tripleThreshold:     0.70,  // energy ratio for ×3 upward correction
 };
 
