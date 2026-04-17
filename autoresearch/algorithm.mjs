@@ -43,7 +43,7 @@ export const SETTINGS = {
 export const BPM_PARAMS = {
   bpmRes:              0.5,   // histogram bin resolution in BPM
   sigma:               1.5,   // Gaussian smoothing width in BPM
-  absMinHeight:        0.25,  // absolute normalised floor for peak picking
+  absMinHeight:        0.15,  // absolute normalised floor for peak picking (lower = more onsets)
   medianWindow:        16,    // half-window size for adaptive peak picking
   slowTempoFloor:      80,    // BPM below which strictHalfThreshold applies
   strictHalfThreshold: 0.95,  // energy ratio to allow ×0.5 below slowTempoFloor
