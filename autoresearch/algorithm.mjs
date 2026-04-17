@@ -71,7 +71,7 @@ export const KEY_PARAMS = {
  * Provides stronger diatonic/non-diatonic separation than Krumhansl-Kessler.
  */
 export const KEY_MAJOR = [
-  16.80, 0.86, 12.95, 1.41, 13.49, 11.93,
+  16.80, 0.86, 12.95, 1.41, 16.00, 11.93,
    1.25, 20.28,  1.80,  8.04,  0.62, 10.57,
 ];
 
