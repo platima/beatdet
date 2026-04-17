@@ -63,7 +63,7 @@ export const KEY_PARAMS = {
   fMax:    2100,  // high-frequency cutoff in Hz
   hpssH:   17,    // HPSS horizontal (time-axis) median filter kernel width
   hpssP:   17,    // HPSS vertical (frequency-axis) median filter kernel width
-  minorPriorBoost: 1.10, // EDM is ~85 % minor — boost minor correlations to correct bias
+  minorPriorBoost: 1.15, // EDM is ~85 % minor — boost minor correlations to correct bias
 };
 
 /**
