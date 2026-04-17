@@ -63,6 +63,7 @@ export const KEY_PARAMS = {
   fMax:    2100,  // high-frequency cutoff in Hz
   hpssH:   17,    // HPSS horizontal (time-axis) median filter kernel width
   hpssP:   17,    // HPSS vertical (frequency-axis) median filter kernel width
+  minorPriorBoost: 1.10, // EDM is ~85 % minor — boost minor correlations to correct bias
 };
 
 /**
@@ -294,10 +295,11 @@ function computeChromaVector(mono, sampleRate) {
  */
 export function detectKeyFromMono(mono, sampleRate) {
   const chroma  = computeChromaVector(mono, sampleRate);
+  const { minorPriorBoost } = KEY_PARAMS;
   const results = [];
   for (let pc = 0; pc < 12; pc++) {
     results.push({ pc, mode: 'major', r: pearsonCorrelation(chroma, rotateRight(KEY_MAJOR, pc)) });
-    results.push({ pc, mode: 'minor', r: pearsonCorrelation(chroma, rotateRight(KEY_MINOR, pc)) });
+    results.push({ pc, mode: 'minor', r: pearsonCorrelation(chroma, rotateRight(KEY_MINOR, pc)) * minorPriorBoost });
   }
   results.sort((a, b) => b.r - a.r);
   const best = results[0];
