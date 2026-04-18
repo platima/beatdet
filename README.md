@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.7.1** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.7.13** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -106,7 +106,33 @@ npm run test:coverage
 
 # Lint
 npm run lint
+
+# Autoresearch combined benchmark
+npm run bench:autoresearch
+
+# Autoresearch key-only benchmark
+npm run bench:autoresearch:key
+
+# Autoresearch tempo-only benchmark
+npm run bench:autoresearch:tempo
 ```
+
+### Autoresearch Benchmarking
+
+The `autoresearch/` tooling now supports three local benchmark lanes:
+
+- `autoresearch/benchmark.mjs`: combined acceptance benchmark for final keep/discard decisions.
+- `autoresearch/benchmark-key.mjs`: key-only benchmark with confusion diagnostics.
+- `autoresearch/benchmark-tempo.mjs`: tempo-only benchmark with half/double/wrong breakdowns.
+
+The recommended workflow is to tune key-only or tempo-only changes with the split harnesses,
+then confirm any candidate keep with the combined benchmark. Local TSV ledgers such as
+`results-combined.tsv`, `results-key.tsv`, and `results-tempo.tsv` are ignored by Git.
+
+To saturate spare CPU, the benchmark wrappers can also load an alternate algorithm file
+via `AUTORESEARCH_ALGORITHM` or the first CLI argument. That makes it practical to fan out
+several ignored candidate files under `autoresearch/candidates/` and benchmark them in
+parallel without mutating the baseline `autoresearch/algorithm.mjs` between runs.
 
 ---
 

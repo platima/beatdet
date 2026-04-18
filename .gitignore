@@ -27,8 +27,12 @@ next-env.d.ts
 # production
 /build
 
-# autoresearch experiment log — local only, never committed
-autoresearch/results.tsv
+# autoresearch experiment logs - local only, never committed
+autoresearch/results*.tsv
+autoresearch/*.log
+autoresearch/candidates/
+run.log
+gs-bench.log
 
 # misc
 .DS_Store

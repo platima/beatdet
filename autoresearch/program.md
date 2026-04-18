@@ -15,7 +15,10 @@ To set up a new experiment run:
 3. **Read the in-scope files**:
    - `autoresearch/program.md` — this file.
    - `autoresearch/algorithm.mjs` — the file you modify.
-   - `autoresearch/benchmark.mjs` — the fixed evaluation harness (do NOT modify).
+  - `autoresearch/benchmark.mjs` — combined acceptance harness.
+  - `autoresearch/benchmark-key.mjs` — key-only harness for targeted key runs.
+  - `autoresearch/benchmark-tempo.mjs` — tempo-only harness for targeted tempo runs.
+  - `autoresearch/benchmarkShared.cjs` — shared fixed scoring and diagnostics.
    - `src/lib/beatDetection.ts` — TypeScript source (read for context; update after wins).
    - `src/lib/keyDetection.ts` — TypeScript source (read for context; update after wins).
 4. **Verify datasets exist**:
@@ -36,7 +39,8 @@ To set up a new experiment run:
   signal-processing steps, key profiles, BPM estimation strategy, etc.
 
 **You CANNOT:**
-- Modify `autoresearch/benchmark.mjs`. It is the fixed evaluation harness.
+- Modify `autoresearch/benchmark.mjs`, `benchmark-key.mjs`, `benchmark-tempo.mjs`,
+  or `benchmarkShared.cjs` during routine search runs. They are fixed harnesses.
 - Modify `autoresearch/program.md`. It is the instruction set.
 - Modify `src/lib/beatDetection.ts` or `src/lib/keyDetection.ts` during experiments.
   These are kept in sync with the winning `algorithm.mjs` only AFTER a run concludes.
@@ -47,7 +51,7 @@ To set up a new experiment run:
 
 ## The metric
 
-Run the benchmark with:
+Run the combined acceptance benchmark with:
 
 ```
 node autoresearch/benchmark.mjs > run.log 2>&1
@@ -68,6 +72,29 @@ SCORE key_correct=512/604 tempo_correct=280/388 combined=792/992 pct=79.84
 **Goal: maximise `pct`** — the combined percentage of tracks where both key detection
 (exact match) and tempo detection (within ±4%, P-score style) are correct.
 
+For targeted runs, use:
+
+```powershell
+node autoresearch/benchmark-key.mjs > key.log 2>&1
+node autoresearch/benchmark-tempo.mjs > tempo.log 2>&1
+```
+
+For parallel candidate runs, point a harness at a different algorithm file:
+
+```powershell
+$env:AUTORESEARCH_ALGORITHM = 'autoresearch/candidates/tempo-candidate-a.mjs'
+node autoresearch/benchmark-tempo.mjs > candidate-a.log 2>&1
+```
+
+or pass the path as the first argument:
+
+```powershell
+node autoresearch/benchmark-key.mjs autoresearch/candidates/key-candidate-a.mjs > candidate-a.log 2>&1
+```
+
+Use the split harnesses to explore one subsystem at a time, but always confirm any
+candidate keep with the combined benchmark before advancing.
+
 Scoring detail:
 - **Key — correct**: detected key matches annotated key (enharmonic-normalised;
   Db→C#, Gb→F# are treated as equivalent).
@@ -83,10 +110,23 @@ If a run is clearly catastrophic (pct < 30%) after 200 tracks, kill it and disca
 
 ## Logging results
 
-`results.tsv` is tab-separated (NOT comma-separated). Columns:
+Use three local TSV logs:
+
+- `results-combined.tsv` for combined acceptance runs
+- `results-key.tsv` for key-only targeted runs
+- `results-tempo.tsv` for tempo-only targeted runs
+
+Each file is tab-separated (NOT comma-separated). Baseline columns:
 
 ```
 commit	key	tempo	combined_pct	status	description
+```
+
+Suggested split columns:
+
+```text
+results-key.tsv:    commit	key_correct	key_close	key_far	key_pct	status	description
+results-tempo.tsv:  commit	tempo_correct	tempo_half	tempo_double	tempo_wrong	tempo_pct	status	description
 ```
 
 1. `commit` — git short hash (7 chars)
@@ -105,7 +145,7 @@ b2c3d4e	519/604	283/388	81.10	keep	fMin 150→120 Hz
 c3d4e5f	508/604	278/388	78.97	discard	KEY_MAJOR profile flatten
 ```
 
-Do NOT commit `results.tsv` — leave it untracked.
+Do NOT commit result TSVs — leave them untracked.
 
 ---
 
@@ -126,15 +166,21 @@ LOOP FOREVER:
      different windowing, onset detection variants)
 3. Apply the change to `algorithm.mjs`.
 4. `git commit` the change (so you can revert cleanly).
-5. Run: `node autoresearch/benchmark.mjs > run.log 2>&1`
+5. Choose the right harness:
+  - Key-only change: `node autoresearch/benchmark-key.mjs > key.log 2>&1`
+  - Tempo-only change: `node autoresearch/benchmark-tempo.mjs > tempo.log 2>&1`
+  - Shared preprocessing or uncertain scope: `node autoresearch/benchmark.mjs > run.log 2>&1`
+  - For parallel search, clone `algorithm.mjs` into ignored candidate files and run
+    multiple harnesses concurrently via `AUTORESEARCH_ALGORITHM` or the first CLI arg.
 6. Check:
    ```
    Select-String "^SCORE" run.log
    ```
-   If the grep returns nothing, the run crashed. Check `Select-Object -Last 50 run.log`.
-7. Log the result to `results.tsv`.
-8. **If `pct` improved** → advance (keep the commit).
-9. **If `pct` equal or worse** → revert: `git reset --hard HEAD~1`.
+  If the grep returns nothing, the run crashed. Check the tail of the relevant log.
+7. Log the result to the matching split TSV.
+8. If the targeted metric improved, run the combined benchmark as the final gate.
+9. **If combined `pct` improved** → advance (keep the commit).
+10. **If the combined `pct` is equal or worse** → revert: `git reset --hard HEAD~1`.
 
 **NEVER STOP**: Once the loop has started, do not pause to ask whether to continue.
 The human may be away. Run indefinitely until manually interrupted.
@@ -145,6 +191,12 @@ harmonic correction logic.
 
 **Simplicity criterion**: a small improvement from a simple change is better than the
 same improvement from a complex one. A simplification that loses no accuracy is a win.
+
+**Diagnostics matter**: use the richer split-benchmark output to direct the next run.
+Examples:
+- Many `Tempo half` misses suggest the BPM estimate is landing too slow.
+- Many `Tempo double` misses suggest it is landing too fast.
+- Repeated key confusion pairs suggest profile weights or mode bias issues.
 
 **Crashes**: if the run errors out, fix the obvious bug and re-run. If the idea is
 fundamentally broken, log `crash` and move on without reverting the fix.
