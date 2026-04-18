@@ -57,12 +57,12 @@ export const BPM_PARAMS = {
  * keyDetection.ts).
  */
 export const KEY_PARAMS = {
-  fftSize: 4096,  // chroma FFT window size
-  hopSize: 2048,  // chroma hop size (fftSize / 2)
+  fftSize: 8192,  // chroma FFT window size
+  hopSize: 4096,  // chroma hop size (fftSize / 2)
   fMin:    150,   // low-frequency cutoff in Hz (excludes kick fundamental)
   fMax:    2100,  // high-frequency cutoff in Hz
-  hpssH:   27,    // HPSS horizontal (time-axis) median filter kernel width (was 17, ~1.25 s window)
-  hpssP:   19,    // HPSS vertical (frequency-axis) median filter kernel width
+  hpssH:   13,    // HPSS horizontal (time-axis) median filter kernel width (retuned for larger chroma hop)
+  hpssP:   35,    // HPSS vertical (frequency-axis) median filter kernel width (retuned for finer FFT bins)
   minorPriorBoost: 1.20, // EDM is ~85 % minor — boost minor correlations to correct bias
 };
 
