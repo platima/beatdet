@@ -61,7 +61,7 @@ export const KEY_PARAMS = {
   hopSize: 2048,  // chroma hop size (fftSize / 2)
   fMin:    150,   // low-frequency cutoff in Hz (excludes kick fundamental)
   fMax:    2100,  // high-frequency cutoff in Hz
-  hpssH:   25,    // HPSS horizontal (time-axis) median filter kernel width (was 17, ~1.15 s window)
+  hpssH:   27,    // HPSS horizontal (time-axis) median filter kernel width (was 17, ~1.25 s window)
   hpssP:   17,    // HPSS vertical (frequency-axis) median filter kernel width
   minorPriorBoost: 1.20, // EDM is ~85 % minor — boost minor correlations to correct bias
 };
@@ -83,7 +83,7 @@ export const KEY_MAJOR = [
  */
 export const KEY_MINOR = [
   22.00, 0.69, 12.99, 13.34, 1.07, 11.15,
-   1.38, 21.07,  7.49,  1.53, 10.21,  0.92,
+  1.38, 21.07,  7.49,  1.53, 10.21,  0.92,
 ];
 
 /* ============================================================
