@@ -1,22 +1,21 @@
 /**
- * BeatDet autoresearch combined benchmark.
+ * BeatDet autoresearch key-only benchmark.
  *
- * This is the final acceptance harness. It evaluates the key and tempo datasets
- * together and should be the last check before keeping a change.
+ * Use this for key-profile and chroma-only experiments. Confirm winning changes
+ * with the combined benchmark before keeping them.
  */
 
 import benchmarkShared from './benchmarkShared.cjs';
 import algorithmLoader from './algorithmLoader.cjs';
 
-const { runCombinedBenchmark } = benchmarkShared;
+const { runKeyBenchmark } = benchmarkShared;
 const { loadAlgorithmModule } = algorithmLoader;
 const { algorithmPath, algorithmModule } = await loadAlgorithmModule();
 
 console.log(`Algorithm file: ${algorithmPath}`);
 
-await runCombinedBenchmark({
+await runKeyBenchmark({
   detectKeyFromMono: algorithmModule.detectKeyFromMono,
-  detectBpmFromMono: algorithmModule.detectBpmFromMono,
   mixDownToMono: algorithmModule.mixDownToMono,
   camelotDistance: algorithmModule.camelotDistance,
 });

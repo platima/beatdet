@@ -1,6 +1,6 @@
 {
   "name": "beatdet",
-  "version": "0.7.12",
+  "version": "0.7.13",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "bench:autoresearch": "node autoresearch/benchmark.mjs",
+    "bench:autoresearch:key": "node autoresearch/benchmark-key.mjs",
+    "bench:autoresearch:tempo": "node autoresearch/benchmark-tempo.mjs"
   },
   "dependencies": {
     "@breezystack/lamejs": "^1.2.7",

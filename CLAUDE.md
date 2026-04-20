@@ -81,6 +81,10 @@ Browser (static site)
 | `CLAUDE.md`                     | AI assistant context (this file)                  |
 | `README.md`                     | User-facing documentation                         |
 | `VERSION`                       | Semantic version string                           |
+| `autoresearch/benchmark.mjs`    | Combined GiantSteps acceptance benchmark          |
+| `autoresearch/benchmark-key.mjs` | Key-only GiantSteps benchmark + confusion report |
+| `autoresearch/benchmark-tempo.mjs` | Tempo-only GiantSteps benchmark + error buckets |
+| `autoresearch/benchmarkShared.cjs` | Shared benchmark datasets, scoring, and diagnostics |
 
 ## Conventions
 
@@ -163,7 +167,7 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 ## Current State
 
 - **Milestone:** v0.5.x = PWA; v0.6.x = UI/UX Polish; v0.7.x = Key Detection; v0.8.x = Projects; v0.9.x = Multi-file Projects; v0.10.x = Active Tempo; v0.11.x = UI Rework; v0.12.x = Waveform Selection; v0.13.x = DJ Tools; v0.14.x = Library Release. Full details in `TODO.md`.
-- **Current version:** v0.7.12
+- **Current version:** v0.7.14
 - **Settings store:** schema v5 (`settingsVersion: '5.0.0'`); migrates v1 -> v2 -> v3 -> v4 -> v5 automatically.
 - **Tests:** run `npm test` for current counts.
 - **MP3 export** via `@breezystack/lamejs`; ZIP bundling via `fflate`.
@@ -183,5 +187,7 @@ directory (local only, excluded from Git) containing the Kevin MacLeod benchmark
 - **Keyboard shortcuts**: Space = play/pause, R = restart, L = toggle loop region, X = zoom in, Z = zoom out, ] = volume up, [ = volume down (all in `WaveformPlayer`); S = open/close settings, ? = keyboard shortcuts help (both in `NavBar`). Modifier-key events (`ctrlKey|metaKey|altKey`) are ignored in all handlers.
 - **Loop region**: `RegionsPlugin` from `wavesurfer.js/dist/plugins/regions` registered via `WaveSurfer.create({ plugins: [...] })`; loop check runs in the `audioprocess` closure via `loopEnabledRef` (avoids stale-closure race). `onRegionChange` prop threads the region bounds to `page.tsx` → `ExportPanel` for custom-range pre-fill.
 - **Playback speed**: `setPlaybackRate()` called on the WaveSurfer instance; speed buttons in the secondary controls row; default 1×.
-- **Key detection**: Bellman-Budge corpus-derived profiles in `src/lib/keyDetection.ts`; computes 12-bin chroma vector via FFT (4096-point, 150-2100 Hz; lower cutoff excludes kick drum fundamental range); before chroma accumulation, Harmonic-Percussive Source Separation (HPSS) isolates the harmonic spectrogram using horizontal (time-axis, L=17 frames) and vertical (frequency-axis, L=17 bins) median filters with squared Wiener soft masks, removing kick harmonics above 150 Hz which the cutoff alone cannot block; correlates against 24 Bellman-Budge major/minor profiles (stronger diatonic/non-diatonic separation than the original Krumhansl-Kessler profiles), returns key, Camelot code, relative key, top-5 candidates, and ambiguity flag. Confidence is the raw Pearson correlation coefficient (0–1). Called from `analyseAudio` after beat detection. `KeyDisplay` component renders the results. Toggleable via `showKey` in `DisplaySettings`.
+- **Key detection**: Bellman-Budge corpus-derived profiles in `src/lib/keyDetection.ts`; computes 12-bin chroma vector via FFT (8192-point, hop 4096, 150-2100 Hz; lower cutoff excludes kick drum fundamental range); before chroma accumulation, Harmonic-Percussive Source Separation (HPSS) isolates the harmonic spectrogram using horizontal (time-axis, L=13 frames) and vertical (frequency-axis, L=35 bins) median filters with squared Wiener soft masks, removing kick harmonics above 150 Hz which the cutoff alone cannot block; correlates against 24 Bellman-Budge major/minor profiles (stronger diatonic/non-diatonic separation than the original Krumhansl-Kessler profiles); minor correlations are boosted by a 1.20× prior factor to correct for the strong minor-key prevalence in electronic music; the minor profile has swapped b7/leading-tone weights (natural minor emphasis) and a boosted root weight (22.00 vs original 18.16); the major profile has a boosted major-3rd weight (16.00 vs original 13.49); returns key, Camelot code, relative key, top-5 candidates, and ambiguity flag. Confidence is the raw Pearson correlation coefficient (0–1). Called from `analyseAudio` after beat detection. `KeyDisplay` component renders the results. Toggleable via `showKey` in `DisplaySettings`.
+- **Autoresearch benchmarking**: `autoresearch/benchmark.mjs` remains the final acceptance harness, while `benchmark-key.mjs` and `benchmark-tempo.mjs` provide faster subsystem-specific search lanes. `benchmarkShared.cjs` owns dataset loading, scoring, and diagnostic reporting. Key runs report top confusion pairs and mode-flip/root-miss counts; tempo runs report half/double octave misses plus slow/fast wrong buckets. Targeted runs should still be confirmed with the combined benchmark before keeping a change.
+- **Parallel autoresearch**: benchmark wrappers can load alternate algorithm files via `AUTORESEARCH_ALGORITHM` or a first CLI path argument, so ignored candidates under `autoresearch/candidates/` can be benchmarked concurrently while `autoresearch/algorithm.mjs` stays on the best-known baseline.
 - `testfiles/` excluded from Git (local only); required for real-audio integration tests.

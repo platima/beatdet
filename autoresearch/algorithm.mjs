@@ -42,13 +42,13 @@ export const SETTINGS = {
  */
 export const BPM_PARAMS = {
   bpmRes:              0.5,   // histogram bin resolution in BPM
-  sigma:               1.5,   // Gaussian smoothing width in BPM
-  absMinHeight:        0.25,  // absolute normalised floor for peak picking
+  sigma:               2.5,   // Gaussian smoothing width in BPM (broader = more robust to IOI jitter)
+  absMinHeight:        0.14,  // absolute normalised floor for peak picking
   medianWindow:        16,    // half-window size for adaptive peak picking
   slowTempoFloor:      80,    // BPM below which strictHalfThreshold applies
   strictHalfThreshold: 0.95,  // energy ratio to allow ×0.5 below slowTempoFloor
-  defaultDownThreshold:0.40,  // energy ratio for all other downward corrections
-  sesqThreshold:       0.60,  // energy ratio for ×1.5 upward correction
+  defaultDownThreshold:0.30,  // energy ratio for all other downward corrections (was 0.40)
+  sesqThreshold:       0.45,  // energy ratio for ×1.5 upward correction (was 0.60)
   tripleThreshold:     0.70,  // energy ratio for ×3 upward correction
 };
 
@@ -57,12 +57,13 @@ export const BPM_PARAMS = {
  * keyDetection.ts).
  */
 export const KEY_PARAMS = {
-  fftSize: 4096,  // chroma FFT window size
-  hopSize: 2048,  // chroma hop size (fftSize / 2)
+  fftSize: 8192,  // chroma FFT window size
+  hopSize: 4096,  // chroma hop size (fftSize / 2)
   fMin:    150,   // low-frequency cutoff in Hz (excludes kick fundamental)
   fMax:    2100,  // high-frequency cutoff in Hz
-  hpssH:   17,    // HPSS horizontal (time-axis) median filter kernel width
-  hpssP:   17,    // HPSS vertical (frequency-axis) median filter kernel width
+  hpssH:   13,    // HPSS horizontal (time-axis) median filter kernel width (retuned for larger chroma hop)
+  hpssP:   35,    // HPSS vertical (frequency-axis) median filter kernel width (retuned for finer FFT bins)
+  minorPriorBoost: 1.20, // EDM is ~85 % minor — boost minor correlations to correct bias
 };
 
 /**
@@ -70,16 +71,19 @@ export const KEY_PARAMS = {
  * Provides stronger diatonic/non-diatonic separation than Krumhansl-Kessler.
  */
 export const KEY_MAJOR = [
-  16.80, 0.86, 12.95, 1.41, 13.49, 11.93,
+  16.80, 0.86, 12.95, 1.41, 16.00, 11.93,
    1.25, 20.28,  1.80,  8.04,  0.62, 10.57,
 ];
 
 /**
  * Bellman-Budge 2005 minor key profile (C-rooted, 12 pitch classes).
+ * Indices 10 (flat-7th = Bb) and 11 (leading tone = B) are swapped relative to
+ * the original to better match natural minor / aeolian mode which is dominant in
+ * electronic music.
  */
 export const KEY_MINOR = [
-  18.16, 0.69, 12.99, 13.34, 1.07, 11.15,
-   1.38, 21.07,  7.49,  1.53,  0.92, 10.21,
+  22.00, 0.69, 12.99, 13.34, 1.07, 11.15,
+  1.38, 21.07,  7.49,  1.53, 10.21,  0.92,
 ];
 
 /* ============================================================
@@ -291,10 +295,11 @@ function computeChromaVector(mono, sampleRate) {
  */
 export function detectKeyFromMono(mono, sampleRate) {
   const chroma  = computeChromaVector(mono, sampleRate);
+  const { minorPriorBoost } = KEY_PARAMS;
   const results = [];
   for (let pc = 0; pc < 12; pc++) {
     results.push({ pc, mode: 'major', r: pearsonCorrelation(chroma, rotateRight(KEY_MAJOR, pc)) });
-    results.push({ pc, mode: 'minor', r: pearsonCorrelation(chroma, rotateRight(KEY_MINOR, pc)) });
+    results.push({ pc, mode: 'minor', r: pearsonCorrelation(chroma, rotateRight(KEY_MINOR, pc)) * minorPriorBoost });
   }
   results.sort((a, b) => b.r - a.r);
   const best = results[0];
