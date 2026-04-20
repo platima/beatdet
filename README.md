@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.7.13** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.7.14** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -207,9 +207,9 @@ src/
    passages).
 6. **BPM estimation**: multi-lag inter-onset intervals (lags 1-3, weighted
    1/lag) converted to BPM, accumulated into a Gaussian-smoothed histogram
-   (0.5 BPM resolution, σ = 1.5 BPM), then passed through two-phase harmonic
-   correction: downward (×0.5, ×1/3 at 40% threshold) to prefer the slower
-   fundamental when subdivisions dominate, and upward (×1.5 at 60% threshold,
+   (0.5 BPM resolution, σ = 2.5 BPM), then passed through two-phase harmonic
+   correction: downward (×0.5, ×1/3 at 30% threshold) to prefer the slower
+   fundamental when subdivisions dominate, and upward (×1.5 at 45% threshold,
    ×3 at 70% threshold) to promote the faster tempo when the detector locked
    onto half-speed or third-speed groupings. Histogram lookups use a ±1-bin
    maximum search for robustness
@@ -217,15 +217,18 @@ src/
    to one beat period at the configured maximum BPM so fast tempos are never
    blocked.
 7. **Key detection**: a 12-bin chroma (pitch class energy) vector is computed
-   from the mono PCM using a separate FFT pass (4096-point, Hann-windowed,
+   from the mono PCM using a separate FFT pass (8192-point, Hann-windowed,
    150-2100 Hz). Before chroma accumulation, Harmonic-Percussive Source
-   Separation (HPSS) is applied: horizontal and vertical median filters on the
-   spectrogram separate sustained harmonic content (synths, pads, bass lines)
-   from transient percussive bursts (kick drums, snares). Only the harmonic
-   component contributes to chroma. This suppresses kick drum harmonics above
-   150 Hz that would otherwise bias the chroma vector. The 150 Hz lower cutoff
-   is retained to block the kick fundamental (~50-130 Hz), which HPSS cannot
-   cleanly separate because the kick repeats so frequently in EDM.
+   Separation (HPSS) is applied: horizontal (13-frame) and vertical (35-bin)
+   median filters on the spectrogram separate sustained harmonic content
+   (synths, pads, bass lines) from transient percussive bursts (kick drums,
+   snares). Only the harmonic component contributes to chroma. This suppresses
+   kick drum harmonics above 150 Hz that would otherwise bias the chroma
+   vector. The 150 Hz lower cutoff is retained to block the kick fundamental
+   (~50-130 Hz), which HPSS cannot cleanly separate because the kick repeats
+   so frequently in EDM. Minor Pearson correlations are boosted by a 1.20×
+   prior factor to correct for the strong minor-key prevalence in electronic
+   music datasets.
    The chroma vector is Pearson-correlated against all 24
    Bellman-Budge major/minor key profiles (corpus-derived, stronger
    diatonic/non-diatonic separation than the original Krumhansl-Kessler

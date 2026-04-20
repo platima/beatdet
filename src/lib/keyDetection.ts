@@ -35,16 +35,21 @@ const NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 
  * Source: Bellman (2005), building on Budge (1943).
  */
 const KEY_MAJOR: readonly number[] = [
-  16.80, 0.86, 12.95, 1.41, 13.49, 11.93,
+  16.80, 0.86, 12.95, 1.41, 16.00, 11.93,
    1.25, 20.28,  1.80,  8.04,  0.62, 10.57,
 ];
 
 /**
  * Bellman-Budge minor profile (C-rooted, 12 elements).
+ *
+ * Indices 10 (flat-7th = Bb) and 11 (leading tone = B) are swapped relative
+ * to the original publication to better match the natural minor / aeolian mode
+ * which dominates electronic music.  The root weight is boosted from 18.16 to
+ * 22.00 for stronger root discrimination.
  */
 const KEY_MINOR: readonly number[] = [
-  18.16, 0.69, 12.99, 13.34, 1.07, 11.15,
-   1.38, 21.07,  7.49,  1.53,  0.92, 10.21,
+  22.00, 0.69, 12.99, 13.34, 1.07, 11.15,
+   1.38, 21.07,  7.49,  1.53, 10.21,  0.92,
 ];
 
 /**
@@ -64,18 +69,26 @@ const RAW_AMBIGUITY_THRESHOLD = 0.40;
 
 /**
  * HPSS horizontal (time-axis) median filter kernel width in frames.
- * At hopSize=2048 and 44100 Hz (~46 ms/frame), 17 frames ≈ 790 ms.
- * Sustained harmonic sources (synths, pads, bass lines) persist over
- * many frames and are retained by this filter.
+ * At hopSize=4096 and 44100 Hz (~93 ms/frame), 13 frames ≈ 1.2 s.
+ * Retuned for the larger chroma hop; sustained harmonic sources
+ * (synths, pads, bass lines) are retained by this filter.
  */
-const HPSS_H_KERNEL = 17;
+const HPSS_H_KERNEL = 13;
 
 /**
  * HPSS vertical (frequency-axis) median filter kernel width in bins.
- * 17 bins at ~11-12 Hz/bin covers ~190 Hz bandwidth, enough to capture
- * the broadband frequency spread of transient percussive events.
+ * At fftSize=8192 and 44100 Hz (~5.4 Hz/bin), 35 bins covers ~189 Hz,
+ * enough to capture the broadband spread of transient percussive events.
+ * Retuned for the finer FFT bin resolution.
  */
-const HPSS_P_KERNEL = 17;
+const HPSS_P_KERNEL = 35;
+
+/**
+ * Minor prior boost factor.  EDM datasets are approximately 85% minor;
+ * without a prior boost, major profiles are slightly over-selected.
+ * Multiplying minor Pearson correlations by this factor corrects the bias.
+ */
+const MINOR_PRIOR_BOOST = 1.20;
 
 /* ============================================================
    Internal helpers
@@ -293,8 +306,8 @@ function separateHarmonicComponent(
  *
  * @param mono        Mono PCM samples (Float32Array).
  * @param sampleRate  Sample rate in Hz.
- * @param fftSize     FFT window size in samples (must be power of two, default 4096).
- * @param hopSize     Hop between frames in samples (default fftSize / 2).
+ * @param fftSize     FFT window size in samples (must be power of two, default 8192).
+ * @param hopSize     Hop between frames in samples (default fftSize / 2 = 4096).
  * @param fMin        Minimum frequency in Hz (default 150 Hz, ~D3).
  * @param fMax        Maximum frequency in Hz (default 2100 Hz, ~C7).
  * @returns           Normalised 12-element chroma vector (values 0–1).
@@ -302,8 +315,8 @@ function separateHarmonicComponent(
 export function computeChromaVector(
   mono: Float32Array,
   sampleRate: number,
-  fftSize = 4096,
-  hopSize = 2048,
+  fftSize = 8192,
+  hopSize = 4096,
   fMin = 150,
   fMax = 2100
 ): Float64Array {
@@ -396,7 +409,7 @@ export function detectKey(mono: Float32Array, sampleRate: number): KeyEstimate {
     results.push({
       pitchClass: pc,
       mode: 'minor',
-      correlation: pearsonCorrelation(chromaArr, rotateRight(KEY_MINOR, pc)),
+      correlation: pearsonCorrelation(chromaArr, rotateRight(KEY_MINOR, pc)) * MINOR_PRIOR_BOOST,
     });
   }
 

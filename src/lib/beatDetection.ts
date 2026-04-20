@@ -267,15 +267,15 @@ export function pickPeaks(
  * detected beat list.
  *
  * Gaussian smoothing: each IOI→BPM value smears weight across neighbouring
- * bins with σ=1.5 BPM, avoiding quantisation gaps at high tempos.
+ * bins with σ=2.5 BPM, avoiding quantisation gaps at high tempos.
  *
  * Harmonic correction: after finding the best candidate, check downward
  * ratios (x0.5, x1/3) for significant histogram energy; if found, prefer
  * the slower tempo.  x0.5 applies a slow-tempo gate: when the resulting
  * BPM would be below 80 (uncommon musical tempo), a strict 95 % threshold
  * is required to prevent false half-tempo corrections; above 80 the
- * standard 40 % applies.  If no downward correction triggers, check the
- * upward ×1.5 (sesquialtera) ratio with a 60 % threshold to catch
+ * standard 30 % applies.  If no downward correction triggers, check the
+ * upward ×1.5 (sesquialtera) ratio with a 45 % threshold to catch
  * half-speed groupings.
  */
 export function estimateBpm(
@@ -309,7 +309,7 @@ export function estimateBpm(
   // 0.5 BPM resolution with σ=1.5 BPM avoids the quantisation errors that
   // appear at high BPMs with integer binning.
   const bpmRes = 0.5;
-  const sigma = 1.5;
+  const sigma = 2.5;
   const numBins = Math.round((bpmMax - bpmMin) / bpmRes) + 1;
   const hist = new Float64Array(numBins);
   const sigBins = sigma / bpmRes;
@@ -352,7 +352,7 @@ export function estimateBpm(
   //   Gothic, 201 -> 134 in Sergio's Dustbin).
   //
   // Phase 2 - upward (sesquialtera): if phase 1 didn't trigger and the
-  //   leader x1.5 has very strong energy (>= 60%), the detector tracked
+  //   leader x1.5 has very strong energy (>= 45%), the detector tracked
   //   half-speed groupings; promote to the faster tempo.
   const leader = candidates[0];
 
@@ -378,13 +378,13 @@ export function estimateBpm(
   // reach 80-95 % of the leader).  If the resulting BPM is below 80 (an
   // uncommon musical tempo), we demand near-parity (95 %) to prevent false
   // corrections (e.g. 133 BPM Canon in D → 67).  Above 80 the standard
-  // 40 % threshold applies, since a leader above ~160 is likely genuine
+  // 30 % threshold applies, since a leader above ~160 is likely genuine
   // subdivisions that should be halved (e.g. 209 → 105 Adeste Fideles).
   //
   // x1/3 keeps 40 % regardless; triple-tempo artefacts are far less common.
   const SLOW_TEMPO_FLOOR = 80;
   const STRICT_HALF_THRESHOLD = 0.95;
-  const DEFAULT_DOWN_THRESHOLD = 0.40;
+  const DEFAULT_DOWN_THRESHOLD = 0.30;
   let corrected = false;
   // Record which ratio was applied, if any, so the UI can suppress
   // redundant harmonic hints when the algorithm already self-corrected.
@@ -414,7 +414,7 @@ export function estimateBpm(
   //   Threshold is kept tight (70 %) to avoid false promotions on tracks
   //   whose true tempo genuinely sits near the ×3 candidate.
   if (!corrected) {
-    for (const [ratio, threshold] of [[1.5, 0.60], [3, 0.70]] as const) {
+    for (const [ratio, threshold] of [[1.5, 0.45], [3, 0.70]] as const) {
       const altBpm = leader.bpm * ratio;
       if (altBpm >= bpmMin && altBpm <= bpmMax) {
         const altScore = histScoreAt(altBpm);
@@ -556,7 +556,7 @@ export async function analyseAudio(
   // valid tempo while remaining as long as possible to suppress noise.
   const effectiveMinBeatGap = Math.min(settings.minBeatGap, 60 / settings.bpmMax);
   const minGapFrames = Math.max(1, Math.round(effectiveMinBeatGap / hopDuration));
-  const peakFrames = pickPeaks(onsets, settings.peakThreshold, minGapFrames, 0.25);
+  const peakFrames = pickPeaks(onsets, settings.peakThreshold, minGapFrames, 0.14);
   throwIfAborted(signal);
   onProgress?.(0.8);
 
