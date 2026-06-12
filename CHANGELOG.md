@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.17] - 2026-06-12
+
+### Fixed
+
+- **Settings migrations no longer skip intermediate steps**: each migration block in the
+  settings store returned early, so a user arriving from schema v1 ran only the v1 to v2
+  step and kept `settingsVersion: '2.0.0'`. The result happened to be safe only because
+  every step re-spreads the full current defaults. Migration steps now chain in sequence
+  and always land on `settingsVersion: '5.0.0'`. The migration function is exported as
+  `migrateSettings` for unit testing.
+
+---
+
 ## [0.7.16] - 2026-06-12
 
 ### Fixed
