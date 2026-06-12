@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.19] - 2026-06-12
+
+### Fixed
+
+- **Tap tempo timer could fire after unmount**: the 3 second tap-chain reset timer in
+  `BpmDisplay` was never cleared on unmount, so it could attempt a state update on an
+  unmounted component. The timer is now cleared in an unmount cleanup effect.
+
+### Removed
+
+- Dead `cosineSignal` helper in the beat detection test suite.
+
+---
+
 ## [0.7.18] - 2026-06-12
 
 ### Fixed

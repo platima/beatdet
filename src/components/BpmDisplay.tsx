@@ -57,6 +57,14 @@ export function BpmDisplay({ result, bpmMultiplier = 1, onMultiplierChange }: Bp
   }, [result]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
+  // Clear any pending tap-reset timer on unmount so it cannot fire a state
+  // update after the component is gone.
+  useEffect(() => {
+    return () => {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    };
+  }, []);
+
   const handleTap = useCallback(() => {
     const now = Date.now();
     const times = tapTimesRef.current;

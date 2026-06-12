@@ -48,19 +48,6 @@ function metronome(bpm: number, durationS: number, offsetS = 0): number[] {
   return times;
 }
 
-/**
- * Generate a pure cosine in a Float32Array.
- * Useful for FFT and spectral-flux smoke tests.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function cosineSignal(freqBin: number, fftSize: number): Float32Array {
-  const sig = new Float32Array(fftSize);
-  for (let n = 0; n < fftSize; n++) {
-    sig[n] = Math.cos((2 * Math.PI * freqBin * n) / fftSize);
-  }
-  return sig;
-}
-
 /* ============================================================
    fft: Cooley-Tukey radix-2 correctness
    ============================================================ */
