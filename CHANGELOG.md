@@ -6,6 +6,17 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.15] - 2026-06-12
+
+### Fixed
+
+- **Version desync**: `package.json` (0.7.13) and the service worker `CACHE_VERSION` (0.5.0)
+  lagged behind the `VERSION` file (0.7.14). All three now carry the same version string, so
+  returning PWA users receive a fresh cache on the next deploy instead of assets keyed to a
+  long-stale cache name.
+
+---
+
 ## [0.7.12] - 2026-04-14
 
 ### Fixed
