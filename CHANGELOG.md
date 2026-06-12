@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.18] - 2026-06-12
+
+### Fixed
+
+- **What's New banner had nothing to say since 0.7.5**: the banner looked up release
+  notes by exact version match, so any release without its own `WHATS_NEW` entry showed
+  only the changelog fallback. The banner now shows the newest curated entry between the
+  version the user last saw and the running version (semver-aware), and a 0.7.15 entry
+  covering the key detection work has been added. Corrupt stored versions degrade to the
+  changelog fallback.
+
+---
+
 ## [0.7.17] - 2026-06-12
 
 ### Fixed
