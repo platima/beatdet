@@ -6,6 +6,16 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.20] - 2026-06-12
+
+### Added
+
+- Unit tests for the settings schema migration chain (v1 through v5) and the session
+  persistence helpers (round trip, oversize audio, corrupt JSON and Base64, quota
+  errors), closing the two largest test coverage gaps found in the code review.
+
+---
+
 ## [0.7.19] - 2026-06-12
 
 ### Fixed
