@@ -6,6 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.21] - 2026-06-12
+
+### Changed
+
+- **Key detection accuracy +2.8 points on GiantSteps (371 to 388 exact of 604)** by
+  porting the vetted wins from the April autoresearch branches:
+  - Square-root compression of the normalised chroma vector before profile correlation.
+  - HPSS horizontal median kernel widened from 13 to 15 frames.
+  - A fifth-confusion resolver (`resolveFifthConfusion`) that demotes a winning key which
+    is merely the dominant of the runner-up when the correlation gap is at most 0.05 and
+    the runner-up's tonic triad has equal or better chroma support.
+  - Minor prior boost raised from 1.20 to 1.28.
+  Combined GiantSteps benchmark moves from 636/990 (64.24%) to 653/990 (65.96%).
+  The experimental per-BPM-bracket tempo corrections from the same branches were
+  evaluated (313/386 vs 265/386 in-set) but deliberately not ported: they memorise
+  individual GiantSteps tracks and are unlikely to generalise.
+
+---
+
 ## [0.7.20] - 2026-06-12
 
 ### Added

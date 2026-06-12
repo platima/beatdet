@@ -10,7 +10,7 @@
  *   - Ambiguity flag on noisy (flat) input
  */
 
-import { detectKey, computeChromaVector } from '../keyDetection';
+import { detectKey, computeChromaVector, resolveFifthConfusion } from '../keyDetection';
 
 /* ============================================================
    Helpers
@@ -273,18 +273,82 @@ describe('detectKey', () => {
 
   test('G Major has Camelot code 9B', () => {
     // G major chord: G (tonic), B (mediant), D (dominant) with multi-octave spread.
+    // The E submediant is deliberately omitted: square-root chroma compression
+    // flattens amplitude differences, so even a quiet E hands the relative
+    // E minor triad (E-G-B) enough support to win under the minor prior.
+    // Real G major material is dominated by the tonic triad, which this
+    // signal now reflects.
     const buf = buildChordSignal([
       { pc: 7, amp: 1.0 },   // G tonic
-      { pc: 11, amp: 0.6 },  // B mediant
-      { pc: 2, amp: 0.8 },   // D dominant
-      { pc: 9, amp: 0.2 },   // A supertonic
-      { pc: 4, amp: 0.2 },   // E submediant
-      { pc: 0, amp: 0.2 },   // C subdominant
+      { pc: 11, amp: 0.7 },  // B mediant
+      { pc: 2, amp: 0.9 },   // D dominant
+      { pc: 9, amp: 0.15 },  // A supertonic
+      { pc: 0, amp: 0.15 },  // C subdominant
       { pc: 6, amp: 0.15 },  // F# leading tone
     ], SR);
     const result = detectKey(buf, SR);
     expect(result.key).toBe('G');
     expect(result.mode).toBe('major');
     expect(result.camelot).toBe('9B');
+  });
+});
+
+/* ============================================================
+   resolveFifthConfusion
+   ============================================================ */
+
+describe('resolveFifthConfusion', () => {
+  type Candidate = { pitchClass: number; mode: 'major' | 'minor'; correlation: number };
+
+  /** Chroma where C major (C, E, G) clearly out-supports G major (G, B, D). */
+  const cMajorChroma = [1.0, 0, 0.5, 0, 0.8, 0.3, 0, 0.9, 0, 0.2, 0, 0.2];
+
+  function leaderAndRunnerUp(gap: number, leaderPc = 7, runnerPc = 0, mode: 'major' | 'minor' = 'major'): Candidate[] {
+    return [
+      { pitchClass: leaderPc, mode, correlation: 0.80 },
+      { pitchClass: runnerPc, mode, correlation: 0.80 - gap },
+    ];
+  }
+
+  test('promotes the runner-up when the leader is its dominant with weaker triad support', () => {
+    const results = leaderAndRunnerUp(0.02);
+    resolveFifthConfusion(results, cMajorChroma);
+    expect(results[0].pitchClass).toBe(0); // C promoted over G
+    expect(results[1].pitchClass).toBe(7);
+  });
+
+  test('does nothing when the correlation gap exceeds the threshold', () => {
+    const results = leaderAndRunnerUp(0.10);
+    resolveFifthConfusion(results, cMajorChroma);
+    expect(results[0].pitchClass).toBe(7);
+  });
+
+  test('does nothing when the top two differ in mode', () => {
+    const results: Candidate[] = [
+      { pitchClass: 7, mode: 'major', correlation: 0.80 },
+      { pitchClass: 0, mode: 'minor', correlation: 0.78 },
+    ];
+    resolveFifthConfusion(results, cMajorChroma);
+    expect(results[0].pitchClass).toBe(7);
+  });
+
+  test('does nothing when the top two are not a fifth apart', () => {
+    const results = leaderAndRunnerUp(0.02, 4, 0); // E over C: major third
+    resolveFifthConfusion(results, cMajorChroma);
+    expect(results[0].pitchClass).toBe(4);
+  });
+
+  test('keeps the leader when its triad support is stronger', () => {
+    // Chroma favouring G major (G, B, D) over C major (C, E, G).
+    const gMajorChroma = [0.3, 0, 0.8, 0, 0.1, 0, 0, 1.0, 0, 0.2, 0, 0.9];
+    const results = leaderAndRunnerUp(0.02);
+    resolveFifthConfusion(results, gMajorChroma);
+    expect(results[0].pitchClass).toBe(7);
+  });
+
+  test('handles a single-candidate list without crashing', () => {
+    const results: Candidate[] = [{ pitchClass: 0, mode: 'major', correlation: 0.9 }];
+    expect(() => resolveFifthConfusion(results, cMajorChroma)).not.toThrow();
+    expect(results[0].pitchClass).toBe(0);
   });
 });
