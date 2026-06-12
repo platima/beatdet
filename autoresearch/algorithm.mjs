@@ -510,6 +510,32 @@ function estimateBpm(beatTimes, bpmMin, bpmMax) {
   }
   candidates.sort((a, b) => b.score - a.score);
 
+  // Perceptual prior arbitration among harmonically related leaders: when
+  // the raw leader and a close runner-up are related by a 4:3 or 3:2 ratio
+  // (the confusion family with no auto-correction path), prefer the
+  // candidate with the higher prior-weighted score. The prior never
+  // promotes unrelated peaks, so sparse or noisy tracks keep their raw
+  // leader and the existing octave corrections.
+  // Mirrors estimateBpm() in src/lib/beatDetection.ts.
+  const tempoPrior = (bpm) => Math.exp(-0.5 * (Math.log2(bpm / 120) / 0.7) ** 2);
+  const isNearRatio = (r, t) => Math.abs(r - t) / t <= 0.04;
+  {
+    let bestIdx = 0;
+    for (let i = 1; i < Math.min(candidates.length, 3); i++) {
+      const r = candidates[i].bpm / candidates[0].bpm;
+      const related = [4 / 3, 3 / 4, 3 / 2, 2 / 3].some((t) => isNearRatio(r, t));
+      if (!related) continue;
+      if (candidates[i].score * tempoPrior(candidates[i].bpm) >
+          candidates[bestIdx].score * tempoPrior(candidates[bestIdx].bpm)) {
+        bestIdx = i;
+      }
+    }
+    if (bestIdx !== 0) {
+      const [promoted] = candidates.splice(bestIdx, 1);
+      candidates.unshift(promoted);
+    }
+  }
+
   const leader = candidates[0];
 
   const histScoreAt = (bpm) => {

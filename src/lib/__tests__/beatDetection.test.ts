@@ -414,3 +414,52 @@ describe('estimateBpm', () => {
     expectBpm(bpm, 120, 5);
   });
 });
+
+/* ============================================================
+   estimateBpm: perceptual tempo prior
+   ============================================================ */
+
+describe('estimateBpm tempo prior', () => {
+  /**
+   * Interleave blocks of 160 BPM and 120 BPM inter-onset intervals. The 4:3
+   * ratio is the one harmonic confusion with no auto-correction path, so the
+   * final ranking is decided purely by the prior-weighted candidate sort.
+   */
+  function fourThreeSplit(fastPerBlock: number, slowPerBlock: number): number[] {
+    const times: number[] = [0];
+    let t = 0;
+    for (let block = 0; block < 10; block++) {
+      const fast = block % 2 === 0;
+      const interval = fast ? 60 / 160 : 60 / 120;
+      const n = fast ? fastPerBlock : slowPerBlock;
+      for (let i = 0; i < n; i++) {
+        t += interval;
+        times.push(t);
+      }
+    }
+    return times;
+  }
+
+  it('flips a modest 4:3 raw-score leader towards the moderate tempo', () => {
+    // 160 BPM leads on raw histogram energy (~16% over 120), but the
+    // perceptual prior favours 120 strongly enough to resolve the near-tie.
+    const { bpm } = estimateBpm(fourThreeSplit(8, 7), 55, 200);
+    expect(Math.abs(bpm - 120)).toBeLessThanOrEqual(3);
+  });
+
+  it('respects a clearly dominant 4:3 raw-score leader', () => {
+    // At ~32% raw-score lead the 160 BPM peak is genuinely dominant and the
+    // prior must not override it.
+    const { bpm } = estimateBpm(fourThreeSplit(9, 7), 55, 200);
+    expect(Math.abs(bpm - 160)).toBeLessThanOrEqual(3);
+  });
+
+  it('does not override a clearly dominant extreme tempo', () => {
+    // A clean 200 BPM metronome has a single dominant peak; the prior must
+    // not drag it towards 120 or its 100 BPM half-tempo alias.
+    const times: number[] = [];
+    for (let i = 0; i < 100; i++) times.push(i * (60 / 200));
+    const { bpm } = estimateBpm(times, 55, 220);
+    expect(Math.abs(bpm - 200)).toBeLessThanOrEqual(3);
+  });
+});

@@ -338,7 +338,46 @@ export function estimateBpm(
     for (let b = 1; b < numBins; b++) if (hist[b] > hist[best]) best = b;
     candidates.push({ bpm: bpmMin + best * bpmRes, score: hist[best] });
   }
+
   candidates.sort((a, b) => b.score - a.score);
+
+  // Perceptual prior arbitration among harmonically related leaders.
+  //
+  // When the raw leader and a close runner-up are related by a 4:3 or 3:2
+  // ratio (the confusion family that has no auto-correction path below),
+  // prefer the candidate with the higher prior-weighted score. The prior is
+  // a log-normal moderate-tempo preference (Parncutt-style, centred on
+  // 120 BPM, sigma in octaves), so near-ties resolve towards the more
+  // plausible musical tempo without any per-BPM special cases.
+  //
+  // The arbitration deliberately never promotes unrelated peaks: a globally
+  // prior-weighted sort was measured to promote junk peaks on sparse
+  // material (a 105 BPM choral track regressed to 187), while restricting
+  // the prior to the harmonic family keeps the raw leader, and therefore
+  // the existing octave corrections, intact everywhere else.
+  const PRIOR_CENTRE_BPM = 120;
+  const PRIOR_SIGMA_OCTAVES = 0.7;
+  const tempoPrior = (bpm: number): number =>
+    Math.exp(-0.5 * (Math.log2(bpm / PRIOR_CENTRE_BPM) / PRIOR_SIGMA_OCTAVES) ** 2);
+  const isNearRatio = (r: number, t: number): boolean => Math.abs(r - t) / t <= 0.04;
+  {
+    let bestIdx = 0;
+    for (let i = 1; i < Math.min(candidates.length, 3); i++) {
+      const r = candidates[i].bpm / candidates[0].bpm;
+      const related = [4 / 3, 3 / 4, 3 / 2, 2 / 3].some((t) => isNearRatio(r, t));
+      if (!related) continue;
+      if (
+        candidates[i].score * tempoPrior(candidates[i].bpm) >
+        candidates[bestIdx].score * tempoPrior(candidates[bestIdx].bpm)
+      ) {
+        bestIdx = i;
+      }
+    }
+    if (bestIdx !== 0) {
+      const [promoted] = candidates.splice(bestIdx, 1);
+      candidates.unshift(promoted);
+    }
+  }
 
   // --- Harmonic correction ---
   // The onset detector can lock onto subdivisions (8th-notes, triplets) or

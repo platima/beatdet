@@ -6,6 +6,22 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.23] - 2026-06-12
+
+### Changed
+
+- **Tempo accuracy +1.6 points on GiantSteps (265 to 271 correct of 386)** via a
+  log-normal perceptual tempo prior (centred on 120 BPM, sigma 0.7 octaves) that
+  arbitrates between the raw histogram leader and a close runner-up related by a
+  4:3 or 3:2 ratio, the one harmonic confusion with no auto-correction path. The
+  prior never promotes unrelated peaks: an unrestricted prior-weighted ranking was
+  measured to break sparse material (a 105 BPM choral track regressed to 187) and
+  was rejected; the harmonic-restricted form scores identically on GiantSteps with
+  the real-audio suite fully green. A tighter sigma (0.6) scored higher in-set but
+  was declined as dataset over-fitting.
+
+---
+
 ## [0.7.22] - 2026-06-12
 
 ### Added

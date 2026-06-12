@@ -213,7 +213,12 @@ src/
    ×3 at 70% threshold) to promote the faster tempo when the detector locked
    onto half-speed or third-speed groupings. Histogram lookups use a ±1-bin
    maximum search for robustness
-   against slight peak offsets. The minimum beat gap is automatically clamped
+   against slight peak offsets. Before the harmonic corrections, a log-normal
+   perceptual tempo prior (centred on 120 BPM) arbitrates between the raw
+   leader and any close runner-up related by a 4:3 or 3:2 ratio, the one
+   confusion family with no auto-correction path; the prior never promotes
+   unrelated peaks, so sparse material keeps its raw leader. The minimum beat
+   gap is automatically clamped
    to one beat period at the configured maximum BPM so fast tempos are never
    blocked.
 7. **Key detection**: a 12-bin chroma (pitch class energy) vector is computed
