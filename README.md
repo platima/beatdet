@@ -239,7 +239,9 @@ src/
    correlation gap is tiny and the runner-up's tonic triad carries at least
    as much chroma energy. The best-fit key, Camelot Wheel code, relative key,
    and top-5 candidates are returned. An ambiguity flag is set when the raw
-   correlation is below 0.40 (flat or chromatic material).
+   correlation is below 0.40 (flat or chromatic material), and a close-call
+   warning names the runner-up key whenever its correlation is within 0.05
+   of the winner, so near-tied results are never presented as certain.
 
 ---
 

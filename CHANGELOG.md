@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.22] - 2026-06-12
+
+### Added
+
+- **Close-call key warning**: when the runner-up key's correlation is within 0.05 of the
+  winner, the key card now shows "Close call - could also be X" (and announces it to
+  screen readers), so near-tied results are never presented as certain. The flag is
+  computed in the detection engine (`findCloseCall`) where unclamped correlations are
+  available, and exposed as the optional `closeCall` field on `KeyEstimate`.
+
+---
+
 ## [0.7.21] - 2026-06-12
 
 ### Changed

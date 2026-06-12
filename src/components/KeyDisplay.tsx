@@ -52,6 +52,7 @@ export function KeyDisplay({ keyEstimate }: KeyDisplayProps) {
     relativeKey,
     candidates,
     ambiguous,
+    closeCall,
   } = keyEstimate;
 
   const modeLabel = mode === 'major' ? 'Major' : 'Minor';
@@ -90,6 +91,11 @@ export function KeyDisplay({ keyEstimate }: KeyDisplayProps) {
           {ambiguous && (
             <p className="mt-1 text-xs" style={{ color: 'var(--warning)' }}>
               Low confidence - key may be ambiguous
+            </p>
+          )}
+          {closeCall && (
+            <p className="mt-1 text-xs" style={{ color: 'var(--warning)' }}>
+              Close call - could also be {closeCall}
             </p>
           )}
         </div>
@@ -188,6 +194,7 @@ export function KeyDisplay({ keyEstimate }: KeyDisplayProps) {
       {/* Aria live announcement for screen readers */}
       <p className="sr-only" aria-live="polite">
         Detected key: {display}. Camelot: {camelot}. Relative key: {relativeKey}.
+        {closeCall ? ` Close call: could also be ${closeCall}.` : ''}
       </p>
     </div>
   );

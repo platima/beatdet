@@ -10,7 +10,7 @@
  *   - Ambiguity flag on noisy (flat) input
  */
 
-import { detectKey, computeChromaVector, resolveFifthConfusion } from '../keyDetection';
+import { detectKey, computeChromaVector, resolveFifthConfusion, findCloseCall } from '../keyDetection';
 
 /* ============================================================
    Helpers
@@ -350,5 +350,43 @@ describe('resolveFifthConfusion', () => {
     const results: Candidate[] = [{ pitchClass: 0, mode: 'major', correlation: 0.9 }];
     expect(() => resolveFifthConfusion(results, cMajorChroma)).not.toThrow();
     expect(results[0].pitchClass).toBe(0);
+  });
+});
+
+/* ============================================================
+   findCloseCall
+   ============================================================ */
+
+describe('findCloseCall', () => {
+  type Candidate = { pitchClass: number; mode: 'major' | 'minor'; correlation: number };
+
+  test('reports the runner-up when within the close-call gap', () => {
+    const results: Candidate[] = [
+      { pitchClass: 7, mode: 'major', correlation: 0.82 },
+      { pitchClass: 4, mode: 'minor', correlation: 0.79 },
+    ];
+    expect(findCloseCall(results)).toEqual({ pitchClass: 4, mode: 'minor' });
+  });
+
+  test('returns null when the winner is clear', () => {
+    const results: Candidate[] = [
+      { pitchClass: 7, mode: 'major', correlation: 0.82 },
+      { pitchClass: 4, mode: 'minor', correlation: 0.70 },
+    ];
+    expect(findCloseCall(results)).toBeNull();
+  });
+
+  test('uses the absolute gap so a resolver-promoted winner still reports its rival', () => {
+    // After resolveFifthConfusion promotes the runner-up, position 0 can hold
+    // the lower correlation; the close call must still be detected.
+    const results: Candidate[] = [
+      { pitchClass: 0, mode: 'major', correlation: 0.78 },
+      { pitchClass: 7, mode: 'major', correlation: 0.80 },
+    ];
+    expect(findCloseCall(results)).toEqual({ pitchClass: 7, mode: 'major' });
+  });
+
+  test('returns null for a single-candidate list', () => {
+    expect(findCloseCall([{ pitchClass: 0, mode: 'major', correlation: 0.9 }])).toBeNull();
   });
 });

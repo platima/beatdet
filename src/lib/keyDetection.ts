@@ -68,6 +68,14 @@ const CAMELOT_MINOR = ['5A', '12A', '7A', '2A', '9A', '4A', '11A', '6A', '1A', '
 const RAW_AMBIGUITY_THRESHOLD = 0.40;
 
 /**
+ * Maximum correlation gap between winner and runner-up for the result to be
+ * flagged as a close call. Mirrors the fifth-confusion resolver's gap: inside
+ * this band the two keys are statistically near-indistinguishable, so the UI
+ * surfaces the runner-up as a plausible alternative.
+ */
+const KEY_CLOSE_CALL_GAP = 0.05;
+
+/**
  * HPSS horizontal (time-axis) median filter kernel width in frames.
  * At hopSize=4096 and 44100 Hz (~93 ms/frame), 15 frames ≈ 1.4 s.
  * Retuned for the larger chroma hop; sustained harmonic sources
@@ -441,6 +449,22 @@ export function resolveFifthConfusion(
   }
 }
 
+/**
+ * Return the runner-up when its correlation sits within the close-call gap
+ * of the winner, or null when the winner is clear. Operates on the final
+ * (post-resolver) ordering, so a promoted runner-up still reports its former
+ * leader as the close alternative. Exported for unit testing.
+ */
+export function findCloseCall(
+  results: ReadonlyArray<{ pitchClass: number; mode: 'major' | 'minor'; correlation: number }>
+): { pitchClass: number; mode: 'major' | 'minor' } | null {
+  if (results.length < 2) return null;
+  const gap = Math.abs(results[0].correlation - results[1].correlation);
+  return gap <= KEY_CLOSE_CALL_GAP
+    ? { pitchClass: results[1].pitchClass, mode: results[1].mode }
+    : null;
+}
+
 /* ============================================================
    Public API
    ============================================================ */
@@ -478,6 +502,10 @@ export function detectKey(mono: Float32Array, sampleRate: number): KeyEstimate {
 
   // Demote a leader that is merely the dominant of a better-supported key.
   resolveFifthConfusion(results, chromaArr);
+
+  // Flag a statistically near-tied runner-up so the UI can inform the user
+  // that the track could plausibly be either key.
+  const closeRunnerUp = findCloseCall(results);
 
   // Use the raw Pearson correlation coefficient as the confidence value,
   // clamped to [0, 1].  This gives an absolute measure of tonal clarity:
@@ -521,5 +549,8 @@ export function detectKey(mono: Float32Array, sampleRate: number): KeyEstimate {
     // ~0.4 indicate the chroma has no clear tonal centre (modal, chromatic,
     // or atonal material).
     ambiguous: best.correlation < RAW_AMBIGUITY_THRESHOLD,
+    closeCall: closeRunnerUp
+      ? `${NOTE_NAMES[closeRunnerUp.pitchClass]} ${closeRunnerUp.mode === 'major' ? 'Major' : 'Minor'}`
+      : undefined,
   };
 }
