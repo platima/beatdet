@@ -6,6 +6,17 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.16] - 2026-06-12
+
+### Fixed
+
+- **Test and typecheck gates swept up `_worktrees/`**: parallel autoresearch worktrees
+  under `_worktrees/` contain full repo copies, so Jest discovered every test suite nine
+  times over (with jest-haste-map name collisions) and `tsc --noEmit` failed on duplicate
+  global declarations across the copies. Jest and tsconfig now exclude `_worktrees/`.
+
+---
+
 ## [0.7.15] - 2026-06-12
 
 ### Fixed
