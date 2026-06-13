@@ -37,6 +37,14 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **×1/3 downward correction false-triggering on high-BPM tracks**: restored a
+  separate 40% threshold for the ×1/3 harmonic correction (had been collapsed into
+  the 30% default when Gaussian smoothing was widened from σ=1.5 to σ=2.5; the
+  wider kernel bleeds enough lag-3 energy into the ×1/3 bin to cross the 30% gate
+  on legitimate 190–210 BPM tracks, incorrectly halving the reported tempo to ~65–70
+  BPM). The ×0.5 correction keeps its 30% default; the ×1/3 gate is now 40% as the
+  code comment already specified. Applied to both `src/lib/beatDetection.ts` and
+  `autoresearch/algorithm.mjs` to maintain 1:1 parity.
 - Tap-tempo 3 s reset timer now cleared on BpmDisplay unmount (prevented a
   potential setState-on-unmounted-component warning).
 - `_worktrees/` directory excluded from Jest haste-map and TypeScript project

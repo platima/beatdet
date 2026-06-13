@@ -47,7 +47,8 @@ export const BPM_PARAMS = {
   medianWindow:        16,    // half-window size for adaptive peak picking
   slowTempoFloor:      80,    // BPM below which strictHalfThreshold applies
   strictHalfThreshold: 0.95,  // energy ratio to allow ×0.5 below slowTempoFloor
-  defaultDownThreshold:0.30,  // energy ratio for all other downward corrections (was 0.40)
+  defaultDownThreshold:0.30,  // energy ratio for x0.5 downward correction (was 0.40)
+  thirdDownThreshold:  0.40,  // energy ratio for x1/3 downward correction; needs higher gate due to wider Gaussian sigma bleeding lag-3 energy into x1/3 bin
   sesqThreshold:       0.45,  // energy ratio for ×1.5 upward correction (was 0.60)
   tripleThreshold:     0.70,  // energy ratio for ×3 upward correction
 };
@@ -465,7 +466,7 @@ function estimateBpm(beatTimes, bpmMin, bpmMax) {
 
   const {
     bpmRes, sigma, slowTempoFloor, strictHalfThreshold,
-    defaultDownThreshold, sesqThreshold, tripleThreshold,
+    defaultDownThreshold, thirdDownThreshold, sesqThreshold, tripleThreshold,
   } = BPM_PARAMS;
 
   const minIoi = 60 / bpmMax;
@@ -552,9 +553,11 @@ function estimateBpm(beatTimes, bpmMin, bpmMax) {
     const altBpm = leader.bpm * ratio;
     if (altBpm < bpmMin || altBpm > bpmMax) continue;
     const altScore = histScoreAt(altBpm);
-    const threshold = ratio === 0.5 && altBpm < slowTempoFloor
-      ? strictHalfThreshold
-      : defaultDownThreshold;
+    const threshold = ratio === 1/3
+      ? thirdDownThreshold
+      : altBpm < slowTempoFloor
+        ? strictHalfThreshold
+        : defaultDownThreshold;
     if (altScore >= leader.score * threshold) {
       candidates.unshift({ bpm: Math.round(altBpm * 2) / 2, score: altScore });
       corrected = true;
