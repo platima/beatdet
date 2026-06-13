@@ -2,7 +2,7 @@
 
 # BeatDet _(Beat Detector)_
 
-**v0.7.14** - Browser-based audio beat detection with interactive waveform visualisation.
+**v0.8.0** - Browser-based audio beat detection with interactive waveform visualisation.
 
 100% "Vibe Coded" because I have NFI what I'm doing with waveform analysis at all!
 
@@ -186,7 +186,7 @@ src/
 │       ├── keyDetection.test.ts  # Key detection unit tests
 │       └── realAudio.test.ts     # Kevin MacLeod benchmark integration tests
 ├── store/
-│   └── settingsStore.ts    # Zustand settings store (schema v4, auto-migration)
+│   └── settingsStore.ts    # Zustand settings store (schema v5, auto-migration)
 └── types/
     └── index.ts            # Shared TypeScript types
 ```

@@ -6,6 +6,46 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.0] - 2026-06-13
+
+### Added
+
+- **Close-call key warning**: when the runner-up key's Pearson correlation is within
+  0.05 of the winner, the key card now shows "Close call - could also be X" so
+  near-tied results are never presented as certain.
+- **Fifth-confusion resolver**: demotes a winning key that is merely the dominant
+  of a well-supported runner-up (gap ≤ 0.05, same mode, runner-up tonic triad
+  has equal or better chroma energy), reducing the most common key detection
+  error family.
+
+### Changed
+
+- **Key accuracy +4.6 points on GiantSteps (371 to 388 correct of 604)** from four
+  compounding changes: square-root chroma compression (reduces peak-note dominance
+  so secondary scale tones carry more weight); HPSS horizontal kernel 13 → 15
+  frames (stronger kick separation); minor prior boost 1.20 → 1.28 (corrects
+  minor-key prevalence in electronic music); fifth-confusion resolver (see above).
+- **Tempo accuracy +2.3 points on GiantSteps (265 to 271 correct of 386)** via the
+  harmonic-restricted perceptual prior (see v0.7.23).
+- **Combined GiantSteps benchmark**: 636/990 (64.24%) → **659/990 (66.57%)**.
+- Settings migration chain refactored to chain all steps sequentially rather than
+  returning at the first matching step; a user migrating from v1 now lands on v5
+  as expected.
+- What's New banner uses semver comparison to find the newest unseen entry rather
+  than an exact version-key lookup; returning users upgrading past skipped versions
+  now always see relevant release notes.
+
+### Fixed
+
+- Tap-tempo 3 s reset timer now cleared on BpmDisplay unmount (prevented a
+  potential setState-on-unmounted-component warning).
+- `_worktrees/` directory excluded from Jest haste-map and TypeScript project
+  scans to prevent collision errors on machines with active worktrees.
+- `package.json` version and service worker `CACHE_VERSION` synchronised with
+  `VERSION` file.
+
+---
+
 ## [0.7.23] - 2026-06-12
 
 ### Changed
