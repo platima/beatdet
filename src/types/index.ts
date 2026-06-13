@@ -61,6 +61,12 @@ export interface KeyEstimate {
   candidates: KeyCandidate[];
   /** True when confidence is too low to be reliable. */
   ambiguous: boolean;
+  /**
+   * Human-readable runner-up key (e.g. "E Minor") when its correlation is
+   * within the close-call gap of the winner, signalling that the track could
+   * plausibly be either key. Undefined when the winner is clear.
+   */
+  closeCall?: string;
 }
 
 /** Full result produced by the beat detection engine. */

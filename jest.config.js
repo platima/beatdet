@@ -34,6 +34,12 @@ const customConfig = {
 
   // Place test files under __tests__ subdirectories.
   testMatch: ['**/__tests__/**/*.test.ts'],
+
+  // Git worktrees for parallel autoresearch live under _worktrees/ and contain
+  // full copies of the repo. Without these ignores Jest discovers every suite
+  // nine times over and jest-haste-map reports package.json name collisions.
+  testPathIgnorePatterns: ['/node_modules/', '/_worktrees/'],
+  modulePathIgnorePatterns: ['<rootDir>/_worktrees/'],
 };
 
 module.exports = createJestConfig(customConfig);

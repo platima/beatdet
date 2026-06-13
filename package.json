@@ -1,6 +1,6 @@
 {
   "name": "beatdet",
-  "version": "0.7.13",
+  "version": "0.7.23",
   "private": true,
   "scripts": {
     "dev": "next dev",

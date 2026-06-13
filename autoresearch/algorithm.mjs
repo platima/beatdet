@@ -61,9 +61,9 @@ export const KEY_PARAMS = {
   hopSize: 4096,  // chroma hop size (fftSize / 2)
   fMin:    150,   // low-frequency cutoff in Hz (excludes kick fundamental)
   fMax:    2100,  // high-frequency cutoff in Hz
-  hpssH:   13,    // HPSS horizontal (time-axis) median filter kernel width (retuned for larger chroma hop)
+  hpssH:   15,    // HPSS horizontal (time-axis) median filter kernel width (retuned for larger chroma hop)
   hpssP:   35,    // HPSS vertical (frequency-axis) median filter kernel width (retuned for finer FFT bins)
-  minorPriorBoost: 1.20, // EDM is ~85 % minor — boost minor correlations to correct bias
+  minorPriorBoost: 1.28, // EDM is ~85 % minor — boost minor correlations to correct bias
 };
 
 /**
@@ -284,7 +284,11 @@ function computeChromaVector(mono, sampleRate) {
   // Normalise to [0, 1]
   let maxVal = 0;
   for (let i = 0; i < 12; i++) if (chroma[i] > maxVal) maxVal = chroma[i];
-  if (maxVal > 0) for (let i = 0; i < 12; i++) chroma[i] /= maxVal;
+  if (maxVal > 0) {
+    for (let i = 0; i < 12; i++) {
+      chroma[i] = Math.sqrt(chroma[i] / maxVal);
+    }
+  }
   return Array.from(chroma);
 }
 
@@ -302,7 +306,30 @@ export function detectKeyFromMono(mono, sampleRate) {
     results.push({ pc, mode: 'minor', r: pearsonCorrelation(chroma, rotateRight(KEY_MINOR, pc)) * minorPriorBoost });
   }
   results.sort((a, b) => b.r - a.r);
-  const best = results[0];
+  let best = results[0];
+  const runnerUp = results[1];
+
+  // Fifth-confusion resolver: when the leader is the dominant (a perfect
+  // fifth above) of the runner-up in the same mode, the correlation gap is
+  // tiny, and the runner-up's tonic triad carries at least as much chroma
+  // energy, prefer the runner-up. Mirrors resolveFifthConfusion() in
+  // src/lib/keyDetection.ts.
+  if (runnerUp) {
+    const triadSupport = (pc, mode) => {
+      const third = mode === 'major' ? 4 : 3;
+      return chroma[pc] + chroma[(pc + third) % 12] + chroma[(pc + 7) % 12];
+    };
+    const correlationGap = best.r - runnerUp.r;
+    const bestIsDominantOfRunnerUp = best.mode === runnerUp.mode
+      && ((best.pc - runnerUp.pc + 12) % 12 === 7);
+
+    if (bestIsDominantOfRunnerUp
+      && correlationGap <= 0.05
+      && triadSupport(runnerUp.pc, runnerUp.mode) >= triadSupport(best.pc, best.mode)) {
+      best = runnerUp;
+    }
+  }
+
   return {
     note:       NOTE_NAMES[best.pc],
     mode:       best.mode,
@@ -482,6 +509,32 @@ function estimateBpm(beatTimes, bpmMin, bpmMax) {
     candidates.push({ bpm: bpmMin + best * bpmRes, score: hist[best] });
   }
   candidates.sort((a, b) => b.score - a.score);
+
+  // Perceptual prior arbitration among harmonically related leaders: when
+  // the raw leader and a close runner-up are related by a 4:3 or 3:2 ratio
+  // (the confusion family with no auto-correction path), prefer the
+  // candidate with the higher prior-weighted score. The prior never
+  // promotes unrelated peaks, so sparse or noisy tracks keep their raw
+  // leader and the existing octave corrections.
+  // Mirrors estimateBpm() in src/lib/beatDetection.ts.
+  const tempoPrior = (bpm) => Math.exp(-0.5 * (Math.log2(bpm / 120) / 0.7) ** 2);
+  const isNearRatio = (r, t) => Math.abs(r - t) / t <= 0.04;
+  {
+    let bestIdx = 0;
+    for (let i = 1; i < Math.min(candidates.length, 3); i++) {
+      const r = candidates[i].bpm / candidates[0].bpm;
+      const related = [4 / 3, 3 / 4, 3 / 2, 2 / 3].some((t) => isNearRatio(r, t));
+      if (!related) continue;
+      if (candidates[i].score * tempoPrior(candidates[i].bpm) >
+          candidates[bestIdx].score * tempoPrior(candidates[bestIdx].bpm)) {
+        bestIdx = i;
+      }
+    }
+    if (bestIdx !== 0) {
+      const [promoted] = candidates.splice(bestIdx, 1);
+      candidates.unshift(promoted);
+    }
+  }
 
   const leader = candidates[0];
 

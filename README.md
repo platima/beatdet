@@ -213,28 +213,40 @@ src/
    ×3 at 70% threshold) to promote the faster tempo when the detector locked
    onto half-speed or third-speed groupings. Histogram lookups use a ±1-bin
    maximum search for robustness
-   against slight peak offsets. The minimum beat gap is automatically clamped
+   against slight peak offsets. Before the harmonic corrections, a log-normal
+   perceptual tempo prior (centred on 120 BPM) arbitrates between the raw
+   leader and any close runner-up related by a 4:3 or 3:2 ratio, the one
+   confusion family with no auto-correction path; the prior never promotes
+   unrelated peaks, so sparse material keeps its raw leader. The minimum beat
+   gap is automatically clamped
    to one beat period at the configured maximum BPM so fast tempos are never
    blocked.
 7. **Key detection**: a 12-bin chroma (pitch class energy) vector is computed
    from the mono PCM using a separate FFT pass (8192-point, Hann-windowed,
    150-2100 Hz). Before chroma accumulation, Harmonic-Percussive Source
-   Separation (HPSS) is applied: horizontal (13-frame) and vertical (35-bin)
+   Separation (HPSS) is applied: horizontal (15-frame) and vertical (35-bin)
    median filters on the spectrogram separate sustained harmonic content
    (synths, pads, bass lines) from transient percussive bursts (kick drums,
    snares). Only the harmonic component contributes to chroma. This suppresses
    kick drum harmonics above 150 Hz that would otherwise bias the chroma
    vector. The 150 Hz lower cutoff is retained to block the kick fundamental
    (~50-130 Hz), which HPSS cannot cleanly separate because the kick repeats
-   so frequently in EDM. Minor Pearson correlations are boosted by a 1.20×
+   so frequently in EDM. Minor Pearson correlations are boosted by a 1.28×
    prior factor to correct for the strong minor-key prevalence in electronic
    music datasets.
-   The chroma vector is Pearson-correlated against all 24
+   The normalised chroma vector is square-root compressed (flattening the
+   dynamic range so secondary scale tones carry more weight), then
+   Pearson-correlated against all 24
    Bellman-Budge major/minor key profiles (corpus-derived, stronger
    diatonic/non-diatonic separation than the original Krumhansl-Kessler
-   profiles). The best-fit key, Camelot Wheel code, relative key, and top-5
-   candidates are returned. An ambiguity flag is set when the raw correlation
-   is below 0.40 (flat or chromatic material).
+   profiles). A fifth-confusion resolver then demotes a winning key that is
+   merely the dominant (a perfect fifth above) of the runner-up when the
+   correlation gap is tiny and the runner-up's tonic triad carries at least
+   as much chroma energy. The best-fit key, Camelot Wheel code, relative key,
+   and top-5 candidates are returned. An ambiguity flag is set when the raw
+   correlation is below 0.40 (flat or chromatic material), and a close-call
+   warning names the runner-up key whenever its correlation is within 0.05
+   of the winner, so near-tied results are never presented as certain.
 
 ---
 

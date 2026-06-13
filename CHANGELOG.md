@@ -6,6 +6,125 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.23] - 2026-06-12
+
+### Changed
+
+- **Tempo accuracy +1.6 points on GiantSteps (265 to 271 correct of 386)** via a
+  log-normal perceptual tempo prior (centred on 120 BPM, sigma 0.7 octaves) that
+  arbitrates between the raw histogram leader and a close runner-up related by a
+  4:3 or 3:2 ratio, the one harmonic confusion with no auto-correction path. The
+  prior never promotes unrelated peaks: an unrestricted prior-weighted ranking was
+  measured to break sparse material (a 105 BPM choral track regressed to 187) and
+  was rejected; the harmonic-restricted form scores identically on GiantSteps with
+  the real-audio suite fully green. A tighter sigma (0.6) scored higher in-set but
+  was declined as dataset over-fitting.
+
+---
+
+## [0.7.22] - 2026-06-12
+
+### Added
+
+- **Close-call key warning**: when the runner-up key's correlation is within 0.05 of the
+  winner, the key card now shows "Close call - could also be X" (and announces it to
+  screen readers), so near-tied results are never presented as certain. The flag is
+  computed in the detection engine (`findCloseCall`) where unclamped correlations are
+  available, and exposed as the optional `closeCall` field on `KeyEstimate`.
+
+---
+
+## [0.7.21] - 2026-06-12
+
+### Changed
+
+- **Key detection accuracy +2.8 points on GiantSteps (371 to 388 exact of 604)** by
+  porting the vetted wins from the April autoresearch branches:
+  - Square-root compression of the normalised chroma vector before profile correlation.
+  - HPSS horizontal median kernel widened from 13 to 15 frames.
+  - A fifth-confusion resolver (`resolveFifthConfusion`) that demotes a winning key which
+    is merely the dominant of the runner-up when the correlation gap is at most 0.05 and
+    the runner-up's tonic triad has equal or better chroma support.
+  - Minor prior boost raised from 1.20 to 1.28.
+  Combined GiantSteps benchmark moves from 636/990 (64.24%) to 653/990 (65.96%).
+  The experimental per-BPM-bracket tempo corrections from the same branches were
+  evaluated (313/386 vs 265/386 in-set) but deliberately not ported: they memorise
+  individual GiantSteps tracks and are unlikely to generalise.
+
+---
+
+## [0.7.20] - 2026-06-12
+
+### Added
+
+- Unit tests for the settings schema migration chain (v1 through v5) and the session
+  persistence helpers (round trip, oversize audio, corrupt JSON and Base64, quota
+  errors), closing the two largest test coverage gaps found in the code review.
+
+---
+
+## [0.7.19] - 2026-06-12
+
+### Fixed
+
+- **Tap tempo timer could fire after unmount**: the 3 second tap-chain reset timer in
+  `BpmDisplay` was never cleared on unmount, so it could attempt a state update on an
+  unmounted component. The timer is now cleared in an unmount cleanup effect.
+
+### Removed
+
+- Dead `cosineSignal` helper in the beat detection test suite.
+
+---
+
+## [0.7.18] - 2026-06-12
+
+### Fixed
+
+- **What's New banner had nothing to say since 0.7.5**: the banner looked up release
+  notes by exact version match, so any release without its own `WHATS_NEW` entry showed
+  only the changelog fallback. The banner now shows the newest curated entry between the
+  version the user last saw and the running version (semver-aware), and a 0.7.15 entry
+  covering the key detection work has been added. Corrupt stored versions degrade to the
+  changelog fallback.
+
+---
+
+## [0.7.17] - 2026-06-12
+
+### Fixed
+
+- **Settings migrations no longer skip intermediate steps**: each migration block in the
+  settings store returned early, so a user arriving from schema v1 ran only the v1 to v2
+  step and kept `settingsVersion: '2.0.0'`. The result happened to be safe only because
+  every step re-spreads the full current defaults. Migration steps now chain in sequence
+  and always land on `settingsVersion: '5.0.0'`. The migration function is exported as
+  `migrateSettings` for unit testing.
+
+---
+
+## [0.7.16] - 2026-06-12
+
+### Fixed
+
+- **Test and typecheck gates swept up `_worktrees/`**: parallel autoresearch worktrees
+  under `_worktrees/` contain full repo copies, so Jest discovered every test suite nine
+  times over (with jest-haste-map name collisions) and `tsc --noEmit` failed on duplicate
+  global declarations across the copies. Jest and tsconfig now exclude `_worktrees/`.
+
+---
+
+## [0.7.15] - 2026-06-12
+
+### Fixed
+
+- **Version desync**: `package.json` (0.7.13) and the service worker `CACHE_VERSION` (0.5.0)
+  lagged behind the `VERSION` file (0.7.14). All three now carry the same version string, so
+  returning PWA users receive a fresh cache on the next deploy instead of assets keyed to a
+  long-stale cache name.
+
+---
+
 ## [0.7.12] - 2026-04-14
 
 ### Fixed

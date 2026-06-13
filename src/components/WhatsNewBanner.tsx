@@ -17,8 +17,17 @@ import { CloseButton } from './Button';
 const STORAGE_KEY = 'beatdet-last-seen-version';
 const CURRENT = process.env.NEXT_PUBLIC_APP_VERSION ?? '';
 
-// Short summary of what's new; update alongside each release.
+// Short summary of what's new; update alongside each release. Entries are
+// keyed by the version that introduced them; the banner shows the newest
+// entry at or below the running version that the user has not yet seen, so
+// patch releases without their own entry still surface the latest summary.
 const WHATS_NEW: Record<string, string[]> = {
+  '0.7.15': [
+    'Musical key detection with Camelot code and top candidates',
+    'Key accuracy improved via HPSS and retuned chroma analysis',
+    'Settings now migrate reliably from any older version',
+    'Fresh offline cache for returning PWA users',
+  ],
   '0.7.5': [
     'What\'s New banner now appears at the top of the page',
     'Drop a new file onto the loaded-file area to replace it',
@@ -43,8 +52,47 @@ const WHATS_NEW: Record<string, string[]> = {
   ],
 };
 
+/**
+ * Compare two dotted semver strings numerically.
+ * Returns negative when a < b, positive when a > b, zero when equal.
+ * Exported for unit testing.
+ */
+export function compareSemver(a: string, b: string): number {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+/**
+ * Pick the newest WHATS_NEW entry at or below the running version that is
+ * newer than the version the user last saw. Returns null when the user has
+ * already seen everything (or the versions cannot be parsed).
+ * Exported for unit testing.
+ */
+export function latestUnseenEntry(
+  current: string,
+  lastSeen: string,
+  entries: Record<string, string[]> = WHATS_NEW
+): string[] | null {
+  let bestKey: string | null = null;
+  for (const key of Object.keys(entries)) {
+    const cmpCurrent = compareSemver(key, current);
+    const cmpSeen = compareSemver(key, lastSeen);
+    // NaN comparisons (unparseable versions) skip the entry, so corrupt
+    // stored values degrade to the changelog fallback instead of guessing.
+    if (!(cmpCurrent <= 0) || !(cmpSeen > 0)) continue;
+    if (bestKey === null || compareSemver(key, bestKey) > 0) bestKey = key;
+  }
+  return bestKey ? entries[bestKey] : null;
+}
+
 export function WhatsNewBanner() {
   const [visible, setVisible] = useState(false);
+  const [lastSeen, setLastSeen] = useState('');
 
   // Reading from localStorage (external system) and conditionally setting
   // visibility is the textbook use case for useEffect + setState.
@@ -54,6 +102,7 @@ export function WhatsNewBanner() {
       const last = localStorage.getItem(STORAGE_KEY);
       // Only show to returning users who have a stored version that differs
       if (last && last !== CURRENT && CURRENT) {
+        setLastSeen(last);
         setVisible(true);
       }
       // Always update stored version to current
@@ -66,7 +115,7 @@ export function WhatsNewBanner() {
 
   if (!visible) return null;
 
-  const items = WHATS_NEW[CURRENT];
+  const items = latestUnseenEntry(CURRENT, lastSeen);
 
   return (
     <div

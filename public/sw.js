@@ -18,7 +18,7 @@
  *   environment). Update it to match the app VERSION on significant releases.
  */
 
-const CACHE_VERSION = '0.5.0';
+const CACHE_VERSION = '0.7.15';
 const CACHE_NAME = `beatdet-cache-${CACHE_VERSION}`;
 
 // App shell pages to pre-cache on install so the app loads offline
